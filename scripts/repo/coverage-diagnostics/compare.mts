@@ -4,8 +4,6 @@
 
 import assert from 'node:assert/strict'
 
-import { validateShardCoverageEntry } from '../../fleet/cover/shards-coverage.mts'
-
 export interface CoverageHitLocation {
   path: string
   metric: string
@@ -13,9 +11,15 @@ export interface CoverageHitLocation {
   index: number
 }
 
+export interface CoverageNegativeCount extends CoverageHitLocation {
+  control: number
+  candidate: number
+}
+
 export interface CoverageHitChanges {
   lost: CoverageHitLocation[]
   gained: CoverageHitLocation[]
+  negative: CoverageNegativeCount[]
 }
 
 function diagnosticRecord(value: unknown): Record<string, unknown> {
@@ -76,6 +80,36 @@ export function compareTestReports(control: unknown, candidate: unknown): void {
   assert.deepEqual(files(after), files(before))
 }
 
+function validateDiagnosticCoverageEntry(entry: Record<string, unknown>): void {
+  for (const [metric, field] of [
+    ['s', 'statementMap'],
+    ['f', 'fnMap'],
+    ['b', 'branchMap'],
+  ] as const) {
+    const counts = diagnosticRecord(entry[metric])
+    const locations = diagnosticRecord(entry[field])
+    const keys = Object.keys(counts).toSorted()
+    assert.deepEqual(keys, Object.keys(locations).toSorted())
+    for (let index = 0, { length } = keys; index < length; index += 1) {
+      const key = keys[index]!
+      diagnosticRecord(locations[key])
+      const value = counts[key]
+      assert.ok(
+        metric === 'b' ? Array.isArray(value) : typeof value === 'number',
+      )
+      const values = [value].flat()
+      for (
+        let offset = 0, { length: valueCount } = values;
+        offset < valueCount;
+        offset += 1
+      ) {
+        const count = values[offset]
+        assert.ok(typeof count === 'number' && Number.isSafeInteger(count))
+      }
+    }
+  }
+}
+
 function coverageHitChanges(
   path: string,
   before: Record<string, unknown>,
@@ -83,6 +117,7 @@ function coverageHitChanges(
 ): CoverageHitChanges {
   const lost: CoverageHitLocation[] = []
   const gained: CoverageHitLocation[] = []
+  const negative: CoverageNegativeCount[] = []
   for (const metric of ['s', 'f', 'b']) {
     const original = diagnosticRecord(before[metric])
     const changed = diagnosticRecord(after[metric])
@@ -103,16 +138,23 @@ function coverageHitChanges(
       ) {
         const count = previous[index]!
         const location = { path, metric, key, index }
-        if (count > 0 && next[index] === 0) {
+        if (count < 0 || next[index]! < 0) {
+          negative.push({
+            ...location,
+            control: count,
+            candidate: next[index]!,
+          })
+        }
+        if (count > 0 && next[index]! <= 0) {
           lost.push(location)
         }
-        if (count === 0 && next[index]! > 0) {
+        if (count <= 0 && next[index]! > 0) {
           gained.push(location)
         }
       }
     }
   }
-  return { __proto__: null, lost, gained } as CoverageHitChanges
+  return { __proto__: null, lost, gained, negative } as CoverageHitChanges
 }
 
 export function compareCoverageReports(
@@ -127,13 +169,14 @@ export function compareCoverageReports(
   )
   const lost: CoverageHitLocation[] = []
   const gained: CoverageHitLocation[] = []
+  const negative: CoverageNegativeCount[] = []
   const paths = Object.keys(before)
   for (let index = 0, { length } = paths; index < length; index += 1) {
     const path = paths[index]!
     const original = diagnosticRecord(before[path])
     const changed = diagnosticRecord(after[path])
-    validateShardCoverageEntry(original)
-    validateShardCoverageEntry(changed)
+    validateDiagnosticCoverageEntry(original)
+    validateDiagnosticCoverageEntry(changed)
     assert.equal(original['path'], path)
     assert.equal(changed['path'], path)
     for (const key of ['statementMap', 'fnMap', 'branchMap']) {
@@ -142,6 +185,7 @@ export function compareCoverageReports(
     const changes = coverageHitChanges(path, original, changed)
     lost.push(...changes.lost)
     gained.push(...changes.gained)
+    negative.push(...changes.negative)
   }
-  return { __proto__: null, lost, gained } as CoverageHitChanges
+  return { __proto__: null, lost, gained, negative } as CoverageHitChanges
 }

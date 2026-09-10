@@ -35,6 +35,283 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
+import { readFileSync as bootstrapReadFileSync } from 'node:fs'
+import bootstrapProcess from 'node:process'
+const bootstrapRunner = (function (
+  readFileSync: typeof bootstrapReadFileSync,
+  process: typeof bootstrapProcess,
+) {
+  interface ScriptResult {
+    readonly exitCode: number
+    readonly data?: unknown | undefined
+    readonly error?: string | undefined
+  }
+
+  function renderScriptResult(result: ScriptResult): string {
+    if (
+      !Number.isInteger(result.exitCode) ||
+      result.exitCode < 0 ||
+      result.exitCode > 255
+    ) {
+      throw new Error(
+        'Script result requires an integer exit code between 0 and 255.',
+      )
+    }
+    return JSON.stringify({
+      ok: result.exitCode === 0,
+      exitCode: result.exitCode,
+      ...(result.data === undefined ? {} : { data: result.data }),
+      ...(result.error === undefined ? {} : { error: result.error }),
+    })
+  }
+
+  class ScriptExit extends Error {
+    readonly exitCode: number
+
+    constructor(exitCode: number) {
+      if (!Number.isInteger(exitCode) || exitCode < 1 || exitCode > 255) {
+        throw new Error(
+          'Script abort requires an integer exit code between 1 and 255.',
+        )
+      }
+      super(
+        `Script stopped with exit code ${exitCode}. Review the preceding diagnostic and retry.`,
+      )
+      this.name = 'ScriptExit'
+      this.exitCode = exitCode
+    }
+  }
+
+  function abortScript(exitCode: number): never {
+    throw new ScriptExit(exitCode)
+  }
+
+  /**
+   * True when argv carries a bare `--`.
+   *
+   * `pnpm run <script> -- --flag` forwards the `--` to the script, and the argv
+   * parser truncates there — every flag after it is DISCARDED, not collected as
+   * a positional. The script then runs with default behaviour while the caller
+   * believes they passed flags. That is merely confusing for a read-only script
+   * and dangerous for a destructive one: `prune:branch-backups -- --dry-run`
+   * drops the `--dry-run` and performs a live run against every repo.
+   *
+   * Checked against `process.argv` because by the time parsing finishes the
+   * dropped flags are unrecoverable — the parsed result cannot tell you what
+   * was lost.
+   */
+  function hasBareDoubleDash(argv: readonly string[]): boolean {
+    return argv.includes('--')
+  }
+
+  /**
+   * The message shown when argv carries a bare `--`. Names the script so the
+   * corrected command can be pasted directly.
+   */
+  function bareDoubleDashMessage(scriptName: string): string {
+    return (
+      'a bare `--` in the command line\n' +
+      `  Where: the argv for ${scriptName}.\n` +
+      '  Saw:   flags after `--`. The argv parser truncates there, so those ' +
+      'flags were NOT applied and the script ran with its defaults.\n' +
+      `  Fix:   drop the \`--\`, e.g. \`pnpm run ${scriptName} --dry-run\`.`
+    )
+  }
+
+  /**
+   * A script's self-description, answered without running its side effect.
+   * `--describe` prints `describe` verbatim — one line, what the script does —
+   * so script inventories and agents can read purpose without opening the file.
+   * `-h`/`--help` prints `describe`, a blank line, then `help`, which opens
+   * with a `Usage:` line naming the sanctioned invocation and lists the flags
+   * `main()` actually parses.
+   */
+  interface ScriptMeta {
+    readonly json?: 'native' | 'result' | undefined
+    readonly describe: string
+    readonly help: string
+  }
+
+  /**
+   * The help request found on argv, if any: `--describe` wins over
+   * `-h`/`--help` when both are present (the narrower ask costs one line;
+   * printing both forms for a mixed argv helps no caller). Pure — exported for
+   * tests.
+   */
+  function helpRequest(
+    argv: readonly string[],
+  ): 'describe' | 'help' | undefined {
+    if (argv.includes('--describe')) {
+      return 'describe'
+    }
+    if (argv.includes('-h') || argv.includes('--help')) {
+      return 'help'
+    }
+    return undefined
+  }
+
+  /**
+   * True when argv carries `--json` on its own — orthogonal to `helpRequest`,
+   * which only reads `--describe`/`-h`/`--help`. A script's own `main()` calls
+   * this to switch its RESULT output to structured JSON without re-parsing
+   * argv itself; `--describe --json` (either order) is answered entirely by
+   * the runner before `main()` runs and never reaches this predicate. Pure —
+   * exported for tests and entry scripts.
+   */
+  function isJsonRequested(argv: readonly string[]): boolean {
+    return argv.includes('--json')
+  }
+
+  /**
+   * The text a help request prints: the one-liner alone for `--describe`, or
+   * the one-liner + blank line + usage body for `--help`. Pure — exported for
+   * tests.
+   */
+  function helpText(kind: 'describe' | 'help', meta: ScriptMeta): string {
+    return kind === 'describe'
+      ? meta.describe
+      : `${meta.describe}\n\n${meta.help}`
+  }
+
+  /**
+   * The `--describe --json` payload: the fleet CLI self-description manifest
+   * (canonical schema: socket-wheelhouse `schemas/cli-describe.schema.json`),
+   * minimal for a script — identity plus the one-line purpose; a script's flags
+   * live in its `help` prose, not structured meta. Pure — exported for tests.
+   */
+  interface DescribeIdentity {
+    readonly name: string
+    readonly version: string
+  }
+
+  function describeManifestText(
+    meta: ScriptMeta,
+    config: DescribeIdentity,
+  ): string {
+    const { name, version } = { __proto__: null, ...config } as DescribeIdentity
+    return JSON.stringify(
+      {
+        $schema:
+          'https://raw.githubusercontent.com/SocketDev/socket-wheelhouse/main/schemas/cli-describe.schema.json',
+        name,
+        version,
+        description: meta.describe,
+      },
+      undefined,
+      2,
+    )
+  }
+
+  function errorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message
+    }
+    return String(error)
+  }
+
+  type MainFn = () =>
+    | number
+    | void
+    | ScriptResult
+    | Promise<number | void | ScriptResult>
+
+  function scriptVersion(): string {
+    try {
+      const value: unknown = JSON.parse(readFileSync('package.json', 'utf8'))
+      if (
+        value !== null &&
+        typeof value === 'object' &&
+        'version' in value &&
+        typeof value.version === 'string'
+      ) {
+        return value.version
+      }
+    } catch {}
+    return '0.0.0'
+  }
+
+  function writeLine(text: string): void {
+    process.stdout.write(`${text}\n`)
+  }
+
+  function runMainMinimal(main: MainFn, meta: ScriptMeta): void {
+    void runMainMinimalAsync(main, meta)
+  }
+
+  async function runMainMinimalAsync(
+    main: MainFn,
+    meta: ScriptMeta,
+  ): Promise<void> {
+    const argv = process.argv.slice(2)
+    const json = isJsonRequested(argv)
+    const request = helpRequest(argv)
+    const name = process.argv[1]?.split('/').pop() ?? 'script'
+    if (request) {
+      writeLine(
+        request === 'describe' && json
+          ? describeManifestText(meta, { name, version: scriptVersion() })
+          : helpText(request, meta),
+      )
+      process.exitCode = 0
+      return
+    }
+    try {
+      if (hasBareDoubleDash(argv)) {
+        throw new Error(bareDoubleDashMessage(name))
+      }
+      if (json && !meta.json) {
+        throw new Error('This script has not declared JSON execution support.')
+      }
+      await invokeMinimalMain(main, meta)
+    } catch (error) {
+      const message = errorMessage(error)
+      const exitCode = error instanceof ScriptExit ? error.exitCode : 1
+      process.exitCode = exitCode
+      if (json) {
+        writeLine(renderScriptResult({ exitCode, error: message }))
+      } else {
+        process.stderr.write(`${message}\n`)
+      }
+    }
+  }
+
+  async function invokeMinimalMain(
+    main: MainFn,
+    meta: ScriptMeta,
+  ): Promise<void> {
+    const json = isJsonRequested(process.argv.slice(2))
+    const result = await main()
+    const code =
+      typeof result === 'object' && result !== null ? result.exitCode : result
+    if (typeof code === 'number') {
+      process.exitCode = code
+    } else if (!process.exitCode) {
+      process.exitCode = 0
+    }
+    if (json && meta.json === 'result') {
+      writeLine(
+        renderScriptResult({
+          ...(typeof result === 'object' && result !== null ? result : {}),
+          exitCode: Number(process.exitCode ?? 0),
+        }),
+      )
+    } else if (!json && typeof result === 'object' && result?.error) {
+      process.stderr.write(`${result.error}\n`)
+    }
+  }
+
+  return { runMainMinimal, abortScript }
+})(bootstrapReadFileSync, bootstrapProcess)
+const { runMainMinimal } = bootstrapRunner
+type ScriptMeta = Parameters<typeof runMainMinimal>[1]
+
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'Prepare a thin fleet checkout and repair its workspace dependencies.',
+  help: 'Usage: node scripts/repo/bootstrap/prepare.mts [--json]',
+  json: 'result',
+}
+
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 // Function declarations hoist, so the sorted-position definition below is
 // usable here.
@@ -219,8 +496,10 @@ export function isMainModule(): boolean {
 }
 
 export function log(message: string): void {
-  // Dep-0 bootstrap prepare doctor runs on a bare clone with no node_modules:
-  // cannot import the lib logger; console.log writes to STDOUT.
+  if (process.argv.includes('--json')) {
+    process.stderr.write(`fleet-prepare: ${message}\n`)
+    return
+  }
   // oxlint-disable-next-line socket/no-console-prefer-logger -- dep-0 bootstrap
   console.log(`fleet-prepare: ${message}`)
 }
@@ -456,7 +735,9 @@ export function tryRun(
     execFileSync(cmd, args as string[], {
       cwd: REPO_ROOT,
       env: env ?? process.env,
-      stdio: 'inherit',
+      stdio: process.argv.includes('--json')
+        ? ['inherit', 2, 'inherit']
+        : 'inherit',
     })
     return true
   } catch {
@@ -468,7 +749,5 @@ export function tryRun(
 // while `process.argv[1]` keeps the path as invoked, so a bare URL equality
 // silently skips the CLI body under a symlinked invocation.
 if (isMainModule()) {
-  // Dep-0 ESM CLI run via node, never CJS-bundled.
-  // oxlint-disable-next-line socket/no-top-level-await -- dep-0 ESM CLI run
-  process.exitCode = await runPrepare()
+  runMainMinimal(runPrepare, SCRIPT_META)
 }

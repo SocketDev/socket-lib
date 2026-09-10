@@ -43,7 +43,8 @@ runs:
     # downloads the fleet release bundle and nothing more. A contents:read
     # request is a subset of a contents:write app grant, so the minter's
     # preflight accepts the PR App contents grant; this token remains read-only.
-    - id: app-token
+    - name: Create payload app token
+      id: app-token
       shell: bash
       env:
         APP_PRIVATE_KEY: ${{ inputs.private-key }}

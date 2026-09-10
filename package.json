@@ -4027,7 +4027,10 @@
     "cover:types": "node scripts/fleet/cover/types/run.mts",
     "setup:ai-clients": "node scripts/fleet/setup/ai-clients.mts",
     "npm:inventory": "node scripts/fleet/registry-infra/npm/account-inventory-read.mts",
-    "soak:check": "node scripts/fleet/check/soak-time-is-consistent.mts"
+    "soak:check": "node scripts/fleet/check/soak-time-is-consistent.mts",
+    "test:profile": "node scripts/fleet/test/profile.mts",
+    "check:test-budget-headroom": "node scripts/fleet/check/test-budget-headroom.mts",
+    "update:pnpm": "node scripts/fleet/update/pnpm.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",

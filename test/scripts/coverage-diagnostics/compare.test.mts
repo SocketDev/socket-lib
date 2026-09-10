@@ -101,20 +101,43 @@ describe('compareCoverageReports', () => {
       lost: [
         { path: '/example/src/example.mts', metric: 'b', key: '0', index: 0 },
       ],
+      negative: [],
       gained: [
         { path: '/example/src/example.mts', metric: 'b', key: '0', index: 1 },
       ],
     })
   })
 
-  test('rejects invalid negative counters and preserves exact parity', () => {
+  test('records native negative branch counters without changing raw evidence', () => {
+    const original = coverageReport()
+    original['/example/src/example.mts'].b[0] = [3, -3]
+    const copy = JSON.parse(JSON.stringify(original)) as typeof original
+    expect(compareCoverageReports(original, copy)).toEqual({
+      lost: [],
+      gained: [],
+      negative: [
+        {
+          path: '/example/src/example.mts',
+          metric: 'b',
+          key: '0',
+          index: 1,
+          control: -3,
+          candidate: -3,
+        },
+      ],
+    })
+    expect(original).toEqual(copy)
+  })
+
+  test('rejects non-integer counters and preserves exact parity', () => {
     const changed = coverageReport()
-    changed['/example/src/example.mts'].s[0] = -1
+    changed['/example/src/example.mts'].s[0] = 0.5
     expect(() => compareCoverageReports(coverageReport(), changed)).toThrow(
       Error,
     )
     expect(compareCoverageReports(coverageReport(), coverageReport())).toEqual({
       lost: [],
+      negative: [],
       gained: [],
     })
   })

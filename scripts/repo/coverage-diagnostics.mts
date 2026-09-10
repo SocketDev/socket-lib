@@ -1,6 +1,6 @@
 /**
- * @file Measure coverage worker counts on one host without changing gate
- *   settings.
+ * @file Measure coverage and profile representative tests without changing
+ *   gate settings.
  */
 
 import assert from 'node:assert/strict'
@@ -14,6 +14,9 @@ import {
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
+import { parseArgs } from 'node:util'
+
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import {
@@ -26,11 +29,24 @@ import { runQuietCommand } from '../fleet/cover-run.mts'
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 import { runMain } from '../fleet/process/run-main.mts'
+import { getScriptArgs } from '../fleet/process/script-output.mts'
 import { coverageDiagnosticPaths } from './_shared/paths.mts'
 import {
   compareCoverageReports,
   compareTestReports,
 } from './coverage-diagnostics/compare.mts'
+import { getEnvValue } from '@socketsecurity/lib-stable/env/rewire'
+
+const COVERAGE_PROFILE_TEST_FILES = [
+  'test/unit/normalize.test.mts',
+  'test/unit/polyfills/set.test.mts',
+  'test/unit/packages/provenance-trust-status.test.mts',
+  'test/unit/packages/tarball-errors.test.mts',
+  'test/unit/dlx/lockfile.test.mts',
+  'test/unit/iterate.test.mts',
+  'test/unit/cacache/shared.test.mts',
+  'test/unit/external-tools/uv/from-vfs.test.mts',
+]
 
 function readDiagnosticJson(
   directory: string,
@@ -82,17 +98,78 @@ function compareDiagnosticSnapshots(control: string, candidate: string) {
   })
 }
 
+function assertCoverageProfileFiles(repoRoot: string, directory: string): void {
+  const report = readDiagnosticJson(directory, 'tests.main.json')
+  assert.ok(Array.isArray(report['testResults']))
+  const files = report['testResults'].map((entry: { name: string }) =>
+    normalizePath(path.relative(repoRoot, entry.name)),
+  )
+  assert.deepEqual(files.toSorted(), COVERAGE_PROFILE_TEST_FILES.toSorted())
+}
+
+function coverageDiagnosticArgs(
+  repoRoot: string,
+  destination: string,
+  workers: number,
+  options: { profile?: boolean | undefined } = {},
+): string[] {
+  const { profile = false } = { __proto__: null, ...options } as typeof options
+  const command = [
+    'run',
+    'cover',
+    '--measure',
+    '--lane',
+    'fast',
+    `--maxWorkers=${workers}`,
+  ]
+  if (!profile) {
+    return command
+  }
+  command.push(
+    '--experimental.importDurations.print=true',
+    '--reporter=default',
+    ...COVERAGE_PROFILE_TEST_FILES,
+  )
+  return [
+    'run',
+    'test:profile',
+    '--cwd',
+    repoRoot,
+    '--output-dir',
+    destination,
+    '--vitest-workers',
+    '--command',
+    JSON.stringify(['pnpm', ...command]),
+  ]
+}
+
+function coverageDiagnosticEnv(
+  options: { profile?: boolean | undefined } = {},
+): NodeJS.ProcessEnv {
+  const { profile = false } = { __proto__: null, ...options } as typeof options
+  return profile
+    ? {
+        ...process.env,
+        DEBUG: [getEnvValue('DEBUG'), 'vitest:coverage']
+          .filter(Boolean)
+          .join(','),
+      }
+    : process.env
+}
+
 export async function runCoverageDiagnostics(
   options: {
     repoRoot?: string | undefined
     execute?: typeof runQuietCommand | undefined
     context?: (() => unknown) | undefined
+    profile?: boolean | undefined
   } = {},
 ): Promise<number> {
   const {
     repoRoot = REPO_ROOT,
     execute = runQuietCommand,
     context = coverageDiagnosticContext,
+    profile = false,
   } = options
   const paths = coverageDiagnosticPaths(repoRoot)
   mkdirSync(paths.output, { recursive: true })
@@ -101,22 +178,20 @@ export async function runCoverageDiagnostics(
   let exitCode = 0
   let head: unknown
   let control: string | undefined
-  for (const [index, workers] of [4, 8, 4, 8].entries()) {
+  const workerCounts = profile ? [4] : [4, 8, 4, 8]
+  const env = coverageDiagnosticEnv({ profile })
+  for (const [index, workers] of workerCounts.entries()) {
     const name = `workers-${workers}-run-${index + 1}`
     const destination = path.join(invocation, name)
-    const args = [
-      'run',
-      'cover',
-      '--measure',
-      '--lane',
-      'fast',
-      `--maxWorkers=${workers}`,
-    ]
+    mkdirSync(destination, { recursive: true })
+    const args = coverageDiagnosticArgs(repoRoot, destination, workers, {
+      profile,
+    })
     const before = context()
     const started = Date.now()
     const result = await execute(args, {
       cwd: repoRoot,
-      env: process.env,
+      env,
       timeoutMs: 120_000,
     })
     const after = context()
@@ -124,13 +199,13 @@ export async function runCoverageDiagnostics(
       name,
       directory: destination,
       workers,
+      profile,
       args,
       before,
       after,
       exitCode: result.exitCode,
       timedOut: result.timedOut === true,
     }
-    mkdirSync(destination, { recursive: true })
     writeFileSync(
       path.join(destination, 'command.log'),
       result.stdout + result.stderr,
@@ -151,6 +226,9 @@ export async function runCoverageDiagnostics(
       assert.equal(measurement['head'], head)
       control ??= destination
       run['measurement'] = measurement
+      if (profile) {
+        assertCoverageProfileFiles(repoRoot, destination)
+      }
       const comparison = compareDiagnosticSnapshots(control, destination)
       run['comparison'] = comparison
       if (
@@ -180,12 +258,19 @@ export async function runCoverageDiagnostics(
 if (isMainModule(import.meta.url)) {
   runMain(
     async () => {
-      process.exitCode = await runCoverageDiagnostics()
+      const { values } = parseArgs({
+        args: getScriptArgs(),
+        options: { profile: { type: 'boolean', default: false } },
+        strict: true,
+      })
+      process.exitCode = await runCoverageDiagnostics({
+        profile: values.profile,
+      })
     },
     {
       describe:
-        'Compare four and eight coverage workers on one host; diagnostic results do not establish gate success.',
-      help: 'Usage: pnpm run cover:diagnose',
+        'Compare coverage workers or profile representative tests; diagnostic results do not establish gate success.',
+      help: 'Usage: pnpm run cover:diagnose [--profile]',
     },
   )
 }
