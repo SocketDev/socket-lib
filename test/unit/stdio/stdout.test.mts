@@ -33,10 +33,6 @@ describe('stdio/stdout', () => {
       expect(stdout).toBeDefined()
       expect(stdout).toBe(process.stdout)
     })
-
-    it('should be a WriteStream', () => {
-      expect(stdout).toBeInstanceOf(Object)
-    })
   })
 
   describe('writeLine', () => {

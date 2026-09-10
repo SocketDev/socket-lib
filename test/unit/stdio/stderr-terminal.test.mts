@@ -29,10 +29,6 @@ describe('stdio/stderr terminal', () => {
       expect(stderr).toBeDefined()
       expect(stderr).toBe(process.stderr)
     })
-
-    it('should be a WriteStream', () => {
-      expect(stderr).toBeInstanceOf(Object)
-    })
   })
 
   describe('clearStderrLine', () => {
