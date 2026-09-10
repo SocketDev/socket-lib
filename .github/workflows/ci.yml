@@ -218,7 +218,8 @@ jobs:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
           payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
-      - uses: ./.github/actions/fleet/run-script
+      - id: coverage
+        uses: ./.github/actions/fleet/run-script
         env:
           # cover builds with source maps first; authenticate its build-time
           # GitHub API reads, same as the test job.
@@ -226,3 +227,23 @@ jobs:
         with:
           setup-script: pnpm run build
           main-script: pnpm run cover
+      - name: Measure failed fast coverage lane
+        if: failure() && steps.coverage.outcome == 'failure'
+        timeout-minutes: 5
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p .cache/repo/coverage-diagnostics
+          pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/fast.log
+      - name: Upload coverage diagnostics
+        if: always() && steps.coverage.outcome == 'failure'
+        uses: ./.github/actions/fleet/upload-artifact
+        with:
+          name: failed-coverage-diagnostics
+          path: |
+            .cache/repo/coverage-diagnostics
+            .cache/fleet/coverage/measurement
+            .cache/fleet/fleet-cover
+          if-no-files-found: ignore
