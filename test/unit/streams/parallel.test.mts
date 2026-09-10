@@ -277,10 +277,11 @@ describe('streams/parallel — error handling', () => {
         }
         return x * 2
       },
-      { concurrency: 1, retries: { retries: 2 } },
+      { concurrency: 1, retries: { retries: 2, baseDelayMs: 0 } },
     )
     const output = await collect(result)
     expect(output).toEqual([2, 4, 6])
+    expect(attempt).toBe(2)
   })
 
   it('respects concurrency limit in parallelMap', async () => {

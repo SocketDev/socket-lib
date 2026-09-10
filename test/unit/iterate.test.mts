@@ -70,10 +70,10 @@ describe('promises', () => {
           }
           return item % 2 === 0
         },
-        { concurrency: 1, retries: 3 },
+        { concurrency: 1, retries: { retries: 3, baseDelayMs: 0 } },
       )
       expect(result).toEqual([2, 4])
-      expect(attempts).toBeGreaterThan(4) // Should have retried for item 2
+      expect(attempts).toBe(5)
     })
 
     it('should respect abort signal', async () => {

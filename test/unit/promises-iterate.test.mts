@@ -278,10 +278,10 @@ describe('promises', () => {
             throw new Error('Temporary failure')
           }
         },
-        { concurrency: 1, retries: 2 },
+        { concurrency: 1, retries: { retries: 2, baseDelayMs: 0 } },
       )
 
-      expect(attempts).toBeGreaterThan(3)
+      expect(attempts).toBe(4)
     })
 
     it('should handle abort signal before first chunk', async () => {
