@@ -3947,6 +3947,7 @@
     "clean": "node scripts/fleet/clean.mts",
     "cover": "node scripts/fleet/cover.mts",
     "cover:allowance": "node scripts/fleet/cover-allowance.mts",
+    "cover:diagnose": "node scripts/repo/coverage-diagnostics.mts",
     "dev": "node scripts/repo/build/run.mts --watch",
     "docs": "node scripts/repo/make-api-md.mts",
     "doctor": "node scripts/fleet/doctor.mts",

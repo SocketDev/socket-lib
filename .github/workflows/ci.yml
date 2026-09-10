@@ -221,100 +221,13 @@ jobs:
         with:
           setup-script: pnpm run build
           main-script: pnpm run cover
-      - name: Measure failed fast coverage lane
+      - name: Compare coverage worker counts
         if: failure() && steps.coverage.outcome == 'failure'
-        timeout-minutes: 5
+        timeout-minutes: 10
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p .cache/repo/coverage-diagnostics
-          pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/fast.log
-      - name: Mint diagnostic source read token
-        id: diagnostic-source-token
-        if: failure() && steps.coverage.outcome == 'failure'
-        uses: ./.github/actions/fleet/github-payload-app-token
-        with:
-          client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
-          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-      - name: Measure demand-loaded network mocks
-        if: failure() && steps.coverage.outcome == 'failure'
-        timeout-minutes: 3
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PAYLOAD_TOKEN: ${{ steps.diagnostic-source-token.outputs.token }}
-          CANONICAL_COMMIT: f9e90fc7f80f2682441d4938570c9d5c593f7431 # test-setup-demand-load
-        run: |
-          set -euo pipefail
-          diagnostics=.cache/repo/coverage-diagnostics
-          cp -R .cache/fleet/coverage/measurement "$diagnostics/control"
-          cp test/fleet/scripts/setup.mts "$diagnostics/setup.before.mts"
-          cp .config/repo/socket-wheelhouse.json "$diagnostics/settings.before.json"
-          test ! -e test/fleet/_shared/lib/network-mocks.mts
-          GH_TOKEN="$PAYLOAD_TOKEN" gh api "repos/SocketDev/socket-wheelhouse/contents/template/base/universal/test/fleet/scripts/setup.mts?ref=${CANONICAL_COMMIT}" --jq .content | base64 --decode > "$diagnostics/setup.candidate.mts"
-          GH_TOKEN="$PAYLOAD_TOKEN" gh api "repos/SocketDev/socket-wheelhouse/contents/template/base/universal/test/fleet/_shared/lib/network-mocks.mts?ref=${CANONICAL_COMMIT}" --jq .content | base64 --decode > "$diagnostics/network-mocks.candidate.mts"
-          printf '%s  %s\n' 7dce0c8b69ce693ec251382e842cc81e2edaf63077c0c22a8f6ece12bb77f967 "$diagnostics/setup.candidate.mts" 70db56b163d15b03dd35315d457402212600f9a6cd31b87785977df46f0a28df "$diagnostics/network-mocks.candidate.mts" | sha256sum --check
-          cat > "$diagnostics/restore.mjs" <<'EOF'
-          import assert from 'node:assert/strict'
-          import { readFileSync, rmSync } from 'node:fs'
-          import { writeThroughMirrorLock } from '../../../scripts/fleet/fs/mirror-lock.mts'
-          const root = '.cache/repo/coverage-diagnostics'
-          const original = readFileSync(`${root}/setup.before.mts`)
-          writeThroughMirrorLock('test/fleet/scripts/setup.mts', original)
-          rmSync('test/fleet/_shared/lib/network-mocks.mts', { force: true })
-          assert.deepEqual(readFileSync('test/fleet/scripts/setup.mts'), original)
-          assert.deepEqual(readFileSync('.config/repo/socket-wheelhouse.json'), readFileSync(`${root}/settings.before.json`))
-          EOF
-          trap 'node "$diagnostics/restore.mjs"' EXIT
-          node --input-type=module <<'EOF'
-          import { readFileSync } from 'node:fs'
-          import { writeThroughMirrorLock } from './scripts/fleet/fs/mirror-lock.mts'
-          const root = '.cache/repo/coverage-diagnostics'
-          writeThroughMirrorLock('test/fleet/scripts/setup.mts', readFileSync(`${root}/setup.candidate.mts`))
-          writeThroughMirrorLock('test/fleet/_shared/lib/network-mocks.mts', readFileSync(`${root}/network-mocks.candidate.mts`))
-          EOF
-          measurement_status=0
-          pnpm run cover --measure --lane fast > "$diagnostics/candidate.log" 2>&1 || measurement_status=$?
-          cp -R .cache/fleet/coverage/measurement "$diagnostics/candidate"
-          node --input-type=module <<'EOF'
-          import assert from 'node:assert/strict'
-          import { readFileSync, writeFileSync } from 'node:fs'
-          const root = '.cache/repo/coverage-diagnostics'
-          const read = (variant, file) => JSON.parse(readFileSync(`${root}/${variant}/lane-fast/${file}`, 'utf8'))
-          const hitChanges = { lost: [], gained: [] }
-          for (const tier of ['main', 'isolated']) {
-            const control = read('control', `tests.${tier}.json`)
-            const candidate = read('candidate', `tests.${tier}.json`)
-            for (const key of ['numTotalTests', 'numPassedTests', 'numFailedTests', 'numPendingTests']) {
-              assert.equal(candidate[key], control[key], `${tier}:${key}`)
-            }
-            assert.deepEqual(candidate.testResults.map(test => test.name).sort(), control.testResults.map(test => test.name).sort())
-            const original = read('control', `coverage-final.${tier}.json`)
-            const changed = read('candidate', `coverage-final.${tier}.json`)
-            assert.deepEqual(Object.keys(changed).sort(), Object.keys(original).sort())
-            for (const path of Object.keys(original)) {
-              for (const key of ['statementMap', 'fnMap', 'branchMap']) {
-                assert.deepEqual(changed[path][key], original[path][key], `${tier}:${path}:${key}`)
-              }
-              for (const metric of ['s', 'f', 'b']) {
-                for (const key of Object.keys(original[path][metric])) {
-                  const before = [original[path][metric][key]].flat()
-                  const after = [changed[path][metric][key]].flat()
-                  before.forEach((count, index) => {
-                    const location = { tier, path, metric, key, index }
-                    if (count > 0 && after[index] === 0) hitChanges.lost.push(location)
-                    if (count === 0 && after[index] > 0) hitChanges.gained.push(location)
-                  })
-                }
-              }
-            }
-          }
-          const comparison = { control: read('control', 'measurement.json'), candidate: read('candidate', 'measurement.json'), identicalTestInventory: true, identicalCoverageMaps: true, hitChanges }
-          writeFileSync(`${root}/comparison.json`, JSON.stringify(comparison, null, 2) + '\n')
-          EOF
-          exit "$measurement_status"
+        run: pnpm run cover:diagnose
       - name: Upload coverage diagnostics
         if: always() && steps.coverage.outcome == 'failure'
         uses: ./.github/actions/fleet/upload-artifact
