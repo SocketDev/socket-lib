@@ -90,14 +90,11 @@ jobs:
       - uses: ./.github/actions/fleet/setup-and-install
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-          # Thin-distribution CI auth: mint a contents:read-only token so the
-          # bootstrap fetch (fired by `prepare` during install) can download the
-          # fleet release bundle from the private wheelhouse. Both refs are
-          # empty on a non-thin member (var/secret unset) - the mint is skipped
-          # and the fetch no-ops. A thin member sets a dedicated read-only App's
-          # client-id var + private-key secret.
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          # Reuse the PR App for a contents:read token scoped to wheelhouse.
+          # Both credentials enable the private release fallback. Without the
+          # key, hydration still pulls public GHCR anonymously.
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
 
       # Cache the model components + activation state ONLY — the same set the
       # bridge's clone mode copies from a system profile. The rest of the
@@ -167,7 +164,9 @@ jobs:
             echo "::error::Fix: read the fill-step log — availability() reasons are printed by the CLI." >&2
             exit 1
           fi
-          VERSION="$(ls "$DIR" | head -1)"
+          VERSIONS=("$DIR"/*)
+          test -e "${VERSIONS[0]}"
+          VERSION="${VERSIONS[0]##*/}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "cache-key=odai-nano-Linux-x64-${VERSION}" >> "$GITHUB_OUTPUT"
           echo "component version: ${VERSION}"
@@ -236,14 +235,11 @@ jobs:
       - uses: ./.github/actions/fleet/setup-and-install
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-          # Thin-distribution CI auth: mint a contents:read-only token so the
-          # bootstrap fetch (fired by `prepare` during install) can download the
-          # fleet release bundle from the private wheelhouse. Both refs are
-          # empty on a non-thin member (var/secret unset) - the mint is skipped
-          # and the fetch no-ops. A thin member sets a dedicated read-only App's
-          # client-id var + private-key secret.
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          # Reuse the PR App for a contents:read token scoped to wheelhouse.
+          # Both credentials enable the private release fallback. Without the
+          # key, hydration still pulls public GHCR anonymously.
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
 
       - name: Restore the filled profile (miss = failure)
         shell: bash

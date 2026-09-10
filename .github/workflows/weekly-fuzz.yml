@@ -180,8 +180,8 @@ jobs:
       - name: Hydrate fleet actions
         uses: ./.github/actions/fleet/checkout
         with:
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
       - name: Rust toolchain
         uses: ./.github/actions/fleet/setup-rust-toolchain
         with:
@@ -327,10 +327,11 @@ jobs:
           # Without this the install runs the firewall unauthenticated while the
           # job still reports green.
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-          # Authorizes a thin member's bundle hydration right after checkout.
-          # Both stay empty on a member with no payload App, skipping the mint.
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          # Reuse the PR App for a contents:read token scoped to wheelhouse.
+          # Both credentials enable the private release fallback. Without the
+          # key, hydration still pulls public GHCR anonymously.
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
       - name: Resolve JS fuzz runtime
         id: js-runtime
         run: |
@@ -431,8 +432,8 @@ jobs:
       - name: Hydrate fleet actions
         uses: ./.github/actions/fleet/checkout
         with:
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
       - name: Go toolchain
         uses: ./.github/actions/fleet/setup-go-toolchain
         with:
@@ -537,8 +538,8 @@ jobs:
           # Without this the install runs the firewall unauthenticated while the
           # job still reports green.
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
-          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
-          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
       # The PR App carries the issues:write grant this needs and already owns
       # the comment surface. The default GITHUB_TOKEN is deliberately not used:
       # an issue it opens is attributed to github-actions[bot] and, more to the

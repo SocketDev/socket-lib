@@ -2676,7 +2676,6 @@ docs/fleet/testing/quality.md
 docs/fleet/workflows/practices.md
 docs/fleet/workflows/publishing.md
 docs/references/fleet/sfw-local-install.md
-opencode.json
 patches/brace-expansion@5.0.9.patch
 patches/minimatch@10.2.6.patch
 scripts/fleet/agent-orphan-sweep.mts
@@ -3388,6 +3387,7 @@ scripts/fleet/git/staged-commit.mts
 scripts/fleet/git/worktree.mts
 scripts/fleet/github/action-port-map.mts
 scripts/fleet/github/actions-runtime.mts
+scripts/fleet/github/app-credentials.mts
 scripts/fleet/github/ghcr-package.mts
 scripts/fleet/github/managed-ruleset-identity.mts
 scripts/fleet/github/raw-url.mts
