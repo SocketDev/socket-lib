@@ -237,129 +237,81 @@ jobs:
           set -euo pipefail
           mkdir -p .cache/repo/coverage-diagnostics
           pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/fast.log
-      - name: Profile failed fast coverage lane
+      - name: Measure demand-loaded network mocks
         if: failure() && steps.coverage.outcome == 'failure'
         timeout-minutes: 3
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          profile_dir="$PWD/.cache/repo/coverage-diagnostics/cpu"
-          mkdir -p "$profile_dir"
-          if [ -d .cache/fleet/coverage/measurement ]; then
-            cp -R .cache/fleet/coverage/measurement .cache/repo/coverage-diagnostics/control
-          fi
-          cat > "$profile_dir/preload.mjs" <<'EOF'
-          import { fileURLToPath } from 'node:url'
-          const directory = fileURLToPath(new URL('.', import.meta.url))
-          for (const flag of ['--cpu-prof', `--cpu-prof-dir=${directory}`]) {
-            if (!process.execArgv.includes(flag)) process.execArgv.push(flag)
-          }
-          EOF
-          export NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--cpu-prof --cpu-prof-dir=${profile_dir} --import=${profile_dir}/preload.mjs"
-          pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/profile.log
-      - name: Measure shared utility tests
-        if: failure() && steps.coverage.outcome == 'failure'
-        timeout-minutes: 3
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
+          CANONICAL_COMMIT: f9e90fc7f80f2682441d4938570c9d5c593f7431 # test-setup-demand-load
         run: |
           set -euo pipefail
           diagnostics=.cache/repo/coverage-diagnostics
+          cp -R .cache/fleet/coverage/measurement "$diagnostics/control"
+          cp test/fleet/scripts/setup.mts "$diagnostics/setup.before.mts"
           cp .config/repo/socket-wheelhouse.json "$diagnostics/settings.before.json"
-          trap 'cp "$diagnostics/settings.before.json" .config/repo/socket-wheelhouse.json' EXIT
-          if [[ -d .cache/fleet/coverage/measurement ]]; then
-            cp -R .cache/fleet/coverage/measurement "$diagnostics/profiled"
-          fi
+          test ! -e test/fleet/_shared/lib/network-mocks.mts
+          git init -q "$diagnostics/canonical"
+          git -C "$diagnostics/canonical" fetch --depth=1 https://github.com/SocketDev/socket-wheelhouse.git "$CANONICAL_COMMIT"
+          test "$(git -C "$diagnostics/canonical" rev-parse FETCH_HEAD)" = "$CANONICAL_COMMIT"
+          git -C "$diagnostics/canonical" show FETCH_HEAD:template/base/universal/test/fleet/scripts/setup.mts > "$diagnostics/setup.candidate.mts"
+          git -C "$diagnostics/canonical" show FETCH_HEAD:template/base/universal/test/fleet/_shared/lib/network-mocks.mts > "$diagnostics/network-mocks.candidate.mts"
+          cat > "$diagnostics/restore.mjs" <<'EOF'
+          import assert from 'node:assert/strict'
+          import { readFileSync, rmSync } from 'node:fs'
+          import { writeThroughMirrorLock } from '../../../scripts/fleet/fs/mirror-lock.mts'
+          const root = '.cache/repo/coverage-diagnostics'
+          const original = readFileSync(`${root}/setup.before.mts`)
+          writeThroughMirrorLock('test/fleet/scripts/setup.mts', original)
+          rmSync('test/fleet/_shared/lib/network-mocks.mts', { force: true })
+          assert.deepEqual(readFileSync('test/fleet/scripts/setup.mts'), original)
+          assert.deepEqual(readFileSync('.config/repo/socket-wheelhouse.json'), readFileSync(`${root}/settings.before.json`))
+          EOF
+          trap 'node "$diagnostics/restore.mjs"' EXIT
           node --input-type=module <<'EOF'
-          import { readFileSync, writeFileSync } from 'node:fs'
-          const path = '.config/repo/socket-wheelhouse.json'
-          const settings = JSON.parse(readFileSync(path, 'utf8'))
-          settings.vitest.nonIsolated = [
-            "test/unit/constants/encoding.test.mts",
-            "test/unit/constants/github.test.mts",
-            "test/unit/constants/licenses.test.mts",
-            "test/unit/constants/maintained-node-versions.test.mts",
-            "test/unit/constants/package-default-socket-categories.test.mts",
-            "test/unit/constants/sentinels.test.mts",
-            "test/unit/constants/socket.test.mts",
-            "test/unit/constants/time.test.mts",
-            "test/unit/constants/typescript.test.mts",
-            "test/unit/constants/units.test.mts",
-            "test/unit/json/format.test.mts",
-            "test/unit/json/parse-errors.test.mts",
-            "test/unit/json/parse-is-json-primitive.test.mts",
-            "test/unit/json/parse.test.mts",
-            "test/unit/json/safe-parse.test.mts",
-            "test/unit/node/async-hooks.test.mts",
-            "test/unit/node/crypto.test.mts",
-            "test/unit/node/events.test.mts",
-            "test/unit/node/fs.test.mts",
-            "test/unit/node/http.test.mts",
-            "test/unit/node/https.test.mts",
-            "test/unit/node/os.test.mts",
-            "test/unit/node/path.test.mts",
-            "test/unit/node/url.test.mts",
-            "test/unit/node/util.test.mts",
-            "test/unit/objects/inspect.test.mts",
-            "test/unit/objects/predicates.test.mts",
-            "test/unit/sorts/natural.test.mts",
-            "test/unit/sorts/strings.test.mts",
-            "test/unit/strings/format.test.mts",
-            "test/unit/strings/lines.test.mts",
-            "test/unit/strings/predicates.test.mts",
-            "test/unit/strings/search.test.mts",
-            "test/unit/strings/transform.test.mts",
-            "test/unit/strings/width.test.mts",
-            "test/unit/versions/compare.test.mts",
-            "test/unit/versions/modify.test.mts",
-            "test/unit/versions/parse.test.mts",
-            "test/unit/versions/range.test.mts",
-            "test/unit/words/article.test.mts",
-            "test/unit/words/capitalize.test.mts",
-            "test/unit/words/pluralize.test.mts",
-            "test/unit/node/fs/promises.test.mts"
-          ]
-          writeFileSync(path, JSON.stringify(settings, null, 2) + '\n')
+          import { readFileSync } from 'node:fs'
+          import { writeThroughMirrorLock } from './scripts/fleet/fs/mirror-lock.mts'
+          const root = '.cache/repo/coverage-diagnostics'
+          writeThroughMirrorLock('test/fleet/scripts/setup.mts', readFileSync(`${root}/setup.candidate.mts`))
+          writeThroughMirrorLock('test/fleet/_shared/lib/network-mocks.mts', readFileSync(`${root}/network-mocks.candidate.mts`))
           EOF
           measurement_status=0
-          pnpm run cover --measure --lane fast > "$diagnostics/shared.log" 2>&1 || measurement_status=$?
-          cp -R .cache/fleet/coverage/measurement "$diagnostics/shared"
+          pnpm run cover --measure --lane fast > "$diagnostics/candidate.log" 2>&1 || measurement_status=$?
+          cp -R .cache/fleet/coverage/measurement "$diagnostics/candidate"
           node --input-type=module <<'EOF'
           import assert from 'node:assert/strict'
           import { readFileSync, writeFileSync } from 'node:fs'
           const root = '.cache/repo/coverage-diagnostics'
-          const read = (tier, file) => JSON.parse(readFileSync(`${root}/${tier}/lane-fast/${file}`, 'utf8'))
-          const control = read('control', 'tests.main.json')
-          const candidate = read('shared', 'tests.main.json')
-          for (const key of ['numTotalTests', 'numPassedTests', 'numFailedTests', 'numPendingTests']) {
-            assert.equal(candidate[key], control[key], key)
-          }
-          assert.deepEqual(candidate.testResults.map(test => test.name).sort(), control.testResults.map(test => test.name).sort())
-          const original = read('control', 'coverage-final.main.json')
-          const shared = read('shared', 'coverage-final.main.json')
-          assert.deepEqual(Object.keys(shared).sort(), Object.keys(original).sort())
-          for (const path of Object.keys(original)) {
-            for (const key of ['statementMap', 'fnMap', 'branchMap']) {
-              assert.deepEqual(shared[path][key], original[path][key], `${path}:${key}`)
+          const read = (variant, file) => JSON.parse(readFileSync(`${root}/${variant}/lane-fast/${file}`, 'utf8'))
+          const hitChanges = { lost: [], gained: [] }
+          for (const tier of ['main', 'isolated']) {
+            const control = read('control', `tests.${tier}.json`)
+            const candidate = read('candidate', `tests.${tier}.json`)
+            for (const key of ['numTotalTests', 'numPassedTests', 'numFailedTests', 'numPendingTests']) {
+              assert.equal(candidate[key], control[key], `${tier}:${key}`)
             }
-          }
-          const hitChanges = { lost: 0, gained: 0 }
-          for (const path of Object.keys(original)) {
-            for (const metric of ['s', 'f', 'b']) {
-              for (const key of Object.keys(original[path][metric])) {
-                const before = [original[path][metric][key]].flat()
-                const after = [shared[path][metric][key]].flat()
-                before.forEach((count, index) => {
-                  if (count > 0 && after[index] === 0) hitChanges.lost += 1
-                  if (count === 0 && after[index] > 0) hitChanges.gained += 1
-                })
+            assert.deepEqual(candidate.testResults.map(test => test.name).sort(), control.testResults.map(test => test.name).sort())
+            const original = read('control', `coverage-final.${tier}.json`)
+            const changed = read('candidate', `coverage-final.${tier}.json`)
+            assert.deepEqual(Object.keys(changed).sort(), Object.keys(original).sort())
+            for (const path of Object.keys(original)) {
+              for (const key of ['statementMap', 'fnMap', 'branchMap']) {
+                assert.deepEqual(changed[path][key], original[path][key], `${tier}:${path}:${key}`)
+              }
+              for (const metric of ['s', 'f', 'b']) {
+                for (const key of Object.keys(original[path][metric])) {
+                  const before = [original[path][metric][key]].flat()
+                  const after = [changed[path][metric][key]].flat()
+                  before.forEach((count, index) => {
+                    const location = { tier, path, metric, key, index }
+                    if (count > 0 && after[index] === 0) hitChanges.lost.push(location)
+                    if (count === 0 && after[index] > 0) hitChanges.gained.push(location)
+                  })
+                }
               }
             }
           }
-          const comparison = { control: read('control', 'measurement.json'), shared: read('shared', 'measurement.json'), identicalTestInventory: true, identicalCoverageMaps: true, hitChanges }
+          const comparison = { control: read('control', 'measurement.json'), candidate: read('candidate', 'measurement.json'), identicalTestInventory: true, identicalCoverageMaps: true, hitChanges }
           writeFileSync(`${root}/comparison.json`, JSON.stringify(comparison, null, 2) + '\n')
           EOF
           exit "$measurement_status"
