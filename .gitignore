@@ -32,41 +32,36 @@
 # so each is ignored in BOTH the repo-root live copy AND the template/base/universal/
 # mirror — the fleet keeps ignores in this root block, not nested per-dir
 # files. Keep in lock-step with RELEASE_ONLY_DIR_MIRROR_FILES (scripts/repo/
-# commit-cascade/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
-**/.claude/hooks/fleet/_dist/fleet-pack.cjs
-# The model-pricing module gen/model-pricing-module.mts bakes from the pricing
-# JSON so rolldown inlines the prices into fleet-pack.cjs. A build output in
-# BOTH trees, shipped in the pack, never cascaded.
-**/scripts/fleet/constants/model-pricing.generated.mts
-**/scripts/fleet/constants/fleet-pack-version.generated.mts
+# sync-scaffolding/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
+**/.claude/hooks/fleet/_dist/fleet-pack.generated.cjs
 # Prebuilt dispatch-launcher variants (one per platform-arch), CI
 # cross-compiled and hydrated from the release bundle; the host build
 # copies its match into _shared/ instead of invoking cc. Contract:
-# scripts/fleet/pack/launcher-variants.mts.
+# scripts/fleet/_shared/launcher-variants.mts.
 **/.claude/hooks/fleet/_dist/launchers/
 # Legacy pre-v1.0.16 dispatch layout: socket-sdk-js still tracks the
 # _dispatch/index.cjs loader, which requires ./fleet-pack.cjs — that generated
 # bundle must stay untracked there. This path stays _dispatch/ on purpose: it
 # describes a layout that member still has on disk, so renaming it here would
 # un-ignore that repo's generated bundle. Keep the entry until every member
-# has migrated to the fleet/index.cjs + _dist/fleet-pack.cjs layout; it
+# has migrated to the fleet/index.cjs + _dist/fleet-pack.generated.cjs layout; it
 # matches nothing once the legacy bundle is gone.
 **/.claude/hooks/fleet/_dispatch/fleet-pack.cjs
 **/.claude/hooks/fleet/_shared/dispatch-launcher
 **/.claude/hooks/fleet/_shared/dispatch-launcher.exe
-**/.claude/hooks/fleet/_shared/dispatch-table-excluded.mts
-**/.claude/hooks/fleet/_shared/dispatch-table-snapshot.mts
-**/.claude/hooks/fleet/_shared/dispatch-table.mts
-**/.claude/hooks/fleet/_shared/excluded-fleet-pack.cjs
-**/.claude/hooks/fleet/_shared/generated-validators.mts
+**/.claude/hooks/fleet/_shared/dispatch-table.excluded.generated.mts
+**/.claude/hooks/fleet/_shared/dispatch-table.snapshot.generated.mts
+**/.claude/hooks/fleet/_shared/dispatch-table.generated.mts
+**/.claude/hooks/fleet/_dist/fleet-pack.excluded.generated.cjs
+**/.claude/hooks/fleet/_shared/validators.generated.mts
 **/.claude/hooks/fleet/_shared/node.path
 **/.claude/hooks/fleet/_shared/snapshot-blob.path
-**/.claude/hooks/fleet/_shared/snapshot-fleet-pack.cjs
-**/.claude/hooks/fleet/_shared/dispatch-manifest.json
+**/.claude/hooks/fleet/_dist/fleet-pack.snapshot.generated.cjs
+**/.claude/hooks/fleet/_shared/dispatch-manifest.generated.json
 # The rolldown-bundled fleet oxlint plugin (build-oxlint-bundle.mts): members
 # load this single artifact via jsPlugins instead of the ~100 rule source
 # dirs. Release-only + gitignored like the hook bundles above.
-**/.config/fleet/oxlint-plugin.mjs
+**/.config/fleet/oxlint-plugin.generated.mjs
 
 # Derived cross-harness rule adapters — generated per-repo, per-platform by
 # the multi-agent scaffolding (setup / init / sync) script from .claude/skills/
@@ -87,7 +82,6 @@
 /.github/copilot-instructions.md
 /.janus/
 /.kiro/
-/.opencode/
 /.windsurf/
 /AGENTS.md
 /opencode.json
@@ -112,7 +106,6 @@ Thumbs.db
 # generated-globs.mts) by generated-globs-are-consistent.mts.
 **/build/
 **/dist/
-**/tmp/
 /template/generated/
 **/out/
 **/.cache/
@@ -137,6 +130,15 @@ node_modules
 npm-debug.log
 pnpm-debug.log
 *.tgz
+
+**/*.generated.cjs
+**/*.generated.cts
+**/*.generated.js
+**/*.generated.json
+**/*.generated.mjs
+**/*.generated.mts
+**/*.generated.ts
+**/template/generated/**
 # <fleet-pack>
 # Fleet-pack untrack set — managed by scripts/repo/bootstrap/fleet.mjs.
 # REGENERATED from the release-bundle manifest on every hydrate; stale
@@ -150,11 +152,6 @@ pnpm-debug.log
 .windsurf/
 AGENTS.md
 opencode.json
-.cargo/config.darwin-signing.toml
-.cargo/config.toml
-.cargo/sign-and-run.sh
-.clang-format
-.clang-tidy
 .claude/agents/fleet/code-reviewer.md
 .claude/agents/fleet/fix.md
 .claude/agents/fleet/offload.md
@@ -583,10 +580,6 @@ opencode.json
 .claude/hooks/fleet/compound-lessons-nudge/index.mts
 .claude/hooks/fleet/compound-lessons-nudge/package.json
 .claude/hooks/fleet/compound-lessons-nudge/tsconfig.json
-.claude/hooks/fleet/concurrent-cargo-build-guard/README.md
-.claude/hooks/fleet/concurrent-cargo-build-guard/index.mts
-.claude/hooks/fleet/concurrent-cargo-build-guard/package.json
-.claude/hooks/fleet/concurrent-cargo-build-guard/tsconfig.json
 .claude/hooks/fleet/config-refs-are-segregated-at-edit/README.md
 .claude/hooks/fleet/config-refs-are-segregated-at-edit/index.mts
 .claude/hooks/fleet/config-refs-are-segregated-at-edit/package.json
@@ -2497,9 +2490,7 @@ opencode.json
 .github/actions/fleet/upload-artifact/action.yml
 .github/local-ci.Dockerfile
 .github/zizmor.yml
-.golangci.yml
 .mcp.json
-clippy.toml
 docs/design/fleet/README.md
 docs/design/fleet/components.css
 docs/design/fleet/tokens.css
@@ -2666,12 +2657,8 @@ docs/fleet/agents.md/worktree-hygiene.md
 docs/fleet/agents.md/writing-skills-well.md
 docs/fleet/ai-balancer.md
 docs/fleet/development/commands.md
-docs/fleet/development/cpp-javascript.md
 docs/fleet/development/documentation.md
-docs/fleet/development/go-javascript.md
 docs/fleet/development/javascript-api.md
-docs/fleet/development/napi-javascript.md
-docs/fleet/development/rust-javascript.md
 docs/fleet/development/settings.md
 docs/fleet/development/setup.md
 docs/fleet/development/upgrades.md
@@ -2692,8 +2679,6 @@ docs/references/fleet/sfw-local-install.md
 opencode.json
 patches/brace-expansion@5.0.9.patch
 patches/minimatch@10.2.6.patch
-rust-toolchain.toml
-rustfmt.toml
 scripts/fleet/agent-orphan-sweep.mts
 scripts/fleet/ai-backends-status.mts
 scripts/fleet/ai-codify/cli.mts
@@ -2863,10 +2848,6 @@ scripts/fleet/browser/timeouts.mts
 scripts/fleet/build-hook-bundle.mts
 scripts/fleet/build-hook-snapshot.mts
 scripts/fleet/build-infra/lib/external-tools-schema.json
-scripts/fleet/build-infra/lib/release-checksums/consumer.mts
-scripts/fleet/build-infra/lib/release-checksums/core.mts
-scripts/fleet/build-infra/lib/release-checksums/producer.mts
-scripts/fleet/build-infra/release-assets.schema.json
 scripts/fleet/build-oxlint-bundle.mts
 scripts/fleet/build-snapshot-launcher.mts
 scripts/fleet/bump.mts
@@ -3301,7 +3282,6 @@ scripts/fleet/cover/types/report.mts
 scripts/fleet/cover/types/run.mts
 scripts/fleet/cover/v8-provider.mts
 scripts/fleet/crate-release-sha.mts
-scripts/fleet/create-release.mts
 scripts/fleet/cross-cli/fleet-fork-detect.mts
 scripts/fleet/cross-cli/pretooluse-hook.mts
 scripts/fleet/depot-ci.mts

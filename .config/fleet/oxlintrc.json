@@ -319,7 +319,7 @@
     "**/test/repo",
     "**/tests/fixtures",
     "**/wasm_exec.js",
-    "**/.config/fleet/oxlint-plugin.mjs",
+    "**/.config/fleet/oxlint-plugin.generated.mjs",
     "**/*.d.ts",
     "**/*.d.ts.map",
     "**/*.tsbuildinfo",
