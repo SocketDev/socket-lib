@@ -1,9 +1,7 @@
 /**
  * @file Extended integration tests for git utility functions against real
- *   temporary git repositories. Split from extended.test.mts along the "real
- *   git operations" boundary to stay under the file-line cap. Each test seeds a
- *   fresh temp repo and exercises actual repository state changes (init, add,
- *   commit, rename, delete) through the git helpers.
+ *   temporary repositories. Each test copies an immutable seed and exercises
+ *   repository state changes through the Git helpers.
  */
 
 import { promises as fs } from 'node:fs'
@@ -26,33 +24,39 @@ import {
   isUnstaged,
   isUnstagedSync,
 } from '../../../src/git/unstaged.mjs'
-import { spawnSync } from '../../../src/process/spawn/child.mjs'
-import { describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 import { runWithTempDir } from '../util/temp-files.mjs'
 import { safeDelete } from '../../../src/fs/safe.mjs'
+import {
+  makeFixtureHandle,
+  makeGitRepo,
+  snapshotRepo,
+} from '../../fleet/_shared/lib/git-fixture.mts'
+
+import type { GitRepoFixture } from '../../fleet/_shared/lib/git-fixture.mts'
+
+let seed: GitRepoFixture
+
+function copyGitSeed(dir: string): GitRepoFixture {
+  snapshotRepo({ dir: seed.dir, into: dir })
+  return makeFixtureHandle({ dir, env: seed.env, root: dir })
+}
 
 describe('git extended tests - real git operations', () => {
-  // Note: No need to save/restore cwd - we always use explicit cwd options.
-  //
-  // Each test in this block does 4-15 spawnSync('git', ...) calls,
-  // which legitimately takes 5-10s under CPU contention when the
-  // full test suite runs in parallel. The default vitest 10s
-  // timeout flakes these — bump describe-scope default to 30s.
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 })
+
+  beforeAll(() => {
+    seed = makeGitRepo({ prefix: 'git-extended-seed-' })
+  })
+  afterAll(() => seed?.cleanup())
 
   it(
     'should work with a temporary git repository',
     async () => {
       await runWithTempDir(async tmpDir => {
         // Initialize a git repo
-        spawnSync('git', ['init'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.name', 'Test User'], {
-          cwd: tmpDir,
-        })
-        spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-          cwd: tmpDir,
-        })
+        const fixture = copyGitSeed(tmpDir)
 
         // Create a file
         const testFile = path.join(tmpDir, 'test.txt')
@@ -63,19 +67,17 @@ describe('git extended tests - real git operations', () => {
         expect(changed).toContain('test.txt')
 
         // Stage the file
-        spawnSync('git', ['add', 'test.txt'], { cwd: tmpDir })
+        fixture.git('add', 'test.txt')
 
         // File should now be staged
         const staged = await getStagedFiles({ cwd: tmpDir })
         expect(staged).toContain('test.txt')
 
         // Commit the file
-        spawnSync('git', ['commit', '-m', 'Initial commit'], { cwd: tmpDir })
+        fixture.git('commit', '-m', 'Initial commit')
 
-        // Now there should be no changes (or at most just test.txt if git is showing it)
-        const afterCommit = await getChangedFiles({ cwd: tmpDir })
-        // In some git configurations, files may still appear, so just check it's an array
-        expect(Array.isArray(afterCommit)).toBe(true)
+        const afterCommit = await getChangedFiles({ cache: false, cwd: tmpDir })
+        expect(afterCommit).toEqual([])
 
         // Modify the file
         await fs.writeFile(testFile, 'modified content', 'utf8')
@@ -97,15 +99,18 @@ describe('git extended tests - real git operations', () => {
         expect(isStagedResult).toBe(false)
 
         // Stage the changes
-        spawnSync('git', ['add', 'test.txt'], { cwd: tmpDir })
+        fixture.git('add', 'test.txt')
 
         // Now it should be staged
         const stagedAfter = await getStagedFiles({ cwd: tmpDir })
         expect(stagedAfter).toContain('test.txt')
 
         // And should still show as changed
-        const isChangedAfter = await isChanged(testFile, { cwd: tmpDir })
-        expect(typeof isChangedAfter).toBe('boolean')
+        const isChangedAfter = await isChanged(testFile, {
+          cache: false,
+          cwd: tmpDir,
+        })
+        expect(isChangedAfter).toBe(true)
       }, 'git-ops-')
     },
     tolerantTimeout(30_000),
@@ -113,11 +118,7 @@ describe('git extended tests - real git operations', () => {
 
   it('should detect untracked files', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      copyGitSeed(tmpDir)
 
       const untracked = path.join(tmpDir, 'untracked.txt')
       await fs.writeFile(untracked, 'untracked', 'utf8')
@@ -133,11 +134,7 @@ describe('git extended tests - real git operations', () => {
 
   it('should handle nested directories', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      copyGitSeed(tmpDir)
 
       const subdir = path.join(tmpDir, 'src', 'nested')
       await fs.mkdir(subdir, { recursive: true })
@@ -163,11 +160,7 @@ describe('git extended tests - real git operations', () => {
 
   it('should work with sync functions', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      const fixture = copyGitSeed(tmpDir)
 
       const testFile = path.join(tmpDir, 'sync-test.txt')
       await fs.writeFile(testFile, 'sync content', 'utf8')
@@ -175,12 +168,12 @@ describe('git extended tests - real git operations', () => {
       const changedSync = getChangedFilesSync({ cache: false, cwd: tmpDir })
       expect(changedSync).toContain('sync-test.txt')
 
-      spawnSync('git', ['add', 'sync-test.txt'], { cwd: tmpDir })
+      fixture.git('add', 'sync-test.txt')
 
       const stagedSync = getStagedFilesSync({ cwd: tmpDir })
       expect(stagedSync).toContain('sync-test.txt')
 
-      spawnSync('git', ['commit', '-m', 'Sync test'], { cwd: tmpDir })
+      fixture.git('commit', '-m', 'Sync test')
 
       await fs.writeFile(testFile, 'modified sync', 'utf8')
 
@@ -200,11 +193,7 @@ describe('git extended tests - real git operations', () => {
 
   it('should handle empty git repository', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      copyGitSeed(tmpDir)
 
       // Empty repo should have no changes
       const changed = await getChangedFiles({ cwd: tmpDir })
@@ -220,11 +209,7 @@ describe('git extended tests - real git operations', () => {
 
   it('should handle files with spaces in names', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      const fixture = copyGitSeed(tmpDir)
 
       const spacedFile = path.join(tmpDir, 'file with spaces.txt')
       await fs.writeFile(spacedFile, 'content', 'utf8')
@@ -236,7 +221,7 @@ describe('git extended tests - real git operations', () => {
       )
       expect(hasFile).toBe(true)
 
-      spawnSync('git', ['add', 'file with spaces.txt'], { cwd: tmpDir })
+      fixture.git('add', 'file with spaces.txt')
 
       const staged = await getStagedFiles({ cwd: tmpDir })
       const hasStagedFile = staged.some(
@@ -248,11 +233,7 @@ describe('git extended tests - real git operations', () => {
 
   it('should handle special characters in file names', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      copyGitSeed(tmpDir)
 
       const specialFile = path.join(tmpDir, 'file-with_special.chars.txt')
       await fs.writeFile(specialFile, 'content', 'utf8')
@@ -264,32 +245,24 @@ describe('git extended tests - real git operations', () => {
 
   it('should work with absolute paths in is* functions', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      copyGitSeed(tmpDir)
 
       const absFile = path.join(tmpDir, 'absolute.txt')
       await fs.writeFile(absFile, 'content', 'utf8')
 
-      const isChangedAbs = await isChanged(absFile)
-      expect(typeof isChangedAbs).toBe('boolean')
+      const isChangedAbs = await isChanged(absFile, { cwd: tmpDir })
+      expect(isChangedAbs).toBe(true)
     }, 'git-absolute-')
   })
 
   it('should handle deleted files', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      const fixture = copyGitSeed(tmpDir)
 
       const delFile = path.join(tmpDir, 'to-delete.txt')
       await fs.writeFile(delFile, 'content', 'utf8')
-      spawnSync('git', ['add', 'to-delete.txt'], { cwd: tmpDir })
-      spawnSync('git', ['commit', '-m', 'Add file'], { cwd: tmpDir })
+      fixture.git('add', 'to-delete.txt')
+      fixture.git('commit', '-m', 'Add file')
 
       // Delete the file
       await safeDelete(delFile)
@@ -306,36 +279,26 @@ describe('git extended tests - real git operations', () => {
 
   it('should handle renamed files', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      const fixture = copyGitSeed(tmpDir)
 
       const oldFile = path.join(tmpDir, 'old-name.txt')
       await fs.writeFile(oldFile, 'content', 'utf8')
-      spawnSync('git', ['add', 'old-name.txt'], { cwd: tmpDir })
-      spawnSync('git', ['commit', '-m', 'Add file'], { cwd: tmpDir })
+      fixture.git('add', 'old-name.txt')
+      fixture.git('commit', '-m', 'Add file')
 
       // Rename the file
       const newFile = path.join(tmpDir, 'new-name.txt')
       await fs.rename(oldFile, newFile)
-      spawnSync('git', ['add', '-A'], { cwd: tmpDir })
+      fixture.git('add', '-A')
 
-      // Should show both old and new in staged
       const staged = await getStagedFiles({ cwd: tmpDir })
-      // Git may show this as a rename or as delete + add
-      expect(staged.length).toBeGreaterThan(0)
+      expect(staged).toContain('new-name.txt')
     }, 'git-renamed-')
   })
 
   it('should handle Buffer stdout from spawn', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      copyGitSeed(tmpDir)
 
       const testFile = path.join(tmpDir, 'buffer-test.txt')
       await fs.writeFile(testFile, 'buffer content', 'utf8')
@@ -348,11 +311,7 @@ describe('git extended tests - real git operations', () => {
 
   it('should handle stdout as string from spawn', async () => {
     await runWithTempDir(async tmpDir => {
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+      copyGitSeed(tmpDir)
 
       const testFile = path.join(tmpDir, 'string-test.txt')
       await fs.writeFile(testFile, 'string content', 'utf8')
