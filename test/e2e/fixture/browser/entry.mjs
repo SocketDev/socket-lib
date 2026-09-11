@@ -12,5 +12,5 @@ import {
   parsePackument,
 } from '@socketsecurity/lib/eco/npm/registry'
 
-export const result = isNodeBuiltin('fs')
+export const nodeBuiltinResult = isNodeBuiltin('fs')
 export const npmResult = { encodePackageName, parsePackument }

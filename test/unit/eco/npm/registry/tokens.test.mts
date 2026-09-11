@@ -1,9 +1,9 @@
 /**
  * @file Unit tests for the npm access-token endpoints. The HTTP adapter is the
- *   in-memory double from `../../../fixture/npm-registry-http`, so every case runs with no
- *   network. The cases here pin the wire shape of the optional fields: npm
- *   reads them under snake_case names, and an omitted one must be absent rather
- *   than sent as an explicit null.
+ *   in-memory double from `../../../fixture/npm-registry-http`, so every case
+ *   runs with no network. The cases here pin the wire shape of the optional
+ *   fields: npm reads them under snake_case names, and an omitted one must be
+ *   absent rather than sent as an explicit null.
  */
 
 import assert from 'node:assert/strict'

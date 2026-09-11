@@ -17,7 +17,7 @@ export async function run(bytes) {
   return {
     manifestName: manifest?.name,
     manifestVersion: manifest?.version,
-    names: entries.map(e => e.name).sort(),
+    names: entries.map(e => e.name).toSorted(),
   }
 }
 

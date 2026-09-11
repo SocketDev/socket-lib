@@ -67,9 +67,11 @@ function fakeStorage() {
       return map.size
     },
     getItem(key) {
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- Storage API
       return map.has(key) ? map.get(key) : null
     },
     key(index) {
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- Storage API
       return [...map.keys()][index] ?? null
     },
     removeItem(key) {
