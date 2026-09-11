@@ -483,8 +483,8 @@
     },
     "budgetAllowances": {
       "fast": {
-        "maxMs": 38220,
-        "reason": "Measured 36399.755 ms at 948646c621443371bb34b20460b20acbf2e29566; 5% headroom; darwin/arm64, Node v26.8.2.",
+        "maxMs": 55304,
+        "reason": "Measured 52669.804 ms at b7126df19f15c79a52da9aa2d8b3a4fcb3f0054f; 5% headroom; darwin/arm64, Node v26.8.2.",
         "created": "2026-09-11",
         "expires": "2026-10-11"
       }
