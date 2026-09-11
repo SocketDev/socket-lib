@@ -44,7 +44,7 @@
 - The sfw CA is a PERSISTENT per-user pair (`pnpm run setup:sfw-ca`), never sfw's per-invocation tmpdir CA: pnpm's Rust tarball fetcher / cargo / uv / go fail `UnknownIssuer` on an uncached download. [`sfw-persistent-ca`](docs/fleet/agents.md/sfw-persistent-ca.md)
 - Dedup the install tree: no avoidable cross-major duplicate, and every `@socketregistry/*` hardened drop-in is redirected via `overrides:`. [`tooling`](docs/fleet/agents.md/tooling.md)
 - An override's value is MEASURED, never predicted: report surviving gateways beside every cut %. [`ecosystem-impact-measurement`](docs/fleet/agents.md/ecosystem-impact-measurement.md)
-- `pnpm run fix --all` runs the fleet doctor: auto-fixes missing `catalog:` entries, reports soak-window install failures. [`fleet-doctor`](docs/fleet/agents.md/fleet-doctor.md)
+- Every user-facing CLI provides `doctor` (diagnose, read-only) and `doctor --fix` (safe, idempotent repair); `pnpm run fix --all` runs the fleet doctor. [`fleet-doctor`](docs/fleet/agents.md/fleet-doctor.md)
 - A peer agent's number is a LEAD: re-measure or attribute it. (`.claude/hooks/fleet/stop-claim-verify-nudge/`) [`a-peers-claim-is-a-lead`](docs/fleet/agents.md/a-peers-claim-is-a-lead.md)
 - Keep work within your scope. [`task-scope`](docs/fleet/agents.md/judgment-and-self-evaluation.md)
 - "stop"/"pause" means stop FORWARD action: finish the in-flight commit, never freeze broken. (`.claude/hooks/fleet/stop-means-commit-guard/`) [`stop-means-finish-the-commit`](docs/fleet/agents.md/stop-means-finish-the-commit.md)
@@ -55,7 +55,7 @@
 - Smallest chunks, land ASAP; never checkout/switch mid-queue. [`worktree-hygiene`](docs/fleet/agents.md/worktree-hygiene.md) <!--advisory-->
 - 🚨 Before reaching for a revert (git checkout/restore/reset to discard work), try fix forward. (`scripts/fleet/whose-work.mts`, `no-revert-guard`) [`fix-forward-not-revert`](docs/fleet/agents.md/fix-forward-not-revert.md)
 - Land often. [`parallel-claude-sessions`](docs/fleet/agents.md/parallel-claude-sessions.md)
-- Before removing a branch as redundant, verify the kept branch contains its content. (`.claude/hooks/fleet/branch-worktree-sweep-nudge/`) [`worktree-hygiene`](docs/fleet/agents.md/worktree-hygiene.md)
+- Clean landed source worktrees; repeat safe cleanup on repo visits. (`.claude/hooks/fleet/worktree-sweep/`) [`worktree-hygiene`](docs/fleet/agents.md/worktree-hygiene.md)
 - Run `pnpm run preflight` to collect local gate failures in one pass. [`preflight-before-the-gate`](docs/fleet/agents.md/preflight-before-the-gate.md)
 - Never name leftover work and drop it: fix it, or leave a `Follow-up:` handle. (`.claude/hooks/fleet/deferred-residue-guard/`) [`no-deferred-residue`](docs/fleet/agents.md/no-deferred-residue.md)
 - 🚨 Verified admins push default-branch commits with `--no-verify`, without a bypass phrase. [`push-policy`](docs/fleet/agents.md/push-policy.md)
