@@ -161,15 +161,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           setup-script: pnpm run build
-          # A pull request tests only what its diff touches; main and tags run
-          # the whole suite, because main is the commit a release cut verifies
-          # green and that guarantee should not depend on a diff being computed
-          # correctly. `--ci` escalates to the full suite by itself whenever it
-          # cannot work out the diff, so a shallow clone or a missing base ref
-          # costs CI minutes rather than coverage.
+          # Ordinary CI uses the diff-aware suite. Manual runs keep the full
+          # suite available, while coverage shards verify each pushed commit.
           main-script:
-            ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' ||
-            'pnpm run test --all' }}
+            ${{ github.event_name == 'workflow_dispatch' && 'pnpm run test --all'
+            || 'pnpm run test --ci' }}
 
   cover-shards:
     if: github.event_name != 'pull_request'

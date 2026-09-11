@@ -39,6 +39,7 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { listWorktrees } from '../fleet/git/worktree.mts'
+import { sharedClaudeSkillsFleetCascadingFleetLibFleetReposJsonPath } from '../fleet/paths/util.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 import { isJsonRequested, runMain } from '../fleet/process/run-main.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
@@ -64,15 +65,8 @@ export interface FleetLibUsageReport {
  * The roster repo names, from the cascaded fleet roster.
  */
 export function rosterRepoNames(repoRoot: string): string[] {
-  const rosterPath = path.join(
-    repoRoot,
-    '.claude',
-    'skills',
-    'fleet',
-    'cascading-fleet',
-    'lib',
-    'fleet-repos.json',
-  )
+  const rosterPath =
+    sharedClaudeSkillsFleetCascadingFleetLibFleetReposJsonPath(repoRoot)
   const roster = JSON.parse(readFileSync(rosterPath, 'utf8')) as {
     repos: Array<{ name: string }>
   }
