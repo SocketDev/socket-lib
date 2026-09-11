@@ -312,6 +312,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           main-script: pnpm run cover:aggregate --shards="$COVERAGE_SHARD_COUNT"
+          setup-script: pnpm run build
       - name: Preserve coverage failure output
         if: ${{ failure() && steps.coverage_aggregate.outcome == 'failure' }}
         uses: ./.github/actions/fleet/upload-artifact
