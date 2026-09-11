@@ -7,9 +7,9 @@
 import { describe, expect, it } from 'vitest'
 
 import { buildBlobUrl, getBlob, getBlobJson } from '../../../src/oci/blob.mjs'
-import { makeFakeAdapter, sha256Digest } from './http-fixtures.mts'
+import { makeFakeAdapter, sha256Digest } from '../fixture/oci-http.mts'
 
-import type { FakeRoute } from './http-fixtures.mts'
+import type { FakeRoute } from '../fixture/oci-http.mts'
 
 describe('buildBlobUrl', () => {
   it('builds the /v2/<repo>/blobs/<digest> URL', () => {

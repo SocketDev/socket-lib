@@ -3,7 +3,7 @@ import { Socket } from 'node:net'
 
 import { afterAll, beforeAll, expect, it, vi } from 'vitest'
 
-import { setupHttpFixture } from './http-request-fixtures.mjs'
+import { setupHttpFixture } from './fixture/http-request.mjs'
 
 const createServerSpy = vi.spyOn(http, 'createServer')
 let server: http.Server

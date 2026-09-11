@@ -7,14 +7,14 @@
  *   internal symbol hooks, and assorted edge cases live in
  *   `logger-symbols.test.mts`. The split keeps each file under the
  *   `socket/max-file-lines` cap; shared capture-stream plumbing is in
- *   `logger-fixtures.ts`.
+ *   `fixture/logger.mts`.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
 import { Logger } from '../../src/logger/node.mjs'
-import { createCaptureStream } from './logger-fixtures.mjs'
-import type { MockStream } from './logger-fixtures.mjs'
+import { createCaptureStream } from './fixture/logger.mjs'
+import type { MockStream } from './fixture/logger.mjs'
 
 describe('Logger', () => {
   let testLogger: Logger

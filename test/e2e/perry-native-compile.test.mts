@@ -20,7 +20,7 @@ import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(testDir, '..', '..')
-const fixtureDir = path.resolve(repoRoot, 'test', 'fixtures', 'perry')
+const fixtureDir = path.resolve(repoRoot, 'test', 'e2e', 'fixture', 'perry')
 // On Windows the runnable shim is perry.cmd; the extensionless `perry` is a
 // POSIX sh script Windows can't exec directly. spawn() runs the .cmd via
 // cmd.exe when shell: true; see the perry spawn below.

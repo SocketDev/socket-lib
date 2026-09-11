@@ -2,7 +2,7 @@
  * @file Isolated tests for the Logger module's LOG_SYMBOLS surface, internal
  *   symbol-keyed hooks, symbol stripping, blank-line tracking, and assorted
  *   edge cases. Split out of `logger.test.mts` to stay under the
- *   `socket/max-file-lines` cap. Shared harness lives in `logger-fixtures.ts`.
+ *   `socket/max-file-lines` cap. Shared harness lives in `fixture/logger.mts`.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -20,7 +20,7 @@ import {
 import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
 import { setTheme } from '../../src/term/themes/context.mjs'
 import { THEMES } from '../../src/term/themes/presets.mjs'
-import { setupLoggerHarness } from './logger-fixtures.mjs'
+import { setupLoggerHarness } from './fixture/logger.mjs'
 
 /**
  * Logger exposes two internal hooks as symbol-keyed methods. The tests reach

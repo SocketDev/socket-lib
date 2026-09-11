@@ -7,7 +7,7 @@
  *   httpJson/httpText wrappers in http-request-json-text.test.mts. Advanced
  *   topics — edge cases, options, retries, error handling — live in
  *   http-request-advanced.test.mts. All files share the same test server via
- *   http-request-fixtures.mts.
+ *   fixture/http-request.mts.
  */
 
 import http from 'node:http'
@@ -30,7 +30,7 @@ import {
   fixture,
   listeningPort,
   setupHttpFixture,
-} from './http-request-fixtures.mjs'
+} from './fixture/http-request.mjs'
 
 setupHttpFixture()
 

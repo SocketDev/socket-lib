@@ -21,7 +21,7 @@ import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 type ExtractCallback = (destPath: string) => Promise<unknown>
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
-const fixturesDir = path.resolve(testDir, '../../fixtures/npm')
+const fixturesDir = path.resolve(testDir, '../fixture/npm')
 const localRequire = createRequire(import.meta.url)
 
 // is-number@7.0.0 fixtures: the packument's `dist.integrity` / `dist.shasum`

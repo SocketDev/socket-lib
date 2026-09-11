@@ -31,7 +31,8 @@ export const repoRoot: string = path.resolve(testDir, '..', '..')
 export const fixtureDir: string = path.resolve(
   repoRoot,
   'test',
-  'fixtures',
+  'e2e',
+  'fixture',
   'browser',
 )
 
