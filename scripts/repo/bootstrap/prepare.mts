@@ -371,10 +371,8 @@ export function fetchBundle(): boolean {
   }
   const pinnedRef = readPinnedRef(REPO_ROOT)
   const appliedRef = readAppliedRefLocal(REPO_ROOT)
-  if (isAppliedRefCurrentOrNewer(pinnedRef, appliedRef)) {
-    log(
-      `bundle ${appliedRef} already applied (at or ahead of pin ${pinnedRef}) — skipping fetch`,
-    )
+  if (isAppliedRefCurrent(pinnedRef, appliedRef)) {
+    log(`bundle ${appliedRef} matches pin ${pinnedRef} — skipping fetch`)
     return true
   }
   if (!tryRun('node', [fleet, '--if-current'])) {
@@ -392,38 +390,11 @@ const SETTINGS_CANDIDATES_LOCAL = [
 
 const APPLIED_MARKER_PATH = '.cache/fleet/socket-wheelhouse/bundle-applied'
 
-export function isAppliedRefCurrentOrNewer(
+export function isAppliedRefCurrent(
   pinnedRef: string | undefined,
   appliedRef: string | undefined,
 ): boolean {
-  if (!pinnedRef || !appliedRef) {
-    return false
-  }
-  if (appliedRef === pinnedRef) {
-    return true
-  }
-  const pinnedSha = packTemplateShaLocal(pinnedRef)
-  const appliedSha = packTemplateShaLocal(appliedRef)
-  if (!pinnedSha || !appliedSha) {
-    return false
-  }
-  const wheelhouse = path.join(REPO_ROOT, '..', 'socket-wheelhouse')
-  if (existsSync(path.join(wheelhouse, '.git'))) {
-    try {
-      execFileSync(
-        'git',
-        ['merge-base', '--is-ancestor', pinnedSha, appliedSha],
-        {
-          cwd: wheelhouse,
-          stdio: 'ignore',
-        },
-      )
-      return true
-    } catch {
-      return false
-    }
-  }
-  return !process.env['CI']
+  return pinnedRef !== undefined && pinnedRef !== '' && appliedRef === pinnedRef
 }
 
 export function isMainModule(): boolean {
@@ -521,10 +492,6 @@ export async function maybeNotifyUpdate(): Promise<void> {
   } catch {
     // Best-effort: offline / no gh / a status hard-fail never breaks install.
   }
-}
-
-function packTemplateShaLocal(ref: string): string | undefined {
-  return /^fleet-pack-(?<sha>[0-9a-f]{40})$/.exec(ref)?.groups?.['sha']
 }
 
 function readAppliedRefLocal(dest: string): string | undefined {

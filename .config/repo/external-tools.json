@@ -120,12 +120,7 @@
           "integrity": "sha512-vZdptPsQPYnBvRR3S+6bikfk3WdkE+0d1a0CoPmSY8QPdfOG3jC4JxdTMN0FvHUzwR5iZQhfomJWq73F/PDWgg=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-08-26",
-        "removable": "2026-09-02",
-        "version": "1.15.1"
-      }
+      "origin": "gh-asset"
     },
     "sfw-free": {
       "notes": [
@@ -166,12 +161,7 @@
           "integrity": "sha512-ZRuz2N0CmEXJuyhADFyqXU3bBDPp6UmDuXBSMoxcFyzUO/q3/5QRgVCimyOU09cG1XS9TRGvPSyL5y6sFN6D2A=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-08-26",
-        "removable": "2026-09-02",
-        "version": "1.15.1"
-      }
+      "origin": "gh-asset"
     },
     "uv": {
       "notes": [

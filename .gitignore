@@ -628,6 +628,7 @@ opencode.json
 .claude/hooks/fleet/cross-repo-guard/README.md
 .claude/hooks/fleet/cross-repo-guard/index.mts
 .claude/hooks/fleet/cross-repo-guard/package.json
+.claude/hooks/fleet/cross-repo-guard/runtime.mts
 .claude/hooks/fleet/cross-repo-guard/tsconfig.json
 .claude/hooks/fleet/default-branch-guard/README.md
 .claude/hooks/fleet/default-branch-guard/index.mts
@@ -1912,6 +1913,7 @@ opencode.json
 .claude/skills/fleet/_shared/scripts/fleet-roster.mts
 .claude/skills/fleet/_shared/scripts/git-default-branch.mts
 .claude/skills/fleet/_shared/scripts/logger-guardrails.mts
+.claude/skills/fleet/_shared/scripts/repository-paths.mts
 .claude/skills/fleet/_shared/scripts/resolve-tools.mts
 .claude/skills/fleet/_shared/scripts/utils.mts
 .claude/skills/fleet/_shared/security-tools.md
@@ -1923,6 +1925,7 @@ opencode.json
 .claude/skills/fleet/agent-ci/reference.md
 .claude/skills/fleet/auditing-api-surface/SKILL.md
 .claude/skills/fleet/auditing-api-surface/lib/audit-api-surface.mts
+.claude/skills/fleet/auditing-api-surface/lib/evidence.mts
 .claude/skills/fleet/auditing-gha/SKILL.md
 .claude/skills/fleet/auditing-gha/canonical-patterns.mts
 .claude/skills/fleet/auditing-gha/run-report.mts
@@ -1931,6 +1934,14 @@ opencode.json
 .claude/skills/fleet/authoring-charts/references/markdown-comparisons.md
 .claude/skills/fleet/authoring-spec/SKILL.md
 .claude/skills/fleet/building-tdd/SKILL.md
+.claude/skills/fleet/cascading-commits/SKILL.md
+.claude/skills/fleet/cascading-commits/lib/cascade-template.mts
+.claude/skills/fleet/cascading-commits/lib/fleet-repos.json
+.claude/skills/fleet/cascading-commits/lib/precascade-gate.mts
+.claude/skills/fleet/cascading-commits/lib/reconcile-lockfiles.mts
+.claude/skills/fleet/cascading-commits/references/lockfile-reconciliation.md
+.claude/skills/fleet/cascading-commits/references/pre-cascade-gate.md
+.claude/skills/fleet/cascading-commits/references/recovery-playbook.md
 .claude/skills/fleet/cascading-fleet/SKILL.md
 .claude/skills/fleet/cascading-fleet/lib/cascade-template.mts
 .claude/skills/fleet/cascading-fleet/lib/fleet-repos.json
@@ -2411,6 +2422,8 @@ opencode.json
 .config/fleet/oxlint-plugin/fleet/prefer-undefined-over-null/package.json
 .config/fleet/oxlint-plugin/fleet/prefer-windows-test-helpers/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-windows-test-helpers/package.json
+.config/fleet/oxlint-plugin/fleet/repository-paths-are-contained/index.mts
+.config/fleet/oxlint-plugin/fleet/repository-paths-are-contained/package.json
 .config/fleet/oxlint-plugin/fleet/require-async-iife-entry/index.mts
 .config/fleet/oxlint-plugin/fleet/require-async-iife-entry/package.json
 .config/fleet/oxlint-plugin/fleet/require-regex-comment/index.mts
@@ -2815,6 +2828,7 @@ scripts/fleet/ai/odai/cache/run.mts
 scripts/fleet/ai/odai/cache/upload.mts
 scripts/fleet/ai/odai/cache/util.mts
 scripts/fleet/ai/odai/diagnostics.mts
+scripts/fleet/ai/odai/run.mts
 scripts/fleet/ai/opencode-auth-store.mts
 scripts/fleet/ai/opencode-auth.mts
 scripts/fleet/ai/provider-apis.mts
@@ -2838,9 +2852,11 @@ scripts/fleet/apple-sign.mts
 scripts/fleet/archives/tar-executable.mts
 scripts/fleet/artifact/client.mts
 scripts/fleet/artifact/download.mts
+scripts/fleet/artifact/retention.mts
 scripts/fleet/artifact/twirp.mts
 scripts/fleet/artifact/upload.mts
 scripts/fleet/artifact/zip.mts
+scripts/fleet/artifact/zip/file.mts
 scripts/fleet/attest/claims.mts
 scripts/fleet/attest/cli-args.mts
 scripts/fleet/attest/endpoints.mts
@@ -2849,6 +2865,7 @@ scripts/fleet/attest/statement.mts
 scripts/fleet/attest/store.mts
 scripts/fleet/attest/subject.mts
 scripts/fleet/audit-transcript.mts
+scripts/fleet/audit/consumer-source.mts
 scripts/fleet/auditing-history/patch-id.mts
 scripts/fleet/auditing-history/types.mts
 scripts/fleet/backup-branches.mts
@@ -3168,6 +3185,7 @@ scripts/fleet/check/release-tags-match-provenance.mts
 scripts/fleet/check/repo-glyphs-are-current.mts
 scripts/fleet/check/repo-owned-claude-paths-are-tracked.mts
 scripts/fleet/check/report-paths-are-helper-built.mts
+scripts/fleet/check/repository-paths-are-contained.mts
 scripts/fleet/check/researching-recency-contract-is-current.mts
 scripts/fleet/check/review-stages-are-ordered.mts
 scripts/fleet/check/root-files-are-sanctioned.mts
@@ -3242,6 +3260,7 @@ scripts/fleet/check/webhooks-are-allowlisted.mts
 scripts/fleet/check/wheelhouse-controlled-files-are-classified.mts
 scripts/fleet/check/workflow-env-is-action-supplied.mts
 scripts/fleet/check/workflow-envs-have-full-fleet-env.mts
+scripts/fleet/check/workflow-full-tests-have-milestone-cadence.mts
 scripts/fleet/check/workflow-installs-have-the-socket-token.mts
 scripts/fleet/check/workflow-scripts-are-explicit-scope.mts
 scripts/fleet/check/workflow-sha-pins-are-stamped-at-commit.mts
@@ -3603,6 +3622,7 @@ scripts/fleet/mcp/protocol.mts
 scripts/fleet/mcp/providers.mts
 scripts/fleet/mcp/reset-process.mts
 scripts/fleet/mcp/reset.mts
+scripts/fleet/mcp/schemas.mts
 scripts/fleet/mcp/slack/client.mts
 scripts/fleet/mcp/slack/credential.mts
 scripts/fleet/mcp/slack/errors.mts
@@ -3750,6 +3770,7 @@ scripts/fleet/registry-infra/npm/settings/migrations.mts
 scripts/fleet/registry-infra/npm/settings/org-sweep.mts
 scripts/fleet/registry-infra/npm/settings/org-web.mts
 scripts/fleet/registry-infra/npm/settings/owner-sweep.mts
+scripts/fleet/registry-infra/npm/settings/publisher-source.mts
 scripts/fleet/registry-infra/npm/settings/sweep.mts
 scripts/fleet/registry-infra/npm/settings/trust-sweep.mts
 scripts/fleet/registry-infra/npm/settings/trust.mts
@@ -4007,6 +4028,7 @@ scripts/fleet/update/_shared.mts
 scripts/fleet/update/brew-parse.mts
 scripts/fleet/update/brew.mts
 scripts/fleet/update/cargo.mts
+scripts/fleet/update/chrome.mts
 scripts/fleet/update/docker.mts
 scripts/fleet/update/external-tools.mts
 scripts/fleet/update/fleet-pins.mts

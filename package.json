@@ -4035,7 +4035,7 @@
     "update:pnpm": "node scripts/fleet/update/pnpm.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "weekly-update:ci": "gh workflow run weekly-update.yml",
-    "ai:odai:cache": "node scripts/fleet/ai/odai/cache/run.mts",
+    "ai:odai:cache": "node scripts/fleet/ai/odai/run.mts cache",
     "build:oxlint-bundle": "node scripts/fleet/build-oxlint-bundle.mts",
     "depot:auth": "node scripts/fleet/registry-infra/depot/browser-auth.mts",
     "setup:1password": "node scripts/fleet/setup/one-password.mts",
@@ -4046,7 +4046,12 @@
     "sweep:worktrees": "node scripts/fleet/worktree-sweep.mts",
     "sweep:worktrees:visit": "node scripts/fleet/worktree/sweep/run.mts",
     "setup:ci:local": "node scripts/fleet/setup/ci-local.mts",
-    "setup:ci:remote": "node scripts/fleet/setup/ci-remote.mts"
+    "setup:ci:remote": "node scripts/fleet/setup/ci-remote.mts",
+    "audit:consumer-source": "node scripts/fleet/audit/consumer-source.mts",
+    "ai:odai:diagnose": "node scripts/fleet/ai/odai/run.mts diagnose",
+    "update:chrome": "node scripts/fleet/ai/odai/run.mts verify-chrome",
+    "mcp:schemas:check": "node scripts/fleet/mcp/schemas.mts check",
+    "mcp:schemas:save": "node scripts/fleet/mcp/schemas.mts save"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -4107,6 +4112,7 @@
     "magic-string": "catalog:",
     "make-fetch-happen": "15.0.6",
     "markdownlint-cli2": "catalog:",
+    "mcp-tada": "catalog:",
     "mdast-util-from-markdown": "catalog:",
     "mdast-util-gfm": "catalog:",
     "mdast-util-to-markdown": "catalog:",
