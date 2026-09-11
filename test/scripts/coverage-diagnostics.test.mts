@@ -300,7 +300,7 @@ describe('runCoverageDiagnostics', () => {
   )
 })
 
-test('collects coverage in two shards before aggregation', () => {
+test('collects coverage in four shards before aggregation', () => {
   const document = parseDocument(
     readFileSync(
       new URL('../../.github/workflows/ci.yml', import.meta.url),
@@ -332,7 +332,7 @@ test('collects coverage in two shards before aggregation', () => {
     }
   }
   const collection = workflow.jobs['cover-shards']
-  expect(collection.strategy.matrix.shard).toEqual([1, 2])
+  expect(collection.strategy.matrix.shard).toEqual([1, 2, 3, 4])
   expect(collection.outputs['shard-count']).toBe('${{ strategy.job-total }}')
   expect(
     collection.steps.find(step => step.name === 'Run coverage'),
@@ -353,7 +353,12 @@ test('collects coverage in two shards before aggregation', () => {
     aggregate.steps
       .filter(step => step.name?.startsWith('Download coverage shard'))
       .map(step => step.with?.['name']),
-  ).toEqual(['coverage-shard-1', 'coverage-shard-2'])
+  ).toEqual([
+    'coverage-shard-1',
+    'coverage-shard-2',
+    'coverage-shard-3',
+    'coverage-shard-4',
+  ])
   expect(
     aggregate.steps.find(step => step.name === 'Run coverage'),
   ).toMatchObject({

@@ -181,7 +181,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2]
+        shard: [1, 2, 3, 4]
     steps:
       # First step cannot call the local ./.github/actions/fleet/checkout
       # composite - nothing is checked out yet for GitHub to resolve
@@ -293,6 +293,16 @@ jobs:
         with:
           name: coverage-shard-2
           path: .cache/fleet/coverage-shards/2
+      - name: Download coverage shard 3
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-3
+          path: .cache/fleet/coverage-shards/3
+      - name: Download coverage shard 4
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-4
+          path: .cache/fleet/coverage-shards/4
       - name: Run coverage
         id: coverage_aggregate
         uses: ./.github/actions/fleet/run-script
