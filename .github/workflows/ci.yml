@@ -161,11 +161,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           setup-script: pnpm run build
-          # Ordinary CI uses the diff-aware suite. Manual runs keep the full
-          # suite available, while coverage shards verify each pushed commit.
-          main-script:
-            ${{ github.event_name == 'workflow_dispatch' && 'pnpm run test --all'
-            || 'pnpm run test --ci' }}
+          # The diff-aware suite escalates when it cannot resolve a safe scope.
+          # Coverage shards verify the complete suite on each pushed commit.
+          main-script: pnpm run test --ci
 
   cover-shards:
     if: github.event_name != 'pull_request'
