@@ -8,7 +8,6 @@
 import { existsSync, mkdirSync, symlinkSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
@@ -17,10 +16,13 @@ import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { spawn } from '../../src/process/spawn/child.mjs'
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+import {
+  REPO_ROOT,
+  TEST_E2E_PERRY_FIXTURE_DIR,
+} from '../../scripts/repo/_shared/paths.mts'
 
-const testDir = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(testDir, '..', '..')
-const fixtureDir = path.resolve(repoRoot, 'test', 'e2e', 'fixture', 'perry')
+const repoRoot = REPO_ROOT
+const fixtureDir = TEST_E2E_PERRY_FIXTURE_DIR
 // On Windows the runnable shim is perry.cmd; the extensionless `perry` is a
 // POSIX sh script Windows can't exec directly. spawn() runs the .cmd via
 // cmd.exe when shell: true; see the perry spawn below.

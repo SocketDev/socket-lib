@@ -11,16 +11,15 @@
 
 import { createRequire } from 'node:module'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
 import { parseProvenancePredicate } from '../../../../../src/eco/npm/registry/index.mjs'
 
 import type { AttestationBundle } from '../../../../../src/eco/npm/registry/index.mjs'
+import { TEST_UNIT_NPM_FIXTURE_DIR } from '../../../../../scripts/repo/_shared/paths.mts'
 
-const testDir = path.dirname(fileURLToPath(import.meta.url))
-const fixturesDir = path.resolve(testDir, '../../../fixture/npm')
+const fixturesDir = TEST_UNIT_NPM_FIXTURE_DIR
 const localRequire = createRequire(import.meta.url)
 
 const attestationFixture = localRequire(

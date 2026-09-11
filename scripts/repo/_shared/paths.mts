@@ -9,6 +9,8 @@
 import path from 'node:path'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
+export * from '../../fleet/paths.mts'
+
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { coverageOutputSegments } from '../../fleet/cover/scope.mts'
 
@@ -25,6 +27,30 @@ export const SRC_EXTERNAL_DIR = normalizePath(
  */
 export const DIST_EXTERNAL_DIR = normalizePath(
   path.join(REPO_ROOT, 'dist', 'external'),
+)
+
+export const TEST_E2E_BROWSER_FIXTURE_DIR = path.join(
+  REPO_ROOT,
+  'test',
+  'e2e',
+  'fixture',
+  'browser',
+)
+
+export const TEST_E2E_PERRY_FIXTURE_DIR = path.join(
+  REPO_ROOT,
+  'test',
+  'e2e',
+  'fixture',
+  'perry',
+)
+
+export const TEST_UNIT_NPM_FIXTURE_DIR = path.join(
+  REPO_ROOT,
+  'test',
+  'unit',
+  'fixture',
+  'npm',
 )
 
 export function coverageDiagnosticPaths(repoRoot: string) {

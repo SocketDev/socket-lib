@@ -18,23 +18,18 @@
 import { mkdirSync, readFileSync, symlinkSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import * as esbuild from 'esbuild'
 import webpack from 'webpack'
 
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+import {
+  REPO_ROOT,
+  TEST_E2E_BROWSER_FIXTURE_DIR,
+} from '../../scripts/repo/_shared/paths.mts'
 
-const testDir = path.dirname(fileURLToPath(import.meta.url))
-
-export const repoRoot: string = path.resolve(testDir, '..', '..')
-export const fixtureDir: string = path.resolve(
-  repoRoot,
-  'test',
-  'e2e',
-  'fixture',
-  'browser',
-)
+export const repoRoot: string = REPO_ROOT
+export const fixtureDir: string = TEST_E2E_BROWSER_FIXTURE_DIR
 
 /**
  * Resolve `@socketsecurity/lib` to THIS repo. The self-dep otherwise symlinks
