@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for the npm trusted-publisher endpoints. The HTTP adapter is
- *   the in-memory double from `../../../fixture/npm-registry-http`, so every case runs with no
- *   network.
+ *   the in-memory double from `../../../fixture/npm-registry-http`, so every
+ *   case runs with no network.
  */
 
 import assert from 'node:assert/strict'
