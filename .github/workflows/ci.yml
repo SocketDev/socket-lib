@@ -223,6 +223,7 @@ jobs:
           COVERAGE_SHARD: ${{ matrix.shard }}
           COVERAGE_SHARD_COUNT: ${{ strategy.job-total }}
         with:
+          setup-script: pnpm run build
           main-script: pnpm run cover:shard --shard="$COVERAGE_SHARD/$COVERAGE_SHARD_COUNT"
       - name: Upload coverage collection
         uses: ./.github/actions/fleet/upload-artifact

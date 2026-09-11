@@ -344,6 +344,7 @@ test('collects coverage in four shards before aggregation', () => {
     with: {
       'main-script':
         'pnpm run cover:shard --shard="$COVERAGE_SHARD/$COVERAGE_SHARD_COUNT"',
+      'setup-script': 'pnpm run build',
     },
   })
 
