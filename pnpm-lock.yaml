@@ -233,6 +233,9 @@ catalogs:
     markdownlint-cli2:
       specifier: 0.23.2
       version: 0.23.2
+    mcp-tada:
+      specifier: 0.1.0
+      version: 0.1.0
     mdast-util-from-markdown:
       specifier: 2.0.3
       version: 2.0.3
@@ -624,6 +627,9 @@ importers:
       markdownlint-cli2:
         specifier: 'catalog:'
         version: 0.23.2(supports-color@10.2.2)
+      mcp-tada:
+        specifier: 'catalog:'
+        version: 0.1.0(@modelcontextprotocol/sdk@1.29.0(supports-color@10.2.2)(zod@4.4.3))(typescript@7.1.0-dev.20260903.1)
       mdast-util-from-markdown:
         specifier: 'catalog:'
         version: 2.0.3(supports-color@10.2.2)
@@ -4160,6 +4166,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/prefer-windows-test-helpers: {}
 
+  .config/fleet/oxlint-plugin/fleet/repository-paths-are-contained: {}
+
   .config/fleet/oxlint-plugin/fleet/require-async-iife-entry: {}
 
   .config/fleet/oxlint-plugin/fleet/require-regex-comment:
@@ -6791,6 +6799,17 @@ packages:
     resolution: {integrity: sha512-+nGYoOlfHmxe5BW5tE0EMJppXEwdSf8uBA1GTZC7Q77kbT35+VKLYJMzVNWCHSsga1ps1tPYFtFyvxvKzWVmMA==}
     engines: {node: '>=6'}
 
+  mcp-tada@0.1.0:
+    resolution: {integrity: sha512-gm0wrPEB4byFFsUF2VLG02jhB02eH5og1D9UVPEnbZGSR2BYkc2k171y65oj9snpM41zQfpJq4GD4cilXfF5zQ==}
+    engines: {node: '>=22.18'}
+    hasBin: true
+    peerDependencies:
+      '@modelcontextprotocol/sdk': '>=1.20.0'
+      typescript: '>=5.4.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   mdast-util-find-and-replace@3.0.2:
     resolution: {integrity: sha512-Tmd1Vg/m3Xz43afeNxDIhWRtFZgM2VLyaf4vSTYwudTyeuTneoL3qtWMA5jeLyz/O1vDJmmV4QuScFCA2tBPwg==}
 
@@ -8003,29 +8022,21 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
 
-  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141': {}
 
   '@anthropic-ai/claude-agent-sdk@0.2.141(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:
@@ -10310,6 +10321,12 @@ snapshots:
   matchit@1.1.0:
     dependencies:
       '@arr/every': 1.0.1
+
+  mcp-tada@0.1.0(@modelcontextprotocol/sdk@1.29.0(supports-color@10.2.2)(zod@4.4.3))(typescript@7.1.0-dev.20260903.1):
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.29.0(supports-color@10.2.2)(zod@4.4.3)
+    optionalDependencies:
+      typescript: 7.1.0-dev.20260903.1
 
   mdast-util-find-and-replace@3.0.2:
     dependencies:
