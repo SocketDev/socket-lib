@@ -12,9 +12,9 @@
  *   1. Walk the configured `scanDirs` for `*.js` files.
  *   2. From each file, extract names from every `const { Foo, Bar } = primordials`
  *      destructure.
- *   3. Read socket-lib's `primordials/` directory from a sibling clone, or
- *      `primordials/*.d.ts` from installed `node_modules`, and pull every
- *      exported name across all leaves.
+ *   3. Read a target-contained primordial snapshot, or `primordials/*.d.ts` from
+ *      installed `node_modules`, and pull every exported name across all
+ *      leaves.
  *   4. Diff: every destructured name must be either (a) in socket-lib verbatim,
  *      (b) in socket-lib via the configured alias map, or (c) in the configured
  *      node-internal-only allowlist. Findings come back classified so callers
@@ -27,6 +27,7 @@ import { ErrorCtor } from '../error.mjs'
 import { StringPrototypeSlice } from '../string.mjs'
 import { getNodeFs } from '../../node/fs.mjs'
 import { getNodePath } from '../../node/path.mjs'
+import { isPathWithinRoot } from '../../paths/predicates.mjs'
 
 // ── Config ──────────────────────────────────────────────────────────
 
@@ -52,12 +53,12 @@ export interface PrimordialsCheckConfig {
   /**
    * Override the auto-resolution of socket-lib's primordials source. Useful for
    * tests; production callers should leave this undefined so the resolver picks
-   * sibling clone → installed `node_modules`.
+   * installed `node_modules`.
    */
   readonly socketLibPrimordialsPath?: string | undefined
   /**
-   * Repo root used to resolve `scanDirs` and to anchor the sibling-clone
-   * fallback (`<repoRoot>/../socket-lib/...`). Defaults to `process.cwd()`.
+   * Repo root used to resolve `scanDirs` and contained source paths.
+   * Defaults to `process.cwd()`.
    */
   readonly repoRoot?: string | undefined
 }
@@ -332,13 +333,21 @@ export function readSocketLibPrimordialNames(resolved: string): Set<string> {
   const out = new Set<string>()
   // Each scanned leaf either has TS exports or is a leftover declaration
   // file; we don't separate them — the parser handles both forms.
-  /* c8 ignore start - leaf-classification branches aren't tested separately */
   for (const name of fs.readdirSync(resolved)) {
-    if (!name.endsWith('.ts') && !name.endsWith('.d.ts')) {
+    if (
+      !name.endsWith('.ts') &&
+      !name.endsWith('.mts') &&
+      !name.endsWith('.cts')
+    ) {
       continue
     }
     const path = getNodePath()
     const full = path.join(resolved, name)
+    if (!isPathWithinRoot(fs.realpathSync(full), fs.realpathSync(resolved))) {
+      throw new ErrorCtor(
+        `Primordial leaf escapes its source directory: ${full}`,
+      )
+    }
     // oxlint-disable-next-line socket/prefer-exists-sync -- needs isFile
     const fileStat = fs.statSync(full)
     if (!fileStat.isFile()) {
@@ -348,64 +357,26 @@ export function readSocketLibPrimordialNames(resolved: string): Set<string> {
       out.add(exp)
     }
   }
-  /* c8 ignore stop */
   return out
 }
 
-/**
- * Locate socket-lib's primordials source. Search order:
- *
- * 1. `config.socketLibPrimordialsPath` if explicitly set. Accepts either a single
- *    file (legacy `primordials.ts` / `.d.ts`) or a directory of leaves
- *    (`primordials/`).
- * 2. Sibling clone — `<repoRoot>/../socket-lib/src/primordials/` (post-split
- *    layout) or `<repoRoot>/../socket-lib/src/primordials.ts` (legacy
- *    single-file layout). Preferred for the dev-loop case where a developer is
- *    editing socket-lib and a consumer in parallel.
- * 3. Installed copy — `<repoRoot>/node_modules/@socketsecurity/lib/
- *    dist/primordials/` (post-split) or `<repoRoot>/node_modules/
- *    @socketsecurity/lib/dist/primordials.d.ts` (legacy). The CI fallback.
- *
- * Throws when none of the candidates exist.
- */
 export function resolveSocketLibPrimordials(
   config: PrimordialsCheckConfig,
 ): string {
-  // Each resolver branch (explicit path, sibling clone, installed
-  // fallback) needs a specific test setup; the branch tracker reports
-  // them sub-arms separately even when the primary path is hit.
-  /* c8 ignore start - resolver branch needs dedicated test setup per candidate */
-  if (config.socketLibPrimordialsPath) {
-    const fs = getNodeFs()
-    if (!fs.existsSync(config.socketLibPrimordialsPath)) {
-      throw new ErrorCtor(
-        `socketLibPrimordialsPath does not exist: ${config.socketLibPrimordialsPath}`,
-      )
-    }
-    return config.socketLibPrimordialsPath
-  }
   const repoRoot = config.repoRoot ?? process.cwd()
   const path = getNodePath()
-  const siblingDir = path.resolve(
-    repoRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials',
-  )
   const fs = getNodeFs()
-  if (fs.existsSync(siblingDir)) {
-    return siblingDir
-  }
-  const siblingLegacy = path.resolve(
-    repoRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials.ts',
-  )
-  if (fs.existsSync(siblingLegacy)) {
-    return siblingLegacy
+  if (config.socketLibPrimordialsPath) {
+    const explicit = path.resolve(repoRoot, config.socketLibPrimordialsPath)
+    if (
+      !fs.existsSync(explicit) ||
+      !isPathWithinRoot(fs.realpathSync(explicit), fs.realpathSync(repoRoot))
+    ) {
+      throw new ErrorCtor(
+        `Primordials source is unavailable or external. Where: ${explicit}. Saw a missing or external source; wanted a source inside ${repoRoot}. Fix: install the package or provide a contained source.`,
+      )
+    }
+    return explicit
   }
   const installedDir = path.resolve(
     repoRoot,
@@ -429,11 +400,10 @@ export function resolveSocketLibPrimordials(
   if (fs.existsSync(installedLegacy)) {
     return installedLegacy
   }
-  /* c8 ignore stop */
   throw new ErrorCtor(
     'Cannot locate socket-lib primordials source. ' +
-      `Looked at:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
-      'Either clone socket-lib at ../socket-lib or run `pnpm install`.',
+      `Looked at:\n  ${installedDir}\n  ${installedLegacy}\n` +
+      'Run `pnpm install` or provide a contained primordial source.',
   )
 }
 

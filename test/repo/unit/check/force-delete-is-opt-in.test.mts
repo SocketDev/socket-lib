@@ -4,8 +4,11 @@ import path from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
 import { safeDelete as deleteFixtureDirectory } from '@socketsecurity/lib-stable/fs/safe'
 
-import { probeDeleteGuard } from '../../../scripts/repo/check/force-delete-is-opt-in.mts'
-import { runWithTempDir } from '../util/temp-files.mjs'
+import {
+  prepareDeleteFixtureRoot,
+  probeDeleteGuard,
+} from '../../../../scripts/repo/check/force-delete-is-opt-in.mts'
+import { runWithTempDir } from '../../../unit/util/temp-files.mjs'
 
 describe('probeDeleteGuard', () => {
   it('keeps the refusal probe unconfigured and scopes cleanup to its own directory', async () => {
@@ -38,4 +41,16 @@ describe('probeDeleteGuard', () => {
       expect(await fs.readdir(root)).toEqual(['project'])
     }, 'delete-guard-probe-')
   })
+})
+
+it('rejects an escaping cache before creating any external directory', async () => {
+  await runWithTempDir(async root => {
+    const repository = path.join(root, 'repository')
+    const external = path.join(root, 'external')
+    await fs.mkdir(repository)
+    await fs.mkdir(external)
+    await fs.symlink(external, path.join(repository, '.cache'), 'dir')
+    expect(() => prepareDeleteFixtureRoot(repository)).toThrow()
+    expect(await fs.readdir(external)).toEqual([])
+  }, 'delete-fixture-boundary-')
 })

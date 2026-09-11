@@ -6,8 +6,16 @@
  *   Usage: node scripts/repo/check/force-delete-is-opt-in.mts [--quiet]
  */
 
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  writeFileSync,
+} from 'node:fs'
 import path from 'node:path'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+import { isPathWithinRoot } from '@socketsecurity/lib-stable/paths/predicates'
 import process from 'node:process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -123,27 +131,60 @@ export async function probeDeleteGuard(config: {
   return findings
 }
 
+export function prepareDeleteFixtureRoot(repoRoot: string): string {
+  const cache = path.join(repoRoot, '.cache')
+  const fixtureBase = path.join(cache, 'delete-guard')
+  for (const candidate of [cache, fixtureBase]) {
+    if (
+      existsSync(candidate) &&
+      !isPathWithinRoot(realpathSync(candidate), realpathSync(repoRoot))
+    ) {
+      throw new Error(
+        'Delete fixture escapes the repository. Fix: remove the escaping cache symlink before running the check.',
+      )
+    }
+  }
+  mkdirSync(fixtureBase, { recursive: true })
+  return fixtureBase
+}
+
 export async function main(): Promise<void> {
   const isQuiet = process.argv.includes('--quiet')
   const { log, safe } = await loadBuilt()
   const logger = log.getDefaultLogger()
-  // del resolves its guard against the REAL cwd, so the property under test is
-  // cwd-relative and cannot be anchored on import.meta.url. Asserted equal to
-  // the repo root, which is where the check runner runs it, so a probe never
-  // lands somewhere unexpected.
-  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- the guard is cwd-relative
-  const cwd = process.cwd()
-  if (path.resolve(cwd) !== REPO_ROOT) {
-    logger.warn(
-      `[force-delete-is-opt-in] skipped: run from the repo root (cwd is ${cwd}); the guard under test is cwd-relative.`,
-    )
+  const fixtureBase = prepareDeleteFixtureRoot(REPO_ROOT)
+  if (!process.argv.includes('--probe-child')) {
+    const fixture = mkdtempSync(path.join(fixtureBase, 'probe-'))
+    const cwd = path.join(fixture, 'cwd')
+    mkdirSync(cwd)
+    try {
+      await spawn(
+        process.execPath,
+        [
+          fileURLToPath(import.meta.url),
+          '--probe-child',
+          ...(isQuiet ? ['--quiet'] : []),
+        ],
+        { cwd, stdio: 'inherit' },
+      )
+    } finally {
+      await safe.safeDelete(fixture, { allowedDirs: [fixture] })
+    }
     return
   }
-  // Beside the repo, never inside a temp dir: the temp dir auto-forces, which
-  // would make property 1 pass for the wrong reason.
+  // oxlint-disable-next-line socket/no-process-cwd-in-scripts-hooks -- the guard is cwd-relative
+  const cwd = process.cwd()
+  if (
+    !isPathWithinRoot(realpathSync(cwd), realpathSync(fixtureBase)) ||
+    path.basename(cwd) !== 'cwd'
+  ) {
+    throw new Error(
+      'Delete probe cwd is invalid. Where: child probe. Saw an external working directory; wanted the repository fixture child. Fix: run the check from the repository root.',
+    )
+  }
   const findings = await probeDeleteGuard({
     cwd,
-    root: path.join(REPO_ROOT, '..'),
+    root: path.dirname(cwd),
     safe,
   })
   if (findings.length) {

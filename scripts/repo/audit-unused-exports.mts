@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { readConsumerEvidence } from './consumer-evidence.mts'
 /**
  * @file Audit which individual `src/` exports — functions, classes, consts —
  *   have zero references anywhere: same-file use, other socket-lib source, or
@@ -28,7 +29,7 @@ import type { ScriptMeta } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
-// Consumer repos live as siblings of socket-lib — every fleet repo that
+// Consumer evidence covers every fleet repo that
 // consumes the lib, plus the wheelhouse (its template/ ships fleet-wide).
 export const CONSUMER_REPOS = [
   'sdxgen',
@@ -200,7 +201,6 @@ export function tallyFileRefs(config: TallyFileConfig): void {
 function main(): number {
   const json = process.argv.includes('--json')
   const libRoot = path.resolve(import.meta.dirname, '../..')
-  const projectsDir = path.dirname(libRoot)
   const srcRoot = path.join(libRoot, 'src')
 
   // 1. Collect export definitions from src/ (vendored src/external/ excluded).
@@ -260,19 +260,14 @@ function main(): number {
   }
   for (let i = 0, { length } = CONSUMER_REPOS; i < length; i += 1) {
     const repo = CONSUMER_REPOS[i]!
-    const root = path.join(projectsDir, repo)
-    const files = listSourceFiles(root)
-    if (!files.length) {
-      logger.warn(`skip (absent or empty): ${repo}`)
-      continue
-    }
-    for (let j = 0, jlen = files.length; j < jlen; j += 1) {
-      const file = files[j]!
+    const evidence = readConsumerEvidence(libRoot, repo)
+    for (const entry of evidence.files) {
+      const file = entry.path
       tallyFileRefs({
         defsByName,
         file,
         repo,
-        source: readFileSync(file, 'utf8'),
+        source: entry.text,
         tallies,
         zone: 'consumer',
       })

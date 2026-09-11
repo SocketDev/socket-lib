@@ -24,7 +24,7 @@
  *     <dir,…>]
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -35,6 +35,8 @@ import {
   walkSimple,
 } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 import type { AcornNode } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
+
+import { readConsumerEvidence } from './consumer-evidence.mts'
 
 import { renderReport } from './audit-api-usage/render.mts'
 
@@ -50,9 +52,8 @@ const logger = getDefaultLogger()
 const PKG = '@socketsecurity/lib'
 const PKG_STABLE = '@socketsecurity/lib-stable'
 
-// Consumer repos live as siblings of socket-lib. Default set = every fleet repo
-// that consumes the lib, plus the wheelhouse.
-const PROJECTS_DIR = path.resolve(import.meta.dirname, '../../..')
+// Consumer evidence covers every declared consumer and the wheelhouse.
+const LIB_ROOT = path.resolve(import.meta.dirname, '../..')
 const DEFAULT_CONSUMERS = [
   'socket-addon',
   'socket-bin',
@@ -355,7 +356,7 @@ function main(): number {
     .map(r => ({
       __proto__: null,
       repo: r.repo,
-      file: path.relative(path.join(PROJECTS_DIR, r.repo), r.file),
+      file: r.file,
       subpath: r.subpath,
     }))
 
@@ -423,15 +424,10 @@ function collectConsumerReferences(consumers: readonly string[]): UsageRef[] {
     i += 1
   ) {
     const repo = consumers[i]!
-    const root = path.join(PROJECTS_DIR, repo)
-    if (!existsSync(root)) {
-      logger.warn(`skip (absent): ${repo}`)
-      continue
-    }
-    const files = listSourceFiles(root)
-    for (let j = 0, flen = files.length; j < flen; j += 1) {
-      const file = files[j]!
-      const source = readFileSync(file, 'utf8')
+    const evidence = readConsumerEvidence(LIB_ROOT, repo)
+    for (const entry of evidence.files) {
+      const file = `./${entry.path}`
+      const source = entry.text
       // Fast-path pre-filter only; not inferring behavior — it skips files
       // that cannot contain a lib specifier before the real AST walk in
       // collectRefs.

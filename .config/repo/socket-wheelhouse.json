@@ -721,7 +721,7 @@
         "test/unit/cacache/read.test.mts",
         "test/unit/cacache/tmp.test.mts",
         "test/unit/cacache/write.test.mts",
-        "test/unit/check/force-delete-is-opt-in.test.mts",
+        "test/repo/unit/check/force-delete-is-opt-in.test.mts",
         "test/unit/cli/check-primordials-render.test.mts",
         "test/unit/cli/check-primordials.test.mts",
         "test/unit/cli/is-main-module.test.mts",
@@ -957,8 +957,8 @@
         "tools/prim/test/lint.test.mts",
         "tools/prim/test/report.test.mts",
         "tools/prim/test/source-text.test.mts",
-        "tools/prim/test/surface-lookup.test.mts",
-        "tools/prim/test/surface-parse.test.mts",
+        "tools/prim/test/surface/lookup.test.mts",
+        "tools/prim/test/surface/parse.test.mts",
         "tools/prim/test/validate.test.mts"
       ],
       "slow": [
@@ -967,7 +967,7 @@
         "test/fleet/nock-loopback-passthrough.test.mts",
         "test/integration/**",
         "test/isolated/**",
-        "test/scripts/audit-fleet-lib-usage.test.mts",
+        "test/repo/unit/audit-fleet-lib-usage.test.mts",
         "test/scripts/exports-have-no-undefined-bindings.test.mts",
         "test/unit/ai/worktree-fanout.test.mts",
         "test/unit/ai/worktree-runone.test.mts",

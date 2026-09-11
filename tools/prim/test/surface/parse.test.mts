@@ -19,7 +19,7 @@ import {
   capitalize,
   deriveNodeBootstrapSurface,
   parseExports,
-} from '../src/surface.mts'
+} from '../../src/surface.mts'
 
 const tmpDirs: string[] = []
 

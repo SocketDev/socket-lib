@@ -1,13 +1,14 @@
 /**
- * @file Local package resolution for development. Checks for local workspace or
- *   sibling project versions.
+ * @file Local package resolution for development. Checks for
+ *   repository-contained workspace packages.
  */
 
-import { existsSync, promises as fs } from 'node:fs'
+import { existsSync, promises as fs, realpathSync } from 'node:fs'
 import path from 'node:path'
+import { isPathWithinRoot } from '@socketsecurity/lib-stable/paths/predicates'
 
 /**
- * Check if local workspace or sibling project versions exist. Used for
+ * Check if repository-contained workspace packages exist. Used for
  * development to use local changes instead of published packages.
  *
  * @param {string} packageName - The package name to search for.
@@ -22,33 +23,23 @@ export async function getLocalPackagePath(
   const checks = []
 
   // Check workspace packages (e.g. @socketregistry/yocto-spinner).
-  if (packageName.startsWith('@socketregistry/')) {
+  if (/^@socketregistry\/[a-z0-9][a-z0-9._-]*$/i.test(packageName)) {
     const pkgName = packageName.replace('@socketregistry/', '')
-    const workspacePath = path.resolve(
-      rootDir,
-      '..',
-      'packages',
-      'npm',
-      pkgName,
-    )
+    const workspacePath = path.resolve(rootDir, 'packages', 'npm', pkgName)
     checks.push(workspacePath)
-  }
-
-  // Check sibling projects (e.g. socket-packageurl-js).
-  if (packageName === '@socketregistry/packageurl-js-stable') {
-    const siblingPath = path.resolve(
-      rootDir,
-      '..',
-      '..',
-      'socket-packageurl-js',
-    )
-    checks.push(siblingPath)
   }
 
   // Return first existing path.
   for (let i = 0, { length } = checks; i < length; i += 1) {
     const checkPath = checks[i]!
-    if (existsSync(path.join(checkPath, 'package.json'))) {
+    if (
+      existsSync(path.join(checkPath, 'package.json')) &&
+      isPathWithinRoot(realpathSync(checkPath), realpathSync(rootDir)) &&
+      isPathWithinRoot(
+        realpathSync(path.join(checkPath, 'package.json')),
+        realpathSync(rootDir),
+      )
+    ) {
       return checkPath
     }
   }
@@ -86,5 +77,19 @@ export async function resolveLocalEntryPoint(localPath: string) {
     }
   }
 
-  return path.join(localPath, mainExport)
+  const entry = path.resolve(localPath, mainExport)
+  assertLocalEntry(localPath, entry)
+  return entry
+}
+
+function assertLocalEntry(localPath: string, entry: string): void {
+  if (
+    !isPathWithinRoot(entry, path.resolve(localPath)) ||
+    (existsSync(entry) &&
+      !isPathWithinRoot(realpathSync(entry), realpathSync(localPath)))
+  ) {
+    throw new Error(
+      `Local package entry escapes its package. Where: ${entry}. Saw an external entry; wanted contained source. Fix: use the declared installed package.`,
+    )
+  }
 }

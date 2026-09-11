@@ -38,6 +38,7 @@
  */
 
 import path from 'node:path'
+import { sourcePrimordialsDir } from '../_shared/paths.mts'
 
 import { applyCodemod, loadPrimordialsSurface } from 'local-prim'
 
@@ -65,10 +66,10 @@ export interface PrimordialsSurface {
  * call.
  */
 export function readSurface(
-  distRoot: string,
+  repoRoot: string,
   srcPrimordialsDir: string,
 ): PrimordialsSurface {
-  const raw = loadPrimordialsSurface(distRoot, srcPrimordialsDir)
+  const raw = loadPrimordialsSurface(repoRoot, srcPrimordialsDir)
   return {
     exports: stringSet(raw.exports),
     exportToLeaf: stringMap(raw.exportToLeaf),
@@ -127,8 +128,9 @@ export async function transformPrimordials(
   // with an `exports.X = …` form parseExports doesn't recognize).
   // `loadPrimordialsSurface` concatenates every leaf in the directory
   // and parses the unified output as a single primordials surface.
-  const srcPrimordialsDir = path.join(distRoot, '..', 'src', 'primordials')
-  const surface = readSurface(distRoot, srcPrimordialsDir)
+  const repoRoot = path.dirname(distRoot)
+  const srcPrimordialsDir = sourcePrimordialsDir(repoRoot)
+  const surface = readSurface(repoRoot, srcPrimordialsDir)
 
   // Per-leaf specifier: walk up from the bundle to dist/, then down to
   // primordials/<leaf>.js. We strip a leading './' replacement because

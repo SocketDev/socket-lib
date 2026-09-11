@@ -21,7 +21,7 @@ import {
   missingRosterRepos,
   redundantKeptLeaves,
   sourceFiles,
-} from '../../scripts/repo/audit-fleet-lib-usage.mts'
+} from '../../../scripts/repo/audit-fleet-lib-usage.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 // A throwaway git repo that gitignores its fleet payload, the way every thin
@@ -64,7 +64,7 @@ describe('sourceFiles', () => {
 })
 
 describe('keptLeaves', () => {
-  const repoRoot = path.join(import.meta.dirname, '..', '..')
+  const repoRoot = path.join(import.meta.dirname, '..', '..', '..')
 
   it('holds the yaml editor out of the stub list', () => {
     expect(keptLeaves(repoRoot).has('yaml/edit')).toBe(true)
@@ -95,55 +95,21 @@ describe('keptLeaves', () => {
   })
 })
 
-describe('fleet usage from a linked worktree', () => {
-  it('scans primary siblings using the worktree roster and exports', () => {
-    const fixture = mkdtempSync(path.join(os.tmpdir(), 'fleet-linked-audit-'))
-    const primary = path.join(fixture, 'projects', 'example-lib')
-    const worktree = path.join(fixture, 'scratch', 'example-branch')
-    const consumer = path.join(fixture, 'projects', 'example-consumer')
-
-    function gitFixture(cwd: string, args: string[]): void {
-      const result = spawnSync('git', args, { cwd, stdio: 'pipe' })
-      expect(result.status).toBe(0)
-    }
-
+describe('fleet usage evidence', () => {
+  it('requires the whole roster and reads captured imports', () => {
+    const root = mkdtempSync(path.join(os.tmpdir(), 'fleet-evidence-'))
     try {
-      mkdirSync(primary, { recursive: true })
-      gitFixture(primary, ['init', '--quiet'])
-      writeFileSync(path.join(primary, 'package.json'), '{}')
-      gitFixture(primary, ['add', 'package.json'])
-      gitFixture(primary, [
-        '-c',
-        'user.name=Example User',
-        '-c',
-        'user.email=example-user@example.com',
-        '-c',
-        'commit.gpgsign=false',
-        'commit',
-        '--quiet',
-        '-m',
-        'test: create audit fixture',
-      ])
-      gitFixture(primary, ['worktree', 'add', '--quiet', '--detach', worktree])
-      mkdirSync(consumer, { recursive: true })
-      gitFixture(consumer, ['init', '--quiet'])
-      writeFileSync(
-        path.join(consumer, 'consumer.mts'),
-        "import { exampleValue } from '@socketsecurity/lib/example/used'",
-      )
       const rosterDir = path.join(
-        worktree,
+        root,
         '.claude/skills/fleet/cascading-fleet/lib',
       )
       mkdirSync(rosterDir, { recursive: true })
       writeFileSync(
         path.join(rosterDir, 'fleet-repos.json'),
-        JSON.stringify({
-          repos: [{ name: 'example-consumer' }, { name: 'missing-consumer' }],
-        }),
+        JSON.stringify({ repos: [{ name: 'example-consumer' }] }),
       )
       writeFileSync(
-        path.join(worktree, 'package.json'),
+        path.join(root, 'package.json'),
         JSON.stringify({
           exports: {
             './example/used': './used.js',
@@ -151,14 +117,33 @@ describe('fleet usage from a linked worktree', () => {
           },
         }),
       )
-
-      expect(missingRosterRepos(worktree)).toEqual(['missing-consumer'])
-      const report = auditFleetLibUsage(worktree)
+      expect(missingRosterRepos(root)).toEqual(['example-consumer'])
+      expect(() => auditFleetLibUsage(root)).toThrow()
+      const evidenceDir = path.join(root, '.cache/consumer-evidence')
+      mkdirSync(evidenceDir, { recursive: true })
+      writeFileSync(
+        path.join(evidenceDir, 'example-consumer.json'),
+        JSON.stringify({
+          schemaVersion: 1,
+          repo: 'example-consumer',
+          slug: 'SocketDev/example-consumer',
+          revision: 'a'.repeat(40),
+          complete: true,
+          files: [
+            {
+              path: 'src/consumer.mts',
+              text: "import { exampleValue } from '@socketsecurity/lib/example/used'",
+            },
+          ],
+        }),
+      )
+      expect(missingRosterRepos(root)).toEqual([])
+      const report = auditFleetLibUsage(root)
       expect(report.reposScanned).toEqual(['example-consumer'])
       expect(report.leaves['example/used']?.named).toEqual(['exampleValue'])
       expect(report.unusedLeaves).toEqual(['example/unused'])
     } finally {
-      safeDeleteSync(fixture)
+      safeDeleteSync(root)
     }
   })
 })

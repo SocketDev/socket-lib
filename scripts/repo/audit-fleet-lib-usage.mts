@@ -1,7 +1,7 @@
 /*
  * @file Fleet-wide usage audit of the @socketsecurity/lib export surface —
  *   the evidence base for stubbing never-used exports out of the published
- *   build. Walks every roster sibling beside the primary checkout, collects
+ *   build. Reads contained revision-bearing consumer evidence, collects
  *   each `@socketsecurity/lib[-stable]/<leaf>` import with its named
  *   bindings, and reconciles them against this package's exports map.
  *
@@ -15,7 +15,7 @@
  *   stubs replace bodies, not declarations.
  *
  *   Output: a JSON report on stdout (or --out <file>). Read-only over the
- *   sibling repos; never writes into them.
+ *   contained consumer evidence.
  *
  *   Usage: node scripts/repo/audit-fleet-lib-usage.mts [--out <file>]
  */
@@ -38,7 +38,12 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
-import { listWorktrees } from '../fleet/git/worktree.mts'
+import {
+  consumerEvidencePath,
+  missingConsumerEvidence,
+  readConsumerEvidence,
+  readConsumerRoster,
+} from './consumer-evidence.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 import { runMain } from '../fleet/process/run-main.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
@@ -64,36 +69,12 @@ export interface FleetLibUsageReport {
  * The roster repo names, from the cascaded fleet roster.
  */
 export function rosterRepoNames(repoRoot: string): string[] {
-  const rosterPath = path.join(
-    repoRoot,
-    '.claude',
-    'skills',
-    'fleet',
-    'cascading-fleet',
-    'lib',
-    'fleet-repos.json',
-  )
-  const roster = JSON.parse(readFileSync(rosterPath, 'utf8')) as {
-    repos: Array<{ name: string }>
-  }
+  const roster = readConsumerRoster(repoRoot)
   return roster.repos.map(r => r.name)
 }
 
-export function fleetProjectsDir(repoRoot: string): string {
-  const primary = listWorktrees(repoRoot).find(worktree => worktree.main)
-  return normalizePath(path.dirname(primary?.path ?? repoRoot))
-}
-
-/**
- * The roster repos with no checkout on disk beside this one. Each missing
- * checkout is a blind spot: its imports are invisible, so every leaf only it
- * uses would be misclassified as fleet-unused.
- */
 export function missingRosterRepos(repoRoot: string): string[] {
-  const projectsDir = fleetProjectsDir(repoRoot)
-  return rosterRepoNames(repoRoot).filter(
-    name => !existsSync(path.join(projectsDir, name, '.git')),
-  )
+  return missingConsumerEvidence(repoRoot, rosterRepoNames(repoRoot))
 }
 
 /**
@@ -250,29 +231,18 @@ export function sourceFiles(repoDir: string): string[] {
 }
 
 /**
- * Run the audit across every roster sibling that exists on disk.
+ * Run the audit across complete captured evidence for every roster member.
  */
 export function auditFleetLibUsage(repoRoot: string): FleetLibUsageReport {
-  const projectsDir = fleetProjectsDir(repoRoot)
   const names = rosterRepoNames(repoRoot)
   const leaves: Record<string, LeafUsage> = {}
   const reposScanned: string[] = []
   for (let i = 0, { length } = names; i < length; i += 1) {
     const name = names[i] as string
-    const dir = path.join(projectsDir, name)
-    if (!existsSync(path.join(dir, '.git'))) {
-      continue
-    }
+    const evidence = readConsumerEvidence(repoRoot, name)
     reposScanned.push(name)
-    const files = sourceFiles(dir)
-    for (let j = 0, flen = files.length; j < flen; j += 1) {
-      const filePath = path.join(dir, files[j] as string)
-      let text: string
-      try {
-        text = readFileSync(filePath, 'utf8')
-      } catch {
-        continue
-      }
+    for (const entry of evidence.files) {
+      const text = entry.text
       if (!text.includes('@socketsecurity/lib')) {
         continue
       }
@@ -406,9 +376,9 @@ function main(): void {
     if (missing.length > 0) {
       throw new Error(
         'audit-fleet-lib-usage: refusing to write the stub list with roster blind spots.\n' +
-          `  Where: ${fleetProjectsDir(REPO_ROOT)}\n` +
-          `  Saw: ${missing.length} roster repo(s) with no checkout on disk (${missing.join(', ')}); wanted every roster member scannable.\n` +
-          '  Fix: clone the missing checkout(s) beside this repo, then re-run --write-stub-list.',
+          `  Where: ${consumerEvidencePath(REPO_ROOT, 'repository')}\n` +
+          `  Saw: ${missing.length} roster repo(s) without evidence (${missing.join(', ')}); wanted complete evidence for every roster member.\n` +
+          '  Fix: collect complete revision-bearing reports in each consumer or validated cascade, then import them and re-run --write-stub-list.',
       )
     }
   }

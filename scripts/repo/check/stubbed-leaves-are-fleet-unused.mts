@@ -1,36 +1,3 @@
-/*
- * @file Repo check — every leaf compiled out of the published build is
- *   provably unreachable and fleet-unused. Three legs, all against what
- *   actually ships:
- *
- *   (a) reachability: no stub may sit in the require graph of a dist module
- *       that ships real code, seeded from EVERY condition of every exports
- *       entry. This is the only leg that needs no sibling checkout, so it is
- *       the one that still runs in CI. It exists because 6.7.0 shipped
- *       http-request/browser as a throwing stub: the fleet imports
- *       `http-request`, whose `browser` condition resolves to that separate
- *       leaf, so no specifier ever named it and legs (b)/(c) read clean while
- *       every SDK browser bundle threw before touching `fetch`.
- *
- *   (b) dist bytes: a built dist module carrying the build-stub banner must
- *       be named in .config/repo/socket-wheelhouse.json — a stub
- *       outside the committed allowlist means the build compiled out a leaf
- *       nobody signed off on. Skipped when dist/ is absent (unbuilt tree).
- *
- *   (c) fleet usage: the committed stub list must still be graph-safe against
- *       the CURRENT roster checkouts — a listed leaf a fleet repo now imports
- *       (directly, or transitively via a used module's relative imports)
- *       would ship as a throwing stub to a real consumer. Skipped loudly when
- *       any roster checkout is missing on disk (CI has no siblings; the
- *       pre-push gate on a full checkout set is the enforcer).
- *
- *   Leg (c) exists because 6.5.1 shipped npm/meta as a throwing stub while
- *   socket-registry imported it — the audit snapshot predated the consumer,
- *   the list went stale, and nothing between build and publish re-checked it.
- *
- * Usage: node scripts/repo/check/stubbed-leaves-are-fleet-unused.mts [--quiet]
- */
-
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -199,10 +166,11 @@ export function main(): void {
       )
       failed = true
     }
-  } else if (!quiet) {
-    logger.warn(
-      `${CHECK} ${missing.length} roster checkout(s) missing (${missing.join(', ')}) — fleet-usage leg skipped.`,
+  } else {
+    logger.error(
+      `${CHECK} ${missing.length} consumer evidence report(s) missing (${missing.join(', ')}). Collect complete revision-bearing reports before evaluating fleet usage.`,
     )
+    failed = true
   }
 
   if (failed) {

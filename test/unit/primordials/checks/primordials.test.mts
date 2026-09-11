@@ -10,7 +10,7 @@
  *   - `.d.ts` declaration form (`export declare const`)
  *   - Resolver (`resolveSocketLibPrimordials`)
  *   - Explicit path override
- *   - Sibling clone preference
+ *   - Sibling clone rejection
  *   - node_modules fallback
  *   - Throws when nothing found
  *   - End-to-end (`checkPrimordials`)
@@ -22,7 +22,7 @@
  *   - Multiple files contribute to same name's `files` list
  */
 
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -32,6 +32,7 @@ import {
   checkPrimordials,
   extractPrimordialsNames,
   extractTsExports,
+  readSocketLibPrimordialNames,
   resolveSocketLibPrimordials,
 } from '../../../../src/primordials/checks/primordials.mjs'
 import type { PrimordialsCheckConfig } from '../../../../src/primordials/checks/primordials.mjs'
@@ -173,6 +174,14 @@ describe('checks/primordials', () => {
     })
   })
 
+  it('rejects a primordial directory leaf that links outside its source', () => {
+    const external = writeFile('external.ts', 'export const ExternalValue = 1')
+    const surface = path.join(tmpDir, 'surface')
+    mkdirSync(surface)
+    symlinkSync(external, path.join(surface, 'leaf.mts'))
+    expect(() => readSocketLibPrimordialNames(surface)).toThrow()
+  })
+
   describe('resolveSocketLibPrimordials', () => {
     it('honors socketLibPrimordialsPath when set and exists', () => {
       const explicit = writeFile('explicit.ts', '')
@@ -189,12 +198,10 @@ describe('checks/primordials', () => {
             socketLibPrimordialsPath: path.join(tmpDir, 'missing.ts'),
           }),
         ),
-      ).toThrow(/socketLibPrimordialsPath does not exist/)
+      ).toThrow(/Primordials source is unavailable or external/)
     })
 
-    it('prefers sibling clone over node_modules', () => {
-      // Set up: tmpDir has a sibling at ../socket-lib AND a
-      // node_modules fallback. Sibling should win.
+    it('ignores sibling clone and uses installed node_modules', () => {
       const repoDir = mkdtempSync(path.join(tmpDir, 'consumer-'))
       const siblingPath = path.join(
         path.dirname(repoDir),
@@ -223,10 +230,10 @@ describe('checks/primordials', () => {
       const found = resolveSocketLibPrimordials(
         makeConfig({ repoRoot: repoDir }),
       )
-      expect(found).toBe(siblingPath)
+      expect(found).toBe(installedPath)
     })
 
-    it('falls back to node_modules when no sibling clone exists', () => {
+    it('resolves installed node_modules', () => {
       const installedPath = writeFile(
         'node_modules/@socketsecurity/lib/dist/primordials.d.ts',
         'export declare const Foo: number',

@@ -18,6 +18,7 @@
 import { compareStr } from '@socketsecurity/lib-stable/sorts/strings'
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { sourcePrimordialsDir } from '../../_shared/paths.mts'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
@@ -32,7 +33,7 @@ import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 const logger = getDefaultLogger()
 
 const rootPath = REPO_ROOT
-const primordialsDir = path.join(rootPath, 'src', 'primordials')
+const primordialsDir = sourcePrimordialsDir(rootPath)
 const outputPath = path.join(
   rootPath,
   'src',

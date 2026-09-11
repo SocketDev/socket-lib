@@ -25,3 +25,7 @@ export const SRC_EXTERNAL_DIR = normalizePath(
 export const DIST_EXTERNAL_DIR = normalizePath(
   path.join(REPO_ROOT, 'dist', 'external'),
 )
+
+export function sourcePrimordialsDir(root: string = REPO_ROOT): string {
+  return normalizePath(path.join(root, 'src', 'primordials'))
+}

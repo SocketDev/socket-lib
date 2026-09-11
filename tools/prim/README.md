@@ -30,7 +30,7 @@ will be (`"private": true`). Two ways to run it:
 ```sh
 # From inside socket-lib, use the root pnpm script:
 pnpm prim --help
-pnpm prim audit --target ../socket-cli
+pnpm prim audit --target .
 
 # From outside socket-lib (e.g. when auditing a sibling repo), invoke
 # the bin directly:
@@ -58,10 +58,10 @@ development - it always picks up the live source under `tools/prim/`.
 pnpm prim --help
 
 # Find both migration candidates AND surface gaps:
-pnpm prim audit --target ../socket-cli
+pnpm prim audit --target .
 
 # Only the gaps (what's missing from socket-lib's primordials):
-pnpm prim audit --target ../socket-cli --gaps
+pnpm prim audit --target . --gaps
 
 # Only the migration candidates (what we could rewrite today):
 pnpm prim audit --target . --dir src --coverage
@@ -84,18 +84,12 @@ pnpm prim lint --target additions/source-patched --dir lib
 
 ## How it knows what's covered
 
-`prim` resolves the primordials surface from one of three locations:
+`prim` resolves the primordials surface from two locations:
 
-1. Explicit `--surface <path>` flag (audit/mod) - overrides everything.
-   Use this to audit against Node's
-   `lib/internal/per_context/primordials.js` or any other
-   primordials-shaped source.
-2. A sibling socket-lib checkout: `../socket-lib/src/primordials.ts`
-   (used during fleet development - picks up unreleased exports).
-3. The installed `@socketsecurity/lib/dist/primordials.js` in the
-   target's `node_modules`.
+1. An explicit `--surface <path>` inside the target repository. Relative paths resolve against the target root.
+2. The installed `@socketsecurity/lib/dist/primordials/` in the target's `node_modules`.
 
-Whichever it finds first wins.
+Copy an external source snapshot into the target before passing `--surface`.
 
 When `--surface` points at a Node `per_context/primordials.js`, the
 loader recognizes the path and dynamically computes the full surface

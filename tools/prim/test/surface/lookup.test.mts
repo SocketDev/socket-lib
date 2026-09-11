@@ -1,20 +1,11 @@
-/**
- * @file Unit tests for `loadPrimordialsSurface`, prim's five-step search for a
- *   primordials source. The order matters more than any single step: a sibling
- *   checkout must win over an installed copy, or fleet development audits
- *   against last week's released surface and reports migrated call sites as
- *   gaps. Each test builds only the layouts it wants present, so the step under
- *   test is the first one that can match.
- */
-
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, symlinkSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { loadPrimordialsSurface } from '../src/surface.mts'
+import { loadPrimordialsSurface } from '../../src/surface.mts'
 
 const tmpDirs: string[] = []
 
@@ -50,7 +41,7 @@ describe('an explicit --surface path', () => {
     const { root, targetRoot } = workspace()
     writeFile(path.join(root, 'socket-lib', 'src', 'primordials.ts'), LEAF)
     const explicit = writeFile(
-      path.join(root, 'vendored-primordials.ts'),
+      path.join(targetRoot, 'vendored-primordials.ts'),
       'export const ArrayPrototypeMap = 1\n',
     )
     const surface = loadPrimordialsSurface(targetRoot, explicit)
@@ -60,10 +51,10 @@ describe('an explicit --surface path', () => {
     expect(surface.exports.has('ObjectKeys')).toBe(false)
   })
 
-  it('resolves a relative path against the cwd', () => {
+  it('resolves a relative path against the target root', () => {
     const { targetRoot } = workspace()
     const explicit = writeFile(path.join(targetRoot, 'surface.ts'), LEAF)
-    const relative = path.relative(process.cwd(), explicit)
+    const relative = path.relative(targetRoot, explicit)
     expect(loadPrimordialsSurface(targetRoot, relative).source).toBe(explicit)
   })
 
@@ -76,51 +67,32 @@ describe('an explicit --surface path', () => {
   })
 })
 
-describe('the sibling socket-lib checkout', () => {
-  it('prefers its split src/primordials/ directory', () => {
+describe('repository boundaries', () => {
+  it('ignores a sibling source without an installed package', () => {
     const { root, targetRoot } = workspace()
-    writeFile(
-      path.join(root, 'socket-lib', 'src', 'primordials', 'object.ts'),
-      LEAF,
-    )
-    const surface = loadPrimordialsSurface(targetRoot)
-    expect(Object.getPrototypeOf(surface)).toBeNull()
-    expect(surface.source).toBe(
-      path.join(root, 'socket-lib', 'src', 'primordials'),
-    )
-    expect(surface.exportToLeaf.get('ObjectKeys')).toBe('object')
+    writeFile(path.join(root, 'socket-lib', 'src', 'primordials.ts'), LEAF)
+    expect(() => loadPrimordialsSurface(targetRoot)).toThrow()
   })
 
-  it('falls back to the legacy single-file src/primordials.ts', () => {
+  it('rejects an explicit source outside the target', () => {
     const { root, targetRoot } = workspace()
-    const legacy = writeFile(
-      path.join(root, 'socket-lib', 'src', 'primordials.ts'),
-      LEAF,
-    )
-    expect(loadPrimordialsSurface(targetRoot).source).toBe(legacy)
+    const external = writeFile(path.join(root, 'external.ts'), LEAF)
+    expect(() => loadPrimordialsSurface(targetRoot, external)).toThrow()
   })
-
-  it('beats the installed copy so unreleased exports are seen', () => {
+  it('rejects a contained symlink to external source', () => {
     const { root, targetRoot } = workspace()
-    const sibling = writeFile(
-      path.join(root, 'socket-lib', 'src', 'primordials.ts'),
-      'export const BrandNewPrimordial = 1\n',
-    )
-    writeFile(
-      path.join(
-        targetRoot,
-        'node_modules',
-        '@socketsecurity',
-        'lib',
-        'dist',
-        'primordials.js',
-      ),
-      LEAF,
-    )
-    const surface = loadPrimordialsSurface(targetRoot)
-    expect(Object.getPrototypeOf(surface)).toBeNull()
-    expect(surface.source).toBe(sibling)
-    expect(surface.exports.has('BrandNewPrimordial')).toBe(true)
+    const external = writeFile(path.join(root, 'external.ts'), LEAF)
+    const link = path.join(targetRoot, 'surface.ts')
+    symlinkSync(external, link)
+    expect(() => loadPrimordialsSurface(targetRoot, link)).toThrow()
+  })
+  it('rejects an escaping leaf within a contained explicit directory', () => {
+    const { root, targetRoot } = workspace()
+    const external = writeFile(path.join(root, 'external.ts'), LEAF)
+    const surface = path.join(targetRoot, 'surface')
+    mkdirSync(surface)
+    symlinkSync(external, path.join(surface, 'leaf.ts'))
+    expect(() => loadPrimordialsSurface(targetRoot, surface)).toThrow()
   })
 })
 
@@ -157,7 +129,7 @@ describe('the installed @socketsecurity/lib copy', () => {
 })
 
 describe('when nothing resolves', () => {
-  it('throws listing all four probed paths and the --surface hint', () => {
+  it('throws listing installed paths and the --surface hint', () => {
     // A bare "not found" leaves the user guessing which layout prim wanted.
     const { targetRoot } = workspace()
     let message = ''
@@ -167,8 +139,6 @@ describe('when nothing resolves', () => {
       message = (e as Error).message
     }
     expect(message).toContain('Cannot locate @socketsecurity/lib/primordials')
-    expect(message).toContain(path.join('socket-lib', 'src', 'primordials'))
-    expect(message).toContain(path.join('socket-lib', 'src', 'primordials.ts'))
     expect(message).toContain(path.join('dist', 'primordials'))
     expect(message).toContain(path.join('dist', 'primordials.js'))
     expect(message).toContain('--surface')

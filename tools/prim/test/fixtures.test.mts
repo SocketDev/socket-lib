@@ -115,16 +115,12 @@ async function runFixture(fixturePath: string): Promise<{
   const scanDir = existsSync(path.join(tmp, 'src'))
     ? path.join(tmp, 'src')
     : tmp
-  // Two concepts here:
-  // - `surfacePath`: where to read the exports map FROM. Real
-  //   src/primordials/ tree owns the surface; fixtures without their own
-  //   primordials borrow socket-lib's so the codemod has something to
-  //   consult.
-  // - `selfPrimordialsRoot`: where the codemod should refuse to write TO.
-  //   Only the fixture's own primordials/ — never the borrowed lib path,
-  //   which lives outside the scan root anyway.
   const fixturePrimordialsPath = findLocalPrimordials(scanDir)
-  const surfacePath = fixturePrimordialsPath ?? LIB_PRIMORDIALS
+  const capturedSurface = path.join(targetRoot, '.cache', 'primordials-surface')
+  if (!fixturePrimordialsPath) {
+    cpSync(LIB_PRIMORDIALS, capturedSurface, { recursive: true })
+  }
+  const surfacePath = fixturePrimordialsPath ?? capturedSurface
   const surface = loadPrimordialsSurface(targetRoot, surfacePath)
   const localPrimordialsPath = fixturePrimordialsPath
   let importStyle: Parameters<typeof applyCodemod>[0]['importStyle']
