@@ -218,14 +218,14 @@ minimumReleaseAgeExclude:
   - sockeye
   # published: 2026-09-08 | removable: 2026-09-15
   - pnpm@12.4.0
+  # published: 2026-09-10 | removable: 2026-09-17
+  - 'mcp-tada@0.1.0'
   # published: 2026-09-04 | removable: 2026-09-11
   - pnpm@12.3.4
   - 'sfw'
   - 'socket'
   - 'sdxgen'
   - 'sockeye'
-  # published: 2026-09-10 | removable: 2026-09-17
-  - 'mcp-tada@0.1.0'
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball
 # specs. Direct git deps in this repo are still allowed; this only
