@@ -15,10 +15,10 @@ import {
   makeFixtureHandle,
   makeGitRepo,
   snapshotRepo,
-} from '../../fleet/_shared/lib/git-fixture.mts'
+} from '../fixture/git.mts'
 import { runWithTempDir } from '../util/temp-files.mjs'
 
-import type { GitRepoFixture } from '../../fleet/_shared/lib/git-fixture.mts'
+import type { GitRepoFixture } from '../fixture/git.mts'
 
 let seed: GitRepoFixture
 
