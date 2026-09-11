@@ -3994,7 +3994,7 @@
     "npm:inventory": "node scripts/fleet/registry-infra/npm/account-inventory-read.mts",
     "npm:publish": "node scripts/fleet/publish-pipeline.mts",
     "npm:staged": "node scripts/fleet/publish-pipeline.mts --status",
-    "npm:trust": "node scripts/fleet/registry-infra/npm/trust.mts",
+    "npm:trust": "node scripts/fleet/registry-infra/npm/settings/trust.mts",
     "offload:model": "node scripts/fleet/offload-model.mts",
     "preflight": "node scripts/fleet/preflight.mts",
     "prepare": "node scripts/repo/bootstrap/prepare.mts && node scripts/fleet/install-git-hooks.mts && node scripts/fleet/prepare.mts",
@@ -4032,7 +4032,17 @@
     "update": "node scripts/fleet/update.mts",
     "update:pnpm": "node scripts/fleet/update/pnpm.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
-    "weekly-update:ci": "gh workflow run weekly-update.yml"
+    "weekly-update:ci": "gh workflow run weekly-update.yml",
+    "ai:odai:cache": "node scripts/fleet/ai/odai/cache/run.mts",
+    "build:oxlint-bundle": "node scripts/fleet/build-oxlint-bundle.mts",
+    "depot:auth": "node scripts/fleet/registry-infra/depot/browser-auth.mts",
+    "setup:1password": "node scripts/fleet/setup/one-password.mts",
+    "setup:pgbot": "node scripts/fleet/setup/pgbot.mts",
+    "mcp:connect": "node scripts/fleet/mcp/connect.mts",
+    "mcp:pgbot": "node scripts/fleet/mcp/pgbot/run.mts",
+    "mcp:status": "node scripts/fleet/mcp/connect.mts --status",
+    "sweep:worktrees": "node scripts/fleet/worktree-sweep.mts",
+    "sweep:worktrees:visit": "node scripts/fleet/worktree/sweep/run.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -4165,7 +4175,7 @@
     ]
   },
   "engines": {
-    "node": ">=22",
+    "node": ">=24",
     "npm": "^11.19.0 || >=12.0.2",
     "pnpm": "^11.25.0 || >=12.3.4"
   },

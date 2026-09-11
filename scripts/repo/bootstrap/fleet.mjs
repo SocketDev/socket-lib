@@ -1928,7 +1928,7 @@ function parseYamlKeyBlocks(yaml) {
   if (current !== void 0) blocks.push(current)
   return blocks
 }
-const MAP_ENTRY_RE = /^(\s+)(['"]?)([^'":\n]+)\2:/
+const MAP_ENTRY_RE = /^(\s+)(?:(['"])(.*?)\2|([^'"\n]+?)):(?:\s|$)/
 const LIST_ITEM_RE = /^(\s+)-\s+(.*)$/
 /**
  * Split a top-level key block's BODY lines into entry chunks. A chunk starts
@@ -1961,7 +1961,7 @@ function parseYamlEntryChunks(bodyLines) {
       entryIndent ??= indent
       if (current !== void 0) chunks.push(current)
       current = {
-        id: map ? `k:${map[3].trim()}` : `i:${item[2].trim()}`,
+        id: map ? `k:${(map[3] ?? map[4]).trim()}` : `i:${item[2].trim()}`,
         lines: [...pending, line],
       }
       pending = []
