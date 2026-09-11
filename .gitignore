@@ -1942,14 +1942,6 @@ opencode.json
 .claude/skills/fleet/cascading-commits/references/lockfile-reconciliation.md
 .claude/skills/fleet/cascading-commits/references/pre-cascade-gate.md
 .claude/skills/fleet/cascading-commits/references/recovery-playbook.md
-.claude/skills/fleet/cascading-fleet/SKILL.md
-.claude/skills/fleet/cascading-fleet/lib/cascade-template.mts
-.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json
-.claude/skills/fleet/cascading-fleet/lib/precascade-gate.mts
-.claude/skills/fleet/cascading-fleet/lib/reconcile-lockfiles.mts
-.claude/skills/fleet/cascading-fleet/references/lockfile-reconciliation.md
-.claude/skills/fleet/cascading-fleet/references/pre-cascade-gate.md
-.claude/skills/fleet/cascading-fleet/references/recovery-playbook.md
 .claude/skills/fleet/cleaning-ci/SKILL.md
 .claude/skills/fleet/cleaning-ci/lib/clean-ci.mts
 .claude/skills/fleet/cleaning-ci/references/exclusions.md
@@ -2816,17 +2808,6 @@ scripts/fleet/ai/model-target-ids.mts
 scripts/fleet/ai/model-targets.mts
 scripts/fleet/ai/model-training-policy.mts
 scripts/fleet/ai/odai.mts
-scripts/fleet/ai/odai/cache/archive.mts
-scripts/fleet/ai/odai/cache/browser.mts
-scripts/fleet/ai/odai/cache/crash.mts
-scripts/fleet/ai/odai/cache/crash/collect.mts
-scripts/fleet/ai/odai/cache/diagnostic.mts
-scripts/fleet/ai/odai/cache/image.mts
-scripts/fleet/ai/odai/cache/kernel.mts
-scripts/fleet/ai/odai/cache/native.mts
-scripts/fleet/ai/odai/cache/run.mts
-scripts/fleet/ai/odai/cache/upload.mts
-scripts/fleet/ai/odai/cache/util.mts
 scripts/fleet/ai/odai/diagnostics.mts
 scripts/fleet/ai/odai/run.mts
 scripts/fleet/ai/opencode-auth-store.mts
@@ -2897,8 +2878,6 @@ scripts/fleet/browser/chrome-cdp.mts
 scripts/fleet/browser/control/acquire.mts
 scripts/fleet/browser/control/auth-flow.mts
 scripts/fleet/browser/control/browser-channel.mts
-scripts/fleet/browser/control/cache-acquire.mts
-scripts/fleet/browser/control/cache-policy.mts
 scripts/fleet/browser/control/chrome-binary.mts
 scripts/fleet/browser/control/launch-shape.mts
 scripts/fleet/browser/control/law.mts
@@ -3628,7 +3607,6 @@ scripts/fleet/mcp/slack/credential.mts
 scripts/fleet/mcp/slack/errors.mts
 scripts/fleet/mcp/slack/format.mts
 scripts/fleet/mcp/slack/run.mts
-scripts/fleet/mcp/slack/stdio.mts
 scripts/fleet/mcp/slack/tools.mts
 scripts/fleet/mcp/slack/validation.mts
 scripts/fleet/mcp/stdio.mts
@@ -4003,7 +3981,6 @@ scripts/fleet/test-support/coverage-exclusions.mts
 scripts/fleet/test-support/fictional-identities.mts
 scripts/fleet/test-support/fixture-names.mts
 scripts/fleet/test.mts
-scripts/fleet/test/budget-headroom.mts
 scripts/fleet/test/budget/balance.mts
 scripts/fleet/test/budget/balance/input.mts
 scripts/fleet/test/budget/balance/options.mts
@@ -4079,8 +4056,6 @@ scripts/fleet/worktree/sweep/worker.mts
 scripts/fleet/write-handoff.mts
 test/fleet/_shared/lib/coverage-env.mts
 test/fleet/_shared/lib/env.mts
-test/fleet/_shared/lib/fake-git.mts
-test/fleet/_shared/lib/git-fixture.mts
 test/fleet/_shared/lib/isolate-home-env.mts
 test/fleet/_shared/lib/matchers.mts
 test/fleet/_shared/lib/network-preload.mjs
@@ -4089,6 +4064,8 @@ test/fleet/_shared/lib/package-bin.mts
 test/fleet/_shared/lib/platform.mts
 test/fleet/_shared/lib/tags.mts
 test/fleet/_shared/lib/timing.mts
+test/fleet/common/fixture/fake-git.mts
+test/fleet/common/fixture/git.mts
 test/fleet/e2e/comment-voice.test.mts
 test/fleet/integration/comment-voice.test.mts
 test/fleet/nock-loopback-passthrough.test.mts
