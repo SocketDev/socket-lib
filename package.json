@@ -4042,7 +4042,9 @@
     "mcp:pgbot": "node scripts/fleet/mcp/pgbot/run.mts",
     "mcp:status": "node scripts/fleet/mcp/connect.mts --status",
     "sweep:worktrees": "node scripts/fleet/worktree-sweep.mts",
-    "sweep:worktrees:visit": "node scripts/fleet/worktree/sweep/run.mts"
+    "sweep:worktrees:visit": "node scripts/fleet/worktree/sweep/run.mts",
+    "setup:ci:local": "node scripts/fleet/setup/ci-local.mts",
+    "setup:ci:remote": "node scripts/fleet/setup/ci-remote.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -4175,7 +4177,7 @@
     ]
   },
   "engines": {
-    "node": ">=22",
+    "node": ">=24",
     "npm": "^11.19.0 || >=12.0.2",
     "pnpm": "^11.25.0 || >=12.3.4"
   },

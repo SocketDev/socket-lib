@@ -38,12 +38,17 @@
 # so each is ignored in BOTH the repo-root live copy AND the template/base/universal/
 # mirror — the fleet keeps ignores in this root block, not nested per-dir
 # files. Keep in lock-step with RELEASE_ONLY_DIR_MIRROR_FILES (scripts/repo/
-# sync-scaffolding/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
+# commit-cascade/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
 **/.claude/hooks/fleet/_dist/fleet-pack.generated.cjs
+# The model-pricing module gen/model-pricing-module.mts bakes from the pricing
+# JSON so rolldown inlines the prices into fleet-pack.generated.cjs. A build output in
+# BOTH trees, shipped in the pack, never cascaded.
+**/scripts/fleet/constants/model-pricing.generated.mts
+**/scripts/fleet/constants/fleet-pack-version.generated.mts
 # Prebuilt dispatch-launcher variants (one per platform-arch), CI
 # cross-compiled and hydrated from the release bundle; the host build
 # copies its match into _shared/ instead of invoking cc. Contract:
-# scripts/fleet/_shared/launcher-variants.mts.
+# scripts/fleet/pack/launcher-variants.mts.
 **/.claude/hooks/fleet/_dist/launchers/
 # Legacy pre-v1.0.16 dispatch layout: socket-sdk-js still tracks the
 # _dispatch/index.cjs loader, which requires ./fleet-pack.cjs — that generated
@@ -88,6 +93,7 @@
 /.github/copilot-instructions.md
 /.janus/
 /.kiro/
+/.opencode/
 /.windsurf/
 /AGENTS.md
 /opencode.json
@@ -112,6 +118,7 @@ Thumbs.db
 # generated-globs.mts) by generated-globs-are-consistent.mts.
 **/build/
 **/dist/
+**/tmp/
 /template/generated/
 **/out/
 **/.cache/
@@ -136,7 +143,6 @@ node_modules
 npm-debug.log
 pnpm-debug.log
 *.tgz
-
 **/*.generated.cjs
 **/*.generated.cts
 **/*.generated.js
@@ -181,7 +187,9 @@ opencode.json
 .claude/commands/fleet/update-hooks-dry.md
 .claude/commands/fleet/update-pricing.md
 .claude/commands/fleet/update-security.md
+.claude/hooks/fleet/_dist/fleet-pack.excluded.generated.cjs
 .claude/hooks/fleet/_dist/fleet-pack.generated.cjs
+.claude/hooks/fleet/_dist/fleet-pack.snapshot.generated.cjs
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-darwin-arm64
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-darwin-x64
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-linux-arm64
@@ -2700,7 +2708,6 @@ docs/fleet/workflows/practices.md
 docs/fleet/workflows/publishing.md
 docs/fleet/workflows/registry-settings.md
 docs/references/fleet/sfw-local-install.md
-opencode.json
 patches/brace-expansion@5.0.9.patch
 patches/minimatch@10.2.6.patch
 scripts/fleet/agent-orphan-sweep.mts
@@ -2798,7 +2805,12 @@ scripts/fleet/ai/model-training-policy.mts
 scripts/fleet/ai/odai.mts
 scripts/fleet/ai/odai/cache/archive.mts
 scripts/fleet/ai/odai/cache/browser.mts
+scripts/fleet/ai/odai/cache/crash.mts
+scripts/fleet/ai/odai/cache/crash/collect.mts
+scripts/fleet/ai/odai/cache/diagnostic.mts
 scripts/fleet/ai/odai/cache/image.mts
+scripts/fleet/ai/odai/cache/kernel.mts
+scripts/fleet/ai/odai/cache/native.mts
 scripts/fleet/ai/odai/cache/run.mts
 scripts/fleet/ai/odai/cache/upload.mts
 scripts/fleet/ai/odai/cache/util.mts
@@ -3439,6 +3451,8 @@ scripts/fleet/github/action-port-map.mts
 scripts/fleet/github/actions-runtime.mts
 scripts/fleet/github/app-credentials.mts
 scripts/fleet/github/apps.mts
+scripts/fleet/github/ci/secrets.json
+scripts/fleet/github/ci/variables.json
 scripts/fleet/github/commit.mts
 scripts/fleet/github/ghcr-package.mts
 scripts/fleet/github/managed-ruleset-identity.mts
@@ -3548,6 +3562,7 @@ scripts/fleet/local-ci/credential-contract.mts
 scripts/fleet/local-ci/credentials.mts
 scripts/fleet/local-ci/docker.mts
 scripts/fleet/local-ci/env.mts
+scripts/fleet/local-ci/requirements.mts
 scripts/fleet/lockstep-emit-mirror-globs.mts
 scripts/fleet/lockstep-emit-schema.mts
 scripts/fleet/lockstep.mts
@@ -3579,11 +3594,14 @@ scripts/fleet/mcp/fleet/tools.mts
 scripts/fleet/mcp/fleet/util.mts
 scripts/fleet/mcp/janus/run.mts
 scripts/fleet/mcp/janus/runner.mts
+scripts/fleet/mcp/janus/tools.mts
 scripts/fleet/mcp/janus/workspace.mts
 scripts/fleet/mcp/paths.mts
 scripts/fleet/mcp/pgbot/run.mts
 scripts/fleet/mcp/playwright/run.mts
+scripts/fleet/mcp/protocol.mts
 scripts/fleet/mcp/providers.mts
+scripts/fleet/mcp/reset-process.mts
 scripts/fleet/mcp/reset.mts
 scripts/fleet/mcp/slack/client.mts
 scripts/fleet/mcp/slack/credential.mts
@@ -3591,7 +3609,9 @@ scripts/fleet/mcp/slack/errors.mts
 scripts/fleet/mcp/slack/format.mts
 scripts/fleet/mcp/slack/run.mts
 scripts/fleet/mcp/slack/stdio.mts
+scripts/fleet/mcp/slack/tools.mts
 scripts/fleet/mcp/slack/validation.mts
+scripts/fleet/mcp/stdio.mts
 scripts/fleet/mcp/util.mts
 scripts/fleet/measure-ecosystem-impact.mts
 scripts/fleet/member/fleet-membership.mts
@@ -3829,6 +3849,8 @@ scripts/fleet/setup/ai-clients.mts
 scripts/fleet/setup/bootstrap-zero-dep-packages.d.mts
 scripts/fleet/setup/bootstrap-zero-dep-packages.mjs
 scripts/fleet/setup/brew.mts
+scripts/fleet/setup/ci-local.mts
+scripts/fleet/setup/ci-remote.mts
 scripts/fleet/setup/claude-config.mts
 scripts/fleet/setup/developer-tools.mts
 scripts/fleet/setup/ecosystems.mts
@@ -3961,6 +3983,11 @@ scripts/fleet/test-support/fictional-identities.mts
 scripts/fleet/test-support/fixture-names.mts
 scripts/fleet/test.mts
 scripts/fleet/test/budget-headroom.mts
+scripts/fleet/test/budget/balance.mts
+scripts/fleet/test/budget/balance/input.mts
+scripts/fleet/test/budget/balance/options.mts
+scripts/fleet/test/budget/balance/plan.mts
+scripts/fleet/test/budget/headroom.mts
 scripts/fleet/test/profile-preload.mts
 scripts/fleet/test/profile-report.mts
 scripts/fleet/test/profile.mts
