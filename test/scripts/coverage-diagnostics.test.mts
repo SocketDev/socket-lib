@@ -300,7 +300,7 @@ describe('runCoverageDiagnostics', () => {
   )
 })
 
-test('keeps the ordinary coverage gate before the Linux diagnostic', () => {
+test('collects coverage in two shards before aggregation', () => {
   const document = parseDocument(
     readFileSync(
       new URL('../../.github/workflows/ci.yml', import.meta.url),
@@ -310,29 +310,64 @@ test('keeps the ordinary coverage gate before the Linux diagnostic', () => {
   expect(document.errors).toEqual([])
   const workflow = document.toJS() as {
     jobs: {
-      cover: {
+      'cover-shards': {
+        outputs: Record<string, string>
+        strategy: { matrix: { shard: number[] } }
         steps: Array<{
+          name?: string | undefined
           run?: string | undefined
-          if?: string | undefined
+          with?: Record<string, string> | undefined
+          env?: Record<string, string> | undefined
+        }>
+      }
+      cover: {
+        needs: string[]
+        steps: Array<{
+          name?: string | undefined
+          run?: string | undefined
           with?: Record<string, string> | undefined
           env?: Record<string, string> | undefined
         }>
       }
     }
   }
-  const { steps } = workflow.jobs.cover
-  const gate = steps.findIndex(
-    step => step.with?.['main-script'] === 'pnpm run cover',
-  )
-  const diagnostic = steps.findIndex(
-    step => step.run === 'pnpm run cover:diagnose --profile',
-  )
-  expect(gate).toBeGreaterThanOrEqual(0)
-  expect(diagnostic).toBeGreaterThan(gate)
-  expect(steps[diagnostic]?.if).toBe(
-    "failure() && steps.coverage.outcome == 'failure'",
-  )
+  const collection = workflow.jobs['cover-shards']
+  expect(collection.strategy.matrix.shard).toEqual([1, 2])
+  expect(collection.outputs['shard-count']).toBe('${{ strategy.job-total }}')
   expect(
-    steps.some(step => Object.hasOwn(step.env ?? {}, 'CANONICAL_COMMIT')),
+    collection.steps.find(step => step.name === 'Run coverage'),
+  ).toMatchObject({
+    env: {
+      COVERAGE_SHARD: '${{ matrix.shard }}',
+      COVERAGE_SHARD_COUNT: '${{ strategy.job-total }}',
+    },
+    with: {
+      'main-script':
+        'pnpm run cover:shard --shard="$COVERAGE_SHARD/$COVERAGE_SHARD_COUNT"',
+    },
+  })
+
+  const aggregate = workflow.jobs.cover
+  expect(aggregate.needs).toEqual(['cover-shards'])
+  expect(
+    aggregate.steps
+      .filter(step => step.name?.startsWith('Download coverage shard'))
+      .map(step => step.with?.['name']),
+  ).toEqual(['coverage-shard-1', 'coverage-shard-2'])
+  expect(
+    aggregate.steps.find(step => step.name === 'Run coverage'),
+  ).toMatchObject({
+    env: {
+      COVERAGE_SHARD_COUNT: '${{ needs.cover-shards.outputs.shard-count }}',
+    },
+    with: {
+      'main-script':
+        'pnpm run cover:aggregate --shards="$COVERAGE_SHARD_COUNT"',
+    },
+  })
+  expect(
+    [...collection.steps, ...aggregate.steps].some(step =>
+      Object.hasOwn(step.env ?? {}, 'CANONICAL_COMMIT'),
+    ),
   ).toBe(false)
 })

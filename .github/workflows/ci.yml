@@ -171,20 +171,17 @@ jobs:
             ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' ||
             'pnpm run test --all' }}
 
-  # Coverage gate. Runs on main pushes, tags and dispatch -- NOT on pull
-  # requests: the sweep is ~15 min, and main is what a release cuts from.
-  #
-  # This job is the reason .config/repo/socket-wheelhouse.json now carries a
-  # `cover.thresholds` block. Without thresholds, computeThresholdFailures
-  # returns no failures by construction, so `pnpm run cover` printed its
-  # percentages and exited 0 no matter how far coverage had fallen -- a gate
-  # that reports rather than gates. The floors are set at the measured
-  # aggregate, so they hold the line and are meant to be raised as it climbs.
-  cover:
-    name: Cover
+  cover-shards:
     if: github.event_name != 'pull_request'
+    outputs:
+      shard-count: ${{ strategy.job-total }}
+    name: Coverage collection (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       # First step cannot call the local ./.github/actions/fleet/checkout
       # composite - nothing is checked out yet for GitHub to resolve
@@ -219,29 +216,97 @@ jobs:
           payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
       - name: Run coverage
-        id: coverage
+        id: coverage_collection
         uses: ./.github/actions/fleet/run-script
         env:
-          # cover builds with source maps first; authenticate its build-time
-          # GitHub API reads, same as the test job.
           GH_TOKEN: ${{ github.token }}
+          COVERAGE_SHARD: ${{ matrix.shard }}
+          COVERAGE_SHARD_COUNT: ${{ strategy.job-total }}
         with:
-          setup-script: pnpm run build
-          main-script: pnpm run cover
-      - name: Profile coverage setup
-        if: failure() && steps.coverage.outcome == 'failure'
-        timeout-minutes: 10
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: pnpm run cover:diagnose --profile
-      - name: Upload coverage diagnostics
-        if: always() && steps.coverage.outcome == 'failure'
+          main-script: pnpm run cover:shard --shard="$COVERAGE_SHARD/$COVERAGE_SHARD_COUNT"
+      - name: Upload coverage collection
         uses: ./.github/actions/fleet/upload-artifact
         with:
-          name: failed-coverage-diagnostics
+          name: coverage-shard-${{ matrix.shard }}
+          path: .cache/fleet/coverage-shards/${{ matrix.shard }}
+      - name: Preserve coverage failure output
+        if: ${{ failure() && steps.coverage_collection.outcome == 'failure' }}
+        uses: ./.github/actions/fleet/upload-artifact
+        with:
+          name: coverage-shard-${{ matrix.shard }}-failure
           path: |
-            .cache/repo/coverage-diagnostics
-            .cache/fleet/coverage/measurement
             .cache/fleet/fleet-cover
+            .cache/fleet/coverage-shards/${{ matrix.shard }}
+          if-no-files-found: ignore
+
+  cover:
+    name: Cover
+    needs: [cover-shards]
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Require successful coverage collection
+        shell: bash
+        env:
+          COLLECTION_RESULT: ${{ needs.cover-shards.result }}
+        run: |
+          if [ "$COLLECTION_RESULT" != success ]; then
+            echo "Coverage collection failed. Fix the failed collection jobs before aggregation."
+            exit 1
+          fi
+      - name: Bootstrap checkout
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+          FETCH_DEPTH: '1'
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          FETCH_ARGS=(--no-tags --prune --depth "${FETCH_DEPTH}" origin "${TRIGGER_REF}")
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+            git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch "${FETCH_ARGS[@]}"
+          else
+            git fetch "${FETCH_ARGS[@]}"
+          fi
+          git checkout -q --detach FETCH_HEAD
+      - name: Set up and install
+        uses: ./.github/actions/fleet/setup-and-install
+        with:
+          socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+      - name: Download coverage shard 1
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-1
+          path: .cache/fleet/coverage-shards/1
+      - name: Download coverage shard 2
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-2
+          path: .cache/fleet/coverage-shards/2
+      - name: Run coverage
+        id: coverage_aggregate
+        uses: ./.github/actions/fleet/run-script
+        env:
+          COVERAGE_SHARD_COUNT: ${{ needs.cover-shards.outputs.shard-count }}
+          GH_TOKEN: ${{ github.token }}
+        with:
+          main-script: pnpm run cover:aggregate --shards="$COVERAGE_SHARD_COUNT"
+      - name: Preserve coverage failure output
+        if: ${{ failure() && steps.coverage_aggregate.outcome == 'failure' }}
+        uses: ./.github/actions/fleet/upload-artifact
+        with:
+          name: coverage-failure-output
+          path: |
+            .cache/fleet/fleet-cover
+            .cache/fleet/coverage
           if-no-files-found: ignore
