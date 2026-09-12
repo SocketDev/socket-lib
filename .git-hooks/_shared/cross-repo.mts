@@ -260,7 +260,7 @@ export function analyzeCrossRepositoryPaths(
       if (!line.trimStart().startsWith('#')) {
         for (const match of line.matchAll(
           // Capture each local dependency value or quoted filesystem path.
-          /(?:file:|link:)(?:[/\\]|[a-z]:[/\\]|\.\.?[/\\])[^\s'",}]+|(?:["'])(?:[a-z]:[/\\]|\.\.?[/\\])[^"'\r\n]+["']/giu,
+          /(?:file:|link:)(?:[/\\]|[a-z]:[/\\]|\.\.?[/\\])[^\s'",}]+|(?:["'])(?:[a-z]:[/\\](?![*?"<>|:])|\.\.?[/\\])[^"'\r\n]+["']/giu,
         )) {
           // Remove only the opening and closing quote delimiters.
           const value = match[0].replace(/^["']|["']$/gu, '')

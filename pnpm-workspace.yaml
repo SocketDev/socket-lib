@@ -220,8 +220,6 @@ minimumReleaseAgeExclude:
   - pnpm@12.4.0
   # published: 2026-09-10 | removable: 2026-09-17
   - 'mcp-tada@0.1.0'
-  # published: 2026-09-04 | removable: 2026-09-11
-  - pnpm@12.3.4
   - 'sfw'
   - 'socket'
   - 'sdxgen'
