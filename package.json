@@ -3972,7 +3972,7 @@
     "fix": "node scripts/fleet/fix.mts",
     "fix:js": "node scripts/fleet/fix.mts --js",
     "fix:repo": "node scripts/fleet/fix.mts --repo",
-    "fleet:update": "node scripts/repo/bootstrap/fleet.mjs --if-current",
+    "fleet:update": "node scripts/repo/bootstrap/fleet.mjs",
     "fmt:js": "node scripts/fleet/format.mts",
     "format": "node scripts/fleet/format.mts",
     "format:check": "node scripts/fleet/format.mts --check",
@@ -3998,7 +3998,7 @@
     "npm:staged": "node scripts/fleet/publish-pipeline.mts --status",
     "npm:trust": "node scripts/fleet/registry-infra/npm/settings/trust.mts",
     "offload:model": "node scripts/fleet/offload-model.mts",
-    "preflight": "node scripts/fleet/preflight.mts",
+    "preflight": "node scripts/repo/bootstrap/fleet.mjs --ensure-current --quiet && node scripts/fleet/preflight.mts",
     "prepare": "node scripts/repo/bootstrap/prepare.mts && node scripts/fleet/install-git-hooks.mts && node scripts/fleet/prepare.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "prim": "node tools/prim/bin/prim.mts",
@@ -4051,7 +4051,9 @@
     "ai:odai:diagnose": "node scripts/fleet/ai/odai/run.mts diagnose",
     "update:chrome": "node scripts/fleet/ai/odai/run.mts verify-chrome",
     "mcp:schemas:check": "node scripts/fleet/mcp/schemas.mts check",
-    "mcp:schemas:save": "node scripts/fleet/mcp/schemas.mts save"
+    "mcp:schemas:save": "node scripts/fleet/mcp/schemas.mts save",
+    "lockstep:assist": "node scripts/fleet/lockstep/assist/run.mts",
+    "worktree:create": "node scripts/fleet/worktree/create/run.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
