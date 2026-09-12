@@ -171,8 +171,8 @@ catalogs:
       specifier: 8.1.0
       version: 8.1.0
     '@playwright/mcp':
-      specifier: 0.0.79
-      version: 0.0.79
+      specifier: 0.0.80
+      version: 0.0.80
     '@shadscan/cli':
       specifier: 0.17.0
       version: 0.17.0
@@ -189,8 +189,8 @@ catalogs:
       specifier: 4.0.4
       version: 4.0.4
     '@types/node':
-      specifier: 26.4.0
-      version: 26.4.0
+      specifier: 26.4.1
+      version: 26.4.1
     '@types/semver':
       specifier: 7.8.0
       version: 7.8.0
@@ -233,6 +233,9 @@ catalogs:
     markdownlint-cli2:
       specifier: 0.23.2
       version: 0.23.2
+    mcp-tada:
+      specifier: 0.1.0
+      version: 0.1.0
     mdast-util-from-markdown:
       specifier: 2.0.3
       version: 2.0.3
@@ -297,8 +300,8 @@ catalogs:
       specifier: 21.1.0
       version: 21.1.0
     typescript:
-      specifier: 7.1.0-dev.20260901.1
-      version: 7.1.0-dev.20260901.1
+      specifier: 7.1.0-dev.20260903.1
+      version: 7.1.0-dev.20260903.1
     vitest:
       specifier: 5.0.0
       version: 5.0.0
@@ -332,7 +335,7 @@ overrides:
   mime-types@>=3: 3.0.2
   minimatch@>=3: 10.2.6
   minipass@>=4: 7.1.3
-  postcss@>=8: 8.5.26
+  postcss@>=8: 8.5.27
   safe-buffer: npm:@socketregistry/safe-buffer@1.0.9
   safer-buffer: npm:@socketregistry/safer-buffer@1.0.10
   semver@>=5.0.0 <7.6.0: 7.8.5
@@ -340,7 +343,7 @@ overrides:
   ssri@>=12: 13.0.1
   string-width@>=5: 8.2.2
   tinyexec: 1.3.0
-  typebox: 1.3.23
+  typebox: 1.3.25
   undici@<6: 6.28.0
   update-notifier@>=4.0.0: 7.3.1
   uuid: 11.1.1
@@ -431,6 +434,7 @@ patchedDependencies:
   '@npmcli/run-script@10.0.4': b1f74f31293142449c0be473fae0f0b977e1e1174e6a88e2021fcb93dc902ed6
   '@polka/url@1.0.0-next.29': 60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea
   '@sigstore/sign@4.1.1': 4d806e50e530edf6761bba8ad98cd1f2867a86201f6faee419444d86f5325def
+  '@socketsecurity/lib@7.0.1': a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3
   '@yarnpkg/core@4.9.1': 90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9
   brace-expansion@5.0.9: a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857
   chalk@5.6.2: 3e5adfdfa27f0c9e066fe820ac91f77773798f205f5e43ff220b250007196661
@@ -442,8 +446,8 @@ patchedDependencies:
   minipass-sized@1.0.3: 2048620f836b8d07ca6b41a3500944fe7a43fb7542aa6d45bceb405afa513738
   node-gyp@12.4.0: 140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9
   pony-cause@2.1.11: 39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8
-  run-local-ci@0.18.1: a7ff16756fe5c1119456df5639c7a23e844d77f9d0a0ca4654c4c50cd6ed6567
-  vitest@5.0.0: 46b174d80b2fbcffeaef525de3594a50d8dd5e812542c1dddf423533bf78cc31
+  run-local-ci@0.18.1: a335253820e963c2659ec1b08ee143e865eb39ec80ca7d313fff50c33e157d99
+  vitest@5.0.0: 555bbde80f3e83833e33f6825435e36659d4e2a927e2a3cb5dbc4d6eaeef976b
 
 importers:
 
@@ -466,22 +470,22 @@ importers:
         version: 1.0.2
       '@inquirer/checkbox':
         specifier: 5.2.2
-        version: 5.2.2(@types/node@26.4.0)
+        version: 5.2.2(@types/node@26.4.1)
       '@inquirer/confirm':
         specifier: 6.2.0
-        version: 6.2.0(@types/node@26.4.0)
+        version: 6.2.0(@types/node@26.4.1)
       '@inquirer/input':
         specifier: 5.1.3
-        version: 5.1.3(@types/node@26.4.0)
+        version: 5.1.3(@types/node@26.4.1)
       '@inquirer/password':
         specifier: 5.1.2
-        version: 5.1.2(@types/node@26.4.0)
+        version: 5.1.2(@types/node@26.4.1)
       '@inquirer/search':
         specifier: 4.3.0
-        version: 4.3.0(@types/node@26.4.0)
+        version: 4.3.0(@types/node@26.4.1)
       '@inquirer/select':
         specifier: 5.2.2
-        version: 5.2.2(@types/node@26.4.0)
+        version: 5.2.2(@types/node@26.4.1)
       '@mdn/browser-compat-data':
         specifier: 'catalog:'
         version: 8.1.0
@@ -499,7 +503,7 @@ importers:
         version: 0.5.1220
       '@playwright/mcp':
         specifier: 'catalog:'
-        version: 0.0.79
+        version: 0.0.80
       '@shadscan/cli':
         specifier: 'catalog:'
         version: 0.17.0
@@ -520,10 +524,10 @@ importers:
         version: 1.0.25
       '@socketsecurity/lib':
         specifier: 7.0.1
-        version: 7.0.1(typescript@7.1.0-dev.20260901.1)
+        version: 7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@socketsecurity/sdk':
         specifier: 4.1.4
         version: 4.1.4
@@ -535,7 +539,7 @@ importers:
         version: 4.0.4
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
       '@types/semver':
         specifier: 'catalog:'
         version: 7.8.0
@@ -553,7 +557,7 @@ importers:
         version: 5.0.0(vitest@5.0.0)
       '@vitiate/core':
         specifier: 'catalog:'
-        version: 0.3.1(typescript@7.1.0-dev.20260901.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
+        version: 0.3.1(typescript@7.1.0-dev.20260903.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
       '@yarnpkg/extensions':
         specifier: 2.0.7
         version: 2.0.7(@yarnpkg/core@4.9.1(patch_hash=90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9)(typanion@3.14.0))
@@ -623,6 +627,9 @@ importers:
       markdownlint-cli2:
         specifier: 'catalog:'
         version: 0.23.2(supports-color@10.2.2)
+      mcp-tada:
+        specifier: 'catalog:'
+        version: 0.1.0(@modelcontextprotocol/sdk@1.29.0(supports-color@10.2.2)(zod@4.4.3))(typescript@7.1.0-dev.20260903.1)
       mdast-util-from-markdown:
         specifier: 'catalog:'
         version: 2.0.3(supports-color@10.2.2)
@@ -694,7 +701,7 @@ importers:
         version: 1.2.7
       run-local-ci:
         specifier: 'catalog:'
-        version: 0.18.1(patch_hash=a7ff16756fe5c1119456df5639c7a23e844d77f9d0a0ca4654c4c50cd6ed6567)(supports-color@10.2.2)
+        version: 0.18.1(patch_hash=a335253820e963c2659ec1b08ee143e865eb39ec80ca7d313fff50c33e157d99)(supports-color@10.2.2)
       semver:
         specifier: 7.8.5
         version: 7.8.5
@@ -735,20 +742,20 @@ importers:
         specifier: 2.1.1
         version: 2.1.1
       typebox:
-        specifier: 1.3.23
-        version: 1.3.23
+        specifier: 1.3.25
+        version: 1.3.25
       typescript:
         specifier: 'catalog:'
-        version: 7.1.0-dev.20260901.1
+        version: 7.1.0-dev.20260903.1
       validate-npm-package-name:
         specifier: 6.0.2
         version: 6.0.2
       vitest:
         specifier: 'catalog:'
-        version: 5.0.0(patch_hash=46b174d80b2fbcffeaef525de3594a50d8dd5e812542c1dddf423533bf78cc31)(@types/node@26.4.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+        version: 5.0.0(patch_hash=555bbde80f3e83833e33f6825435e36659d4e2a927e2a3cb5dbc4d6eaeef976b)(@types/node@26.4.1)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
       vitiate:
         specifier: 'catalog:'
-        version: 0.3.1(typescript@7.1.0-dev.20260901.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
+        version: 0.3.1(typescript@7.1.0-dev.20260903.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
       webpack:
         specifier: 5.109.2
         version: 5.109.2(@swc/core@1.15.43)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.26)
@@ -772,353 +779,343 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/actionlint-on-workflow-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/active-edits-bash-recorder:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/active-edits-ledger:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/adversarial-review-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/agent-orphan-sweep-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
 
   .claude/hooks/fleet/agent-prompt-budget-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/agent-session-budget-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/ai-balancer-proxy-start:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/ai-balancer-watchdog:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/ai-config-drift-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/ai-config-poisoning-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/ai-shim-start:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/alpha-sort-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/answer-questions-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/answer-status-requests-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/anti-prose-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/artifact-gates-on-stop:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/ask-suppression-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/attribution-rewrite-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/auth-rotation-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/authorization-phrase-emission-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/auto-land-on-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/auto-land-on-stop:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/auto-push-on-stop:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/avoid-cd-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/bash-file-write-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/bash-timeout-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/bot-comment-collapse-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
-
-  .claude/hooks/fleet/branch-worktree-sweep-nudge:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/brew-supply-chain-is-hardened-at-edit:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/broken-hook-detector:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/bump-defers-to-release-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/bundle-flags-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/bundle-stale-reminder:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/c8-ignore-reason-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/cascade-first-triage-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/cascade-graph-defers-to-script-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/catch-message-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/changelog-entry-shape-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/changelog-no-empty-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/check-new-deps:
     dependencies:
@@ -1127,24 +1124,24 @@ importers:
         version: '@socketregistry/packageurl-js@1.5.2'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@socketsecurity/sdk-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/sdk@4.1.4'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/claude-code-action-lockdown-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/claude-lockdown-guard:
     dependencies:
@@ -1154,77 +1151,77 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/claude-md-defer-detail-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/claude-md-rule-add-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/claude-md-section-size-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/claude-md-size-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/claude-segmentation-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/clipboard-snippet-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/clone-reviewed-repo-nudge:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/code-as-law-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/codex-no-write-guard:
     dependencies:
@@ -1234,273 +1231,273 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/codify-footgun-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/commit-author-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/commit-cadence-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/commit-message-format-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/commit-paths-are-named-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/commit-pr-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/commit-size-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/compound-lessons-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/config-refs-are-segregated-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/consumer-grep-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/convo-prose-nudge:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/copy-on-select-hint-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/corepack-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/corrupt-rebase-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/crlf-split-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/cross-repo-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/default-branch-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/defer-to-script-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/deferred-residue-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/denied-domain-reference-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/dep-derived-source-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/detached-head-write-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/dirty-lockfile-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/dirty-worktree-stop-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/disowned-dirt-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/dogfood-cascade-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/dont-blame-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/dont-stop-mid-queue-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/drift-check-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/enqueue-dont-pivot-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/enterprise-push-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/env-kill-switches-are-absent-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/error-messages-are-thorough-at-edit:
     dependencies:
@@ -1510,205 +1507,205 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/excuse-detector:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/fetch-allowlist-is-respected-at-edit:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/file-size-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/fixer-peer-edits-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/fixes-need-tests-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/follow-direct-imperative-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/foreign-repo-conventions-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/generic-export-name-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/gh-body-code-format-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/gh-token-hygiene-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/git-config-write-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/git-identity-drift-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/gitignore-is-single-file-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/gitmodules-comment-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
 
   .claude/hooks/fleet/golden-fixtures-are-named-golden-at-edit:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/handoff-command-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/handoff-request-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/history-rewrite-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/honeypot-echo-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/hook-snapshot-rewire-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/human-gate-ends-turn-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/immutable-release-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/inline-script-defer-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/issue-autolink-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/judgment-nudge:
     dependencies:
@@ -1718,68 +1715,68 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/keep-working-while-waiting-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/land-as-you-go-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/land-fast-nudge:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/latest-release-pin-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/link-protocol-dep-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/live-edit-collision-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/lock-step-ref-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/logger-guard:
     dependencies:
@@ -1789,209 +1786,209 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/long-running-task-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/markdown-filenames-are-canonical-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/mass-delete-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/memories-are-codified-at-edit:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/memory-codify-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/memory-discovery-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/memory-pressure-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/mermaid-github-safe-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/minimum-release-age-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/mixed-clock-recency-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/model-fallback:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/model-policy-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/model-spawn-policy-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/module-noun-name-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/new-hook-claude-md-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-amend-peer-commit-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-blanket-file-exclusion-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-blind-keychain-read-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-boolean-trap-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-branch-reuse-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-cascade-transient-git-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-chained-pausing-git-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-ci-env-install-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-clipboard-access-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-comment-essays-guard:
     dependencies:
@@ -2001,84 +1998,84 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-commit-ai-attribution-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-copyleft-source-read:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-corepack-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-credential-file-read-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-description-aside-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-designated-ignore-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-direct-linter-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-disable-lint-rule-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-duplicate-pr-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-empty-commit-guard:
     dependencies:
@@ -2088,85 +2085,85 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-ext-issue-ref-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-file-oxlint-disable-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-fleet-fork-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-fleet-pr-to-main-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-fleet-scope-in-non-member-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-force-push-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-github-ai-attribution-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-hook-cmd-regex-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-ignoring-tracked-file-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-meta-comments-guard:
     dependencies:
@@ -2176,17 +2173,17 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-new-config-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-non-fleet-push-guard:
     dependencies:
@@ -2196,7 +2193,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-npm-otp-flag-guard:
     dependencies:
@@ -2206,33 +2203,33 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-orphaned-staging:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-other-linters-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-pkgjson-pnpm-overrides-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-placeholder-commit-subject-guard:
     dependencies:
@@ -2242,50 +2239,50 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-platform-import-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-pm-exec-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-pr-assets-in-branch-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-pr-from-default-branch-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-pr-from-default-checkout-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-pr-in-squash-repo-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-pr-review-verdict-guard:
     dependencies:
@@ -2295,140 +2292,140 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-premature-commit-kill-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-primary-branch-switch:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-private-ref-in-tests-docs-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-private-repo-leak-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-raw-gh-auth-login-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-registry-mutation-in-repo-script-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-removal-comment-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-repo-scope-in-fleet-config-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-revert-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-screenshot-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-self-referential-symlink-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-shell-injection-bypass-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-shrinking-overwrite-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-stdin-flag-without-input-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-strip-types-guard:
     dependencies:
@@ -2438,161 +2435,161 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-subagent-commit-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-tail-install-out-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-test-in-scripts-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-token-in-dotenv-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-total-squash-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-tsx-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-unasked-non-fleet-pr-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-underscore-ident-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-unisolated-git-fixture-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-unmocked-ai-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-unmocked-net-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-unsafe-delete-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-upstream-edit-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-verify-format-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-version-bump-pr-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-vitest-double-dash-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-wheelhouse-pr-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/no-wheelhouse-pr-link-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/node-modules-staging-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/non-fleet-pr-issue-ask-guard:
     dependencies:
@@ -2604,40 +2601,40 @@ importers:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/notion-replace-content-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/npm-2fa-needs-pty-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/npm-auth-lane-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/npm-otp-flow-nudge:
     dependencies:
@@ -2647,29 +2644,29 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/npmrc-trust-optout-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/observed-test-failure-stop-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/operate-from-repo-root-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/options-param-naming-guard:
     dependencies:
@@ -2681,66 +2678,66 @@ importers:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/overeager-staging-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/oxlint-plugin-load-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/package-manager-auto-update-is-disabled-at-edit:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/parallel-agent-edit-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/parallel-agent-on-stop-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/parallel-agent-removal-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/parallel-agent-spawn-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/parallel-agent-staging-guard:
     dependencies:
@@ -2750,13 +2747,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/parallel-spawn-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/path-guard:
     dependencies:
@@ -2772,194 +2769,194 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/paths-mts-inherit-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/peer-resource-lease-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/peer-uncommitted-work-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/peer-workstream-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/personal-path-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/plan-location-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/plan-review-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/playwright-launch-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pnpm-filter-zero-match-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pointer-comment-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
         version: 0.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/post-push-ci-monitor-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pr-body-style-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pr-comment-brevity-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pr-comment-shape-nudge:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pr-merge-conflict-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pr-vs-push-default-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pre-commit-race-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-async-spawn-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-evergreen-target-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-fff-search-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-fn-decl-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-inline-small-dependency-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-join-helpers-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-json-clone-guard:
     dependencies:
@@ -2971,104 +2968,104 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-mcp-server-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-pipx-over-pip-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-pnpm-over-npm-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-rebase-over-revert-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-script-emission-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-type-import-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prefer-vitest-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/primary-checkout-branch-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/primary-checkout-on-default-stop-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/private-name-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/private-package-name-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/private-paths-are-absent-at-edit:
     dependencies:
@@ -3078,121 +3075,121 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/proc-environ-exfil-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prompt-injection-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/prose-code-format-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/provenance-publish-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/public-surface-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/pull-request-target-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/push-protected-branch-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/read-orientation-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/readme-fleet-shape-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/rebase-during-merge-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/release-commit-subject-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/release-defers-to-script-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/release-tag-tied-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/release-workflow-guard:
     dependencies:
@@ -3202,114 +3199,114 @@ importers:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/repeat-action-needs-a-script-nudge:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/reply-code-format-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/reply-prose-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/reply-ref-link-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/repo-map-refresh:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/report-location-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/reserved-script-dir-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/resource-lease-recorder:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/revert-bypass-last-resort-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/rg-replace-flag-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/rule-citations-are-generic-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/rust-target-sweep-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/sabotage-target-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/scan-label-in-commit-guard:
     dependencies:
@@ -3319,78 +3316,78 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/scratch-in-tree-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/secret-content-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/sed-in-place-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/session-handoff-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/setup-basics-tools:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/setup-claude-scanners:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/setup-firewall:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/setup-misc-tools:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/setup-security-tools:
     dependencies:
@@ -3399,208 +3396,208 @@ importers:
         version: '@socketregistry/packageurl-js@1.5.2'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
 
   .claude/hooks/fleet/setup-signing:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/shallow-clone-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/shared-index-add-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/shell-substitution-in-message-guard:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/silent-guard-compliance-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/single-lander-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/skill-usage-logger:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/small-pr-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/snapshot-hostile-require-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/soak-exclude-date-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
 
   .claude/hooks/fleet/soak-exclude-scope-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/soak-pin-needs-annotation-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/spend-warning-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/squash-freeze-boundary-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/squash-history-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/stale-log-read-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/stale-node-modules-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/stale-process-sweeper:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
 
   .claude/hooks/fleet/stale-tree-clobber-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/ste-language-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/stop-claim-verify-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/stop-means-commit-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/sweep-ds-store:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/synthesized-script-edit-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/target-arch-env-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/task-scope-guard: {}
 
@@ -3608,51 +3605,51 @@ importers:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/test-env-scrub-order-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/test-network-pattern-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/test-platform-coverage-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/test-script-defers-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/token-guard: {}
 
@@ -3660,36 +3657,36 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/trust-downgrade-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/tsc-canonical-tsconfig-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/unaddressed-review-feedback-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/unbacked-claim-commit-guard:
     dependencies:
@@ -3699,202 +3696,202 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/uncodified-lesson-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/uncommitted-sweep-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/unpushed-main-nudge:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/untrusted-coauthor-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/untrusted-content-directive-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/upstream-gitlinks-are-absent-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/upstream-is-read-only-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/upstream-read-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/use-repo-test-script-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/use-the-script-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/uses-sha-verify-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
 
   .claude/hooks/fleet/variant-analysis-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/verify-absence-claims-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/verify-before-publish-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/verify-render-pre-commit-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/version-bump-order-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/vitest-vs-node-test-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/vscode-folder-open-task-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/waiting-discipline-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/wheelhouse-drift-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/workflow-agent-task-tools-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/workflow-multiline-body-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .claude/hooks/fleet/workflow-sha-pins-are-stamped-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
 
   .claude/hooks/fleet/worktree-remove-relink-nudge:
     dependencies:
@@ -3904,13 +3901,23 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
+
+  .claude/hooks/fleet/worktree-sweep:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.4.1
 
   .claude/hooks/fleet/zsh-word-split-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.4.0
+        version: 26.4.1
 
   .config/fleet/oxlint-plugin:
     dependencies:
@@ -3977,8 +3984,6 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/no-fileoverview-prefer-file: {}
 
-  .config/fleet/oxlint-plugin/fleet/no-floating-async-map: {}
-
   .config/fleet/oxlint-plugin/fleet/no-force-delete: {}
 
   .config/fleet/oxlint-plugin/fleet/no-handbuilt-file-url: {}
@@ -3996,6 +4001,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/no-logger-newline-literal: {}
 
   .config/fleet/oxlint-plugin/fleet/no-malformed-bypass-marker: {}
+
+  .config/fleet/oxlint-plugin/fleet/no-map-async-callback: {}
 
   .config/fleet/oxlint-plugin/fleet/no-minified-bundler-output: {}
 
@@ -4043,7 +4050,7 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/no-spawn-stream-double-consume: {}
 
-  .config/fleet/oxlint-plugin/fleet/no-spawnsync-code-field: {}
+  .config/fleet/oxlint-plugin/fleet/no-spawnsync-code-property: {}
 
   .config/fleet/oxlint-plugin/fleet/no-src-import-in-test-expect: {}
 
@@ -4093,6 +4100,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/prefer-cached-for-loop: {}
 
+  .config/fleet/oxlint-plugin/fleet/prefer-char-code-comparison: {}
+
   .config/fleet/oxlint-plugin/fleet/prefer-crlf-safe-split: {}
 
   .config/fleet/oxlint-plugin/fleet/prefer-ellipsis-char: {}
@@ -4139,6 +4148,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-compare-str: {}
 
+  .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-env: {}
+
   .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-error-message: {}
 
   .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-normalize-path: {}
@@ -4156,6 +4167,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/prefer-undefined-over-null: {}
 
   .config/fleet/oxlint-plugin/fleet/prefer-windows-test-helpers: {}
+
+  .config/fleet/oxlint-plugin/fleet/repository-paths-are-contained: {}
 
   .config/fleet/oxlint-plugin/fleet/require-async-iife-entry: {}
 
@@ -4200,7 +4213,7 @@ importers:
         version: 0.2.141(supports-color@10.2.2)(zod@4.4.3)
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)'
+        version: '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)'
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
         version: 0.1.1
@@ -4299,10 +4312,6 @@ packages:
 
   '@babel/core@7.29.7':
     resolution: {integrity: sha512-RgHBCvtjbOK2gXSNBNIkNoEc9qoVEtau3hj8gEqKQuL3HZAibKarWFEI3Lfm6EYKkLalOh8eSrj9b+ch9H/VBA==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/generator@7.29.7':
-    resolution: {integrity: sha512-DkXD5OJQaAQIdZ1bt3UZdEnHAn9Imd3IVBdX03UFe+ony9Ojw5pzr9YVKGDY1jt+Gcn/FnGkNf8r+Vj5NOJWtQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/generator@7.29.8':
@@ -5087,8 +5096,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  '@playwright/mcp@0.0.79':
-    resolution: {integrity: sha512-VpqD4a3vFyGQMY9sh3UJiO6wjcurggkljKfAyCHL0QWGY5m6Ehr3MNsAAHPDHO//n13g0PCjpHatAOiulrqdZQ==}
+  '@playwright/mcp@0.0.80':
+    resolution: {integrity: sha512-FOPXHm2SvFhAQylm10jMZ35B/SR2TaMLVkavAlwoG4N2qCb5RqbvhQYcu3zmXNyxR2DW0Ooxe+9XPVt5UjKRCQ==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -5540,8 +5549,8 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
-  '@types/node@26.4.0':
-    resolution: {integrity: sha512-faiGnoIrLH/V8cibOMEAZ8pMw6oXqSukl29ra4mN8GdaB2ZewzeaLj+INpV5N+Z1eKWzY+IzaIZH2EIR6YZRNQ==}
+  '@types/node@26.4.1':
+    resolution: {integrity: sha512-k97ENvZWtvA6yqz5/FS6a7duDgOPEeOQOc2iKS/nY6mX6qJUKtLnWzQS+Xj6tXweyj6ZcTAK2Qecetnvi9nCLA==}
 
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
@@ -5558,44 +5567,44 @@ packages:
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
 
-  '@typescript/typescript-darwin-arm64@7.1.0-dev.20260901.1':
-    resolution: {integrity: sha512-2vhjvcF8hshvIT4dPN8bfA6KI81CsZPpMvA0YrCkGan42n46DSIz0T2Jp/hSv4CdHoihhIYViTx0gR8a/CGhQQ==}
+  '@typescript/typescript-darwin-arm64@7.1.0-dev.20260903.1':
+    resolution: {integrity: sha512-+CQ/ky5OkDHN+9gXJKrbUTpbNHRi7e6XOS5icdyBN57OqXhWygT8JH2XpTl1j5T9MxaoMzLjYRW+OaCwvNDpNQ==}
     engines: {node: '>=16.20.0'}
     cpu: [arm64]
     os: [darwin]
 
-  '@typescript/typescript-darwin-x64@7.1.0-dev.20260901.1':
-    resolution: {integrity: sha512-UhzELABon1ezC9+RsOIioZL3ztx8se+9MYOBUGmo2UqeNVMTPvGuhbtZ3RdJ3idrwpDsavRc1tygCStnnxg/jg==}
+  '@typescript/typescript-darwin-x64@7.1.0-dev.20260903.1':
+    resolution: {integrity: sha512-qeocDSgcslTWBVdg1IA2/OcYg1vDXBDpnjdTaTdbB8npgcQxFA1iyGnajJFd2WtEgiNDWvRO239CPiJYJpsTfw==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [darwin]
 
-  '@typescript/typescript-linux-arm64@7.1.0-dev.20260901.1':
-    resolution: {integrity: sha512-BQa5kgwYdwWmtm3UyWLmHedC6V0UMHHwogAy+IettGBpimKhBoyeUF02cgGI7ITLv39JIy+NOfrwwN1JX3rTAA==}
+  '@typescript/typescript-linux-arm64@7.1.0-dev.20260903.1':
+    resolution: {integrity: sha512-HZ3RWslCTyC3RcvD31bbmqFjg8PPthPqUvJzlnpbw/jsUnsCE/LaKrTC/8AQtkqb0XHi0Mhi/VT+kHZWKugpMg==}
     engines: {node: '>=16.20.0'}
     cpu: [arm64]
     os: [linux]
 
-  '@typescript/typescript-linux-arm@7.1.0-dev.20260901.1':
-    resolution: {integrity: sha512-WZt0gZLqSkqqSfnr0mOiqF7fqjy+J3JSj5nHRugvBTG2lseV73RppGfjwOl+RtEy8zRb2KpKbMr37OPNvhplEQ==}
+  '@typescript/typescript-linux-arm@7.1.0-dev.20260903.1':
+    resolution: {integrity: sha512-OddAcYjjW/N3YIlnLLrifVxrFONAAF835L+JfXozQwsSq/4w6sQBaGw8WVRs+KJuCNZ2z9dTvx0EmEhm9jI8YQ==}
     engines: {node: '>=16.20.0'}
     cpu: [arm]
     os: [linux]
 
-  '@typescript/typescript-linux-x64@7.1.0-dev.20260901.1':
-    resolution: {integrity: sha512-0ObxW8yMFlfhVuUcV0A4pBq1IHf9iQgoKUkukTaxCMJDrlYSfzYKSzBzFjFSyh4t3Ctf9+VGp2IryntamYtUsw==}
+  '@typescript/typescript-linux-x64@7.1.0-dev.20260903.1':
+    resolution: {integrity: sha512-zKK5QxJSofs6V6w4lbgdRf9R10fdbBjHZ1sF6uRZePmzjqDCS6ELTPSEujPR+Iy8iFqZBo87ZmR1baDmuFtJjw==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [linux]
 
-  '@typescript/typescript-win32-arm64@7.1.0-dev.20260901.1':
-    resolution: {integrity: sha512-8MKD/h5KE1niyFCQNrNzm18vtUL3zMbIuRj0tycC0FJZGVJUqC+r0t3rUbW0udYADr/235Lz3COB0tcCQ3SW5Q==}
+  '@typescript/typescript-win32-arm64@7.1.0-dev.20260903.1':
+    resolution: {integrity: sha512-IT0nShRuiDbHl+3wRwXjCQA+PDE3pRwhRz+97z+UlRSjyQ3UgWNNdGEh/pALk6gK2hBfsEuoKNtHLHquq8hRug==}
     engines: {node: '>=16.20.0'}
     cpu: [arm64]
     os: [win32]
 
-  '@typescript/typescript-win32-x64@7.1.0-dev.20260901.1':
-    resolution: {integrity: sha512-D0mY2AZd20cLR3FPLRWcivt2mu1qJc9a7LfO8JRcX97fo3CCHHMDqu1Ez5ffycoZzpSk48OZIwxMPALMLa8Iiw==}
+  '@typescript/typescript-win32-x64@7.1.0-dev.20260903.1':
+    resolution: {integrity: sha512-iK/eeSrtrIsFPGKBhsxnHC7P/hX2FwzVff3j0UnbCDKNiJb4G6WUiC9+qth30QBCCBGJ5ba70RG0qcuUcLm+0A==}
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [win32]
@@ -6237,9 +6246,6 @@ packages:
   err-code@2.0.3:
     resolution: {integrity: sha512-2bmlRpNKBxT/CRmPOlyISQpNj+qSeYvcym/uT0Jx2bMOlKLtSy1ZmLuVxSEKKyor/N5yhvp/ZiG1oE3DEYMSFA==}
 
-  es-module-lexer@2.1.0:
-    resolution: {integrity: sha512-n27zTYMjYu1aj4MjCWzSP7G9r75utsaoc8m61weK+W8JMBGGQybd43GstCXZ3WNmSFtGT9wi59qQTW6mhTR5LQ==}
-
   es-module-lexer@2.3.2:
     resolution: {integrity: sha512-poHGpORABojJJucnV9KbOavETW8lBVnphkW77ER5/BQ5Fz7oXSoCNek7IH3vR5nRjdsEz926ibFYX8KtLQmdyw==}
 
@@ -6387,11 +6393,6 @@ packages:
   fs-minipass@3.0.3:
     resolution: {integrity: sha512-XUBA9XClHbnJWSfBzjkm6RvPsyg3sryZt06BEQoXcF7EK/xpGaQYJgQKDJSUH5SGZ76Y7pFx1QBnXz09rU5Fbw==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
-
-  fsevents@2.3.2:
-    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
-    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
-    os: [darwin]
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -6792,6 +6793,17 @@ packages:
   matchit@1.1.0:
     resolution: {integrity: sha512-+nGYoOlfHmxe5BW5tE0EMJppXEwdSf8uBA1GTZC7Q77kbT35+VKLYJMzVNWCHSsga1ps1tPYFtFyvxvKzWVmMA==}
     engines: {node: '>=6'}
+
+  mcp-tada@0.1.0:
+    resolution: {integrity: sha512-gm0wrPEB4byFFsUF2VLG02jhB02eH5og1D9UVPEnbZGSR2BYkc2k171y65oj9snpM41zQfpJq4GD4cilXfF5zQ==}
+    engines: {node: '>=22.18'}
+    hasBin: true
+    peerDependencies:
+      '@modelcontextprotocol/sdk': '>=1.20.0'
+      typescript: '>=5.4.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
 
   mdast-util-find-and-replace@3.0.2:
     resolution: {integrity: sha512-Tmd1Vg/m3Xz43afeNxDIhWRtFZgM2VLyaf4vSTYwudTyeuTneoL3qtWMA5jeLyz/O1vDJmmV4QuScFCA2tBPwg==}
@@ -7290,13 +7302,13 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright-core@1.63.0-alpha-2026-08-05:
-    resolution: {integrity: sha512-YussvUybTfBtyYbGXWh43f+5kNP03wg98M6mu4DphYET7PSbNVajsdLGjWE1xrsjqOw32i2wFlRP7U5mcOpMZg==}
+  playwright-core@1.63.0-alpha-2026-08-31:
+    resolution: {integrity: sha512-1ek0Lyr12h6jcs/WTcNoVtzZkQp7D/90PsMuBW/Rm6h3AsWAbzpqj0geMv8+8Tzzr9CSUYvg9kznrVZINQMXXw==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.63.0-alpha-2026-08-05:
-    resolution: {integrity: sha512-zbGZUK+JYkoDV3cUgfvh2czTBJL34Gmz5gHVI25xiIpvYSR17Q1M7TS8hnwECUe+IkKaeXbKrSyJTyogm2DVWw==}
+  playwright@1.63.0-alpha-2026-08-31:
+    resolution: {integrity: sha512-3XAsuznfu8jBVJ4QxdGvBkt0+b8ZFwuwJYyOfiIw5ZjUOrNLNRhKxzLzLuydou3gJ9c6eMwVqgzdiOwhy54Kzw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -7322,6 +7334,10 @@ packages:
 
   postcss@8.5.26:
     resolution: {integrity: sha512-u82N74LFzG8ca+dD8puPnplTXoGH4fTPpVGuIbt36G3qvNlkvfD0lEAZSxaly3KX8TS/L1A1gsCEmvKmBcVbkQ==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.5.27:
+    resolution: {integrity: sha512-79Iho8QeYyooJ8e9lCRyTVlyTAkS/kXBYKff6TMzS3kEWGQ8Ds5UEtXpGrSUDLUWok6QTvxeYy0GO8fopHnaSA==}
     engines: {node: ^10 || ^12 || >=14}
 
   presentable-error@0.0.1:
@@ -7717,16 +7733,16 @@ packages:
     resolution: {integrity: sha512-faYHw0anBbc/kWF3zFTEnxSFOAGUX9GFbOBthvDdLsIlEoWOFOtS0zgCiQYwIskL9iGXZL3kAXD8OoZ4GmMATA==}
     engines: {node: '>= 18'}
 
-  typebox@1.3.23:
-    resolution: {integrity: sha512-eMDZIb3EhHxm/tQ+xfbb++B+1KMpquxYoRQ0nHWukMmNxrYHsbRQwW15chb2doi0FdJ/MxDXpgZRFJUyizMkkw==}
+  typebox@1.3.25:
+    resolution: {integrity: sha512-glTozrjba2L9Mqqy9Y9joPmrXGTW7aINuBPl8tdZJJIUIXprRWT1EU8riXUHhPOXSk4K3pDKL6OV5CkpoOKcbw==}
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@7.1.0-dev.20260901.1:
-    resolution: {integrity: sha512-EdwHzF3udir04ubeFHOL05NbldTcukHk6v+LWHcX8VU6xy564y9n9JY/2swf4YMbWFt3rptVCGnQSX9bxjc+vQ==}
+  typescript@7.1.0-dev.20260903.1:
+    resolution: {integrity: sha512-xp/rsu6Whgm+q5K4Ym4KvQ7NBd1Zp9PtU9fdYdCwYvLUL80lA749aKr81fgBHYm/p2Bql4hMoM7NeGQCLe36YQ==}
     engines: {node: '>=16.20.0'}
     hasBin: true
 
@@ -8058,7 +8074,7 @@ snapshots:
   '@babel/core@7.29.7(supports-color@10.2.2)':
     dependencies:
       '@babel/code-frame': 7.29.7
-      '@babel/generator': 7.29.7
+      '@babel/generator': 7.29.8
       '@babel/helper-compilation-targets': 7.29.7
       '@babel/helper-module-transforms': 7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2)
       '@babel/helpers': 7.29.7
@@ -8074,14 +8090,6 @@ snapshots:
       semver: 7.8.5
     transitivePeerDependencies:
       - supports-color
-
-  '@babel/generator@7.29.7':
-    dependencies:
-      '@babel/parser': 7.29.8
-      '@babel/types': 7.29.8
-      '@jridgewell/gen-mapping': 0.3.13
-      '@jridgewell/trace-mapping': 0.3.31
-      jsesc: 3.1.0
 
   '@babel/generator@7.29.8':
     dependencies:
@@ -8261,71 +8269,71 @@ snapshots:
 
   '@inquirer/ansi@2.0.7': {}
 
-  '@inquirer/checkbox@5.2.2(@types/node@26.4.0)':
+  '@inquirer/checkbox@5.2.2(@types/node@26.4.1)':
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@26.4.0)
+      '@inquirer/core': 11.2.1(@types/node@26.4.1)
       '@inquirer/figures': 2.0.8
-      '@inquirer/type': 4.0.7(@types/node@26.4.0)
+      '@inquirer/type': 4.0.7(@types/node@26.4.1)
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
 
-  '@inquirer/confirm@6.2.0(@types/node@26.4.0)':
+  '@inquirer/confirm@6.2.0(@types/node@26.4.1)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@26.4.0)
-      '@inquirer/type': 4.0.7(@types/node@26.4.0)
+      '@inquirer/core': 11.2.1(@types/node@26.4.1)
+      '@inquirer/type': 4.0.7(@types/node@26.4.1)
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
 
-  '@inquirer/core@11.2.1(@types/node@26.4.0)':
+  '@inquirer/core@11.2.1(@types/node@26.4.1)':
     dependencies:
       '@inquirer/ansi': 2.0.7
       '@inquirer/figures': 2.0.8
-      '@inquirer/type': 4.0.7(@types/node@26.4.0)
+      '@inquirer/type': 4.0.7(@types/node@26.4.1)
       cli-width: 4.1.0
       fast-wrap-ansi: 0.2.2
       mute-stream: 3.0.0
       signal-exit: 4.1.0
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
 
   '@inquirer/figures@2.0.8': {}
 
-  '@inquirer/input@5.1.3(@types/node@26.4.0)':
+  '@inquirer/input@5.1.3(@types/node@26.4.1)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@26.4.0)
-      '@inquirer/type': 4.0.7(@types/node@26.4.0)
+      '@inquirer/core': 11.2.1(@types/node@26.4.1)
+      '@inquirer/type': 4.0.7(@types/node@26.4.1)
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
 
-  '@inquirer/password@5.1.2(@types/node@26.4.0)':
-    dependencies:
-      '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@26.4.0)
-      '@inquirer/type': 4.0.7(@types/node@26.4.0)
-    optionalDependencies:
-      '@types/node': 26.4.0
-
-  '@inquirer/search@4.3.0(@types/node@26.4.0)':
-    dependencies:
-      '@inquirer/core': 11.2.1(@types/node@26.4.0)
-      '@inquirer/figures': 2.0.8
-      '@inquirer/type': 4.0.7(@types/node@26.4.0)
-    optionalDependencies:
-      '@types/node': 26.4.0
-
-  '@inquirer/select@5.2.2(@types/node@26.4.0)':
+  '@inquirer/password@5.1.2(@types/node@26.4.1)':
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@26.4.0)
-      '@inquirer/figures': 2.0.8
-      '@inquirer/type': 4.0.7(@types/node@26.4.0)
+      '@inquirer/core': 11.2.1(@types/node@26.4.1)
+      '@inquirer/type': 4.0.7(@types/node@26.4.1)
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
 
-  '@inquirer/type@4.0.7(@types/node@26.4.0)':
+  '@inquirer/search@4.3.0(@types/node@26.4.1)':
+    dependencies:
+      '@inquirer/core': 11.2.1(@types/node@26.4.1)
+      '@inquirer/figures': 2.0.8
+      '@inquirer/type': 4.0.7(@types/node@26.4.1)
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
+
+  '@inquirer/select@5.2.2(@types/node@26.4.1)':
+    dependencies:
+      '@inquirer/ansi': 2.0.7
+      '@inquirer/core': 11.2.1(@types/node@26.4.1)
+      '@inquirer/figures': 2.0.8
+      '@inquirer/type': 4.0.7(@types/node@26.4.1)
+    optionalDependencies:
+      '@types/node': 26.4.1
+
+  '@inquirer/type@4.0.7(@types/node@26.4.1)':
+    optionalDependencies:
+      '@types/node': 26.4.1
 
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
@@ -8704,10 +8712,10 @@ snapshots:
       '@perryts/perry-linux-x64-musl': 0.5.1220
       '@perryts/perry-win32-x64': 0.5.1220
 
-  '@playwright/mcp@0.0.79':
+  '@playwright/mcp@0.0.80':
     dependencies:
-      playwright: 1.63.0-alpha-2026-08-05
-      playwright-core: 1.63.0-alpha-2026-08-05
+      playwright: 1.63.0-alpha-2026-08-31
+      playwright-core: 1.63.0-alpha-2026-08-31
 
   '@polka/url@1.0.0-next.29(patch_hash=60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea)': {}
 
@@ -8848,9 +8856,9 @@ snapshots:
     dependencies:
       yoctocolors-cjs: 2.1.3
 
-  '@socketsecurity/lib@7.0.1(typescript@7.1.0-dev.20260901.1)':
+  '@socketsecurity/lib@7.0.1(patch_hash=a07ae34e75e4e6547a1c68678e556ca4396d02abebb1efe42224f92ed132c8c3)(typescript@7.1.0-dev.20260903.1)':
     optionalDependencies:
-      typescript: 7.1.0-dev.20260901.1
+      typescript: 7.1.0-dev.20260903.1
 
   '@socketsecurity/sdk@4.1.4': {}
 
@@ -8984,7 +8992,7 @@ snapshots:
     dependencies:
       '@types/http-cache-semantics': 4.2.0
       '@types/keyv': 3.1.4
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
       '@types/responselike': 1.0.3
 
   '@types/chai@5.2.3':
@@ -9012,7 +9020,7 @@ snapshots:
 
   '@types/keyv@3.1.4':
     dependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
 
   '@types/mdast@4.0.4':
     dependencies:
@@ -9020,13 +9028,13 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@26.4.0':
+  '@types/node@26.4.1':
     dependencies:
       undici-types: 8.3.0
 
   '@types/responselike@1.0.3':
     dependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
 
   '@types/semver@7.8.0': {}
 
@@ -9036,25 +9044,25 @@ snapshots:
 
   '@types/unist@3.0.3': {}
 
-  '@typescript/typescript-darwin-arm64@7.1.0-dev.20260901.1':
+  '@typescript/typescript-darwin-arm64@7.1.0-dev.20260903.1':
     optional: true
 
-  '@typescript/typescript-darwin-x64@7.1.0-dev.20260901.1':
+  '@typescript/typescript-darwin-x64@7.1.0-dev.20260903.1':
     optional: true
 
-  '@typescript/typescript-linux-arm64@7.1.0-dev.20260901.1':
+  '@typescript/typescript-linux-arm64@7.1.0-dev.20260903.1':
     optional: true
 
-  '@typescript/typescript-linux-arm@7.1.0-dev.20260901.1':
+  '@typescript/typescript-linux-arm@7.1.0-dev.20260903.1':
     optional: true
 
-  '@typescript/typescript-linux-x64@7.1.0-dev.20260901.1':
+  '@typescript/typescript-linux-x64@7.1.0-dev.20260903.1':
     optional: true
 
-  '@typescript/typescript-win32-arm64@7.1.0-dev.20260901.1':
+  '@typescript/typescript-win32-arm64@7.1.0-dev.20260903.1':
     optional: true
 
-  '@typescript/typescript-win32-x64@7.1.0-dev.20260901.1':
+  '@typescript/typescript-win32-x64@7.1.0-dev.20260903.1':
     optional: true
 
   '@ultrathink/acorn.rs.wasm@0.1.1': {}
@@ -9069,7 +9077,7 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 5.0.0(patch_hash=46b174d80b2fbcffeaef525de3594a50d8dd5e812542c1dddf423533bf78cc31)(@types/node@26.4.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      vitest: 5.0.0(patch_hash=555bbde80f3e83833e33f6825435e36659d4e2a927e2a3cb5dbc4d6eaeef976b)(@types/node@26.4.1)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
 
   '@vitest/istanbul-lib-coverage@1.0.1': {}
 
@@ -9077,14 +9085,14 @@ snapshots:
     dependencies:
       '@vitest/istanbul-lib-coverage': 1.0.1
 
-  '@vitest/mocker@5.0.0(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
+  '@vitest/mocker@5.0.0(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.0
       estree-walker: 3.0.3
       magic-string: 1.2.3
     optionalDependencies:
-      vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@5.0.0':
     dependencies:
@@ -9100,7 +9108,7 @@ snapshots:
       pathe: 2.0.3
       sirv: 3.0.2
       tinyrainbow: 3.1.1
-      vitest: 5.0.0(patch_hash=46b174d80b2fbcffeaef525de3594a50d8dd5e812542c1dddf423533bf78cc31)(@types/node@26.4.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      vitest: 5.0.0(patch_hash=555bbde80f3e83833e33f6825435e36659d4e2a927e2a3cb5dbc4d6eaeef976b)(@types/node@26.4.1)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
 
   '@vitest/utils@5.0.0':
     dependencies:
@@ -9108,20 +9116,20 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.1
 
-  '@vitiate/core@0.3.1(typescript@7.1.0-dev.20260901.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)':
+  '@vitiate/core@0.3.1(typescript@7.1.0-dev.20260903.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)':
     dependencies:
       '@optique/core': 1.1.0
       '@optique/run': 1.1.0
       '@swc/core': 1.15.41
       '@vitiate/engine': 0.3.1
       '@vitiate/swc-plugin': 0.3.1
-      es-module-lexer: 2.1.0
+      es-module-lexer: 2.3.2
       escape-string-regexp: 5.0.0
       ipaddr.js: 2.4.0
       magic-string: 1.2.3
-      valibot: 1.4.2(typescript@7.1.0-dev.20260901.1)
-      vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
-      vitest: 5.0.0(patch_hash=46b174d80b2fbcffeaef525de3594a50d8dd5e812542c1dddf423533bf78cc31)(@types/node@26.4.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      valibot: 1.4.2(typescript@7.1.0-dev.20260903.1)
+      vite: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vitest: 5.0.0(patch_hash=555bbde80f3e83833e33f6825435e36659d4e2a927e2a3cb5dbc4d6eaeef976b)(@types/node@26.4.1)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
     transitivePeerDependencies:
       - '@swc/helpers'
       - typescript
@@ -9724,8 +9732,6 @@ snapshots:
 
   err-code@2.0.3: {}
 
-  es-module-lexer@2.1.0: {}
-
   es-module-lexer@2.3.2: {}
 
   es-toolkit@1.47.0: {}
@@ -9913,9 +9919,6 @@ snapshots:
     dependencies:
       minipass: 7.1.3
 
-  fsevents@2.3.2:
-    optional: true
-
   fsevents@2.3.3:
     optional: true
 
@@ -10080,7 +10083,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
       merge-stream: 2.0.0
       supports-color: 10.2.2
 
@@ -10303,6 +10306,12 @@ snapshots:
   matchit@1.1.0:
     dependencies:
       '@arr/every': 1.0.1
+
+  mcp-tada@0.1.0(@modelcontextprotocol/sdk@1.29.0(supports-color@10.2.2)(zod@4.4.3))(typescript@7.1.0-dev.20260903.1):
+    dependencies:
+      '@modelcontextprotocol/sdk': 1.29.0(supports-color@10.2.2)(zod@4.4.3)
+    optionalDependencies:
+      typescript: 7.1.0-dev.20260903.1
 
   mdast-util-find-and-replace@3.0.2:
     dependencies:
@@ -10980,13 +10989,11 @@ snapshots:
 
   playwright-core@1.62.1: {}
 
-  playwright-core@1.63.0-alpha-2026-08-05: {}
+  playwright-core@1.63.0-alpha-2026-08-31: {}
 
-  playwright@1.63.0-alpha-2026-08-05:
+  playwright@1.63.0-alpha-2026-08-31:
     dependencies:
-      playwright-core: 1.63.0-alpha-2026-08-05
-    optionalDependencies:
-      fsevents: 2.3.2
+      playwright-core: 1.63.0-alpha-2026-08-31
 
   pnpm-workspace-yaml@1.8.0:
     dependencies:
@@ -11007,6 +11014,13 @@ snapshots:
       util-deprecate: 1.0.2
 
   postcss@8.5.26:
+    dependencies:
+      nanoid: 3.3.18
+      picocolors: 1.1.1
+      source-map-js: 1.2.1
+    optional: true
+
+  postcss@8.5.27:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
@@ -11041,7 +11055,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.1
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
       long: 5.3.2
 
   proxy-addr@2.0.7:
@@ -11149,7 +11163,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  run-local-ci@0.18.1(patch_hash=a7ff16756fe5c1119456df5639c7a23e844d77f9d0a0ca4654c4c50cd6ed6567)(supports-color@10.2.2):
+  run-local-ci@0.18.1(patch_hash=a335253820e963c2659ec1b08ee143e865eb39ec80ca7d313fff50c33e157d99)(supports-color@10.2.2):
     dependencies:
       '@actions/workflow-parser': 0.3.43
       dockerode: 5.0.1(supports-color@10.2.2)
@@ -11481,19 +11495,19 @@ snapshots:
       media-typer: 1.1.0
       mime-types: 3.0.2
 
-  typebox@1.3.23: {}
+  typebox@1.3.25: {}
 
   typescript@5.9.3: {}
 
-  typescript@7.1.0-dev.20260901.1:
+  typescript@7.1.0-dev.20260903.1:
     optionalDependencies:
-      '@typescript/typescript-darwin-arm64': 7.1.0-dev.20260901.1
-      '@typescript/typescript-darwin-x64': 7.1.0-dev.20260901.1
-      '@typescript/typescript-linux-arm': 7.1.0-dev.20260901.1
-      '@typescript/typescript-linux-arm64': 7.1.0-dev.20260901.1
-      '@typescript/typescript-linux-x64': 7.1.0-dev.20260901.1
-      '@typescript/typescript-win32-arm64': 7.1.0-dev.20260901.1
-      '@typescript/typescript-win32-x64': 7.1.0-dev.20260901.1
+      '@typescript/typescript-darwin-arm64': 7.1.0-dev.20260903.1
+      '@typescript/typescript-darwin-x64': 7.1.0-dev.20260903.1
+      '@typescript/typescript-linux-arm': 7.1.0-dev.20260903.1
+      '@typescript/typescript-linux-arm64': 7.1.0-dev.20260903.1
+      '@typescript/typescript-linux-x64': 7.1.0-dev.20260903.1
+      '@typescript/typescript-win32-arm64': 7.1.0-dev.20260903.1
+      '@typescript/typescript-win32-x64': 7.1.0-dev.20260903.1
 
   uc.micro@2.1.0: {}
 
@@ -11553,9 +11567,9 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
 
-  valibot@1.4.2(typescript@7.1.0-dev.20260901.1):
+  valibot@1.4.2(typescript@7.1.0-dev.20260903.1):
     optionalDependencies:
-      typescript: 7.1.0-dev.20260901.1
+      typescript: 7.1.0-dev.20260903.1
 
   validate-npm-package-license@3.0.4:
     dependencies:
@@ -11568,25 +11582,25 @@ snapshots:
 
   verkit@0.3.2: {}
 
-  vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0):
+  vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
-      postcss: 8.5.26
+      postcss: 8.5.27
       rolldown: 1.2.7
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
       esbuild: 0.28.2
       fsevents: 2.3.3
       jiti: 2.7.0
       terser: 5.48.0
       yaml: 2.9.0
 
-  vitest@5.0.0(patch_hash=46b174d80b2fbcffeaef525de3594a50d8dd5e812542c1dddf423533bf78cc31)(@types/node@26.4.0)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)):
+  vitest@5.0.0(patch_hash=555bbde80f3e83833e33f6825435e36659d4e2a927e2a3cb5dbc4d6eaeef976b)(@types/node@26.4.1)(@vitest/coverage-v8@5.0.0)(@vitest/ui@5.0.0)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      '@vitest/mocker': 5.0.0(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
       chai: 6.2.2
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -11597,18 +11611,18 @@ snapshots:
       tinybench: 6.1.4
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
-      vite: 8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 26.4.0
+      '@types/node': 26.4.1
       '@vitest/coverage-v8': 5.0.0(vitest@5.0.0)
       '@vitest/ui': 5.0.0(vitest@5.0.0)
     transitivePeerDependencies:
       - msw
 
-  vitiate@0.3.1(typescript@7.1.0-dev.20260901.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0):
+  vitiate@0.3.1(typescript@7.1.0-dev.20260903.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0):
     dependencies:
-      '@vitiate/core': 0.3.1(typescript@7.1.0-dev.20260901.1)(vite@8.2.2(@types/node@26.4.0)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
+      '@vitiate/core': 0.3.1(typescript@7.1.0-dev.20260903.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
     transitivePeerDependencies:
       - '@swc/helpers'
       - typescript
@@ -11634,7 +11648,7 @@ snapshots:
       browserslist: 4.28.2
       chrome-trace-event: 1.0.4
       enhanced-resolve: 5.24.4
-      es-module-lexer: 2.1.0
+      es-module-lexer: 2.3.2
       eslint-scope: 5.1.1
       events: 3.3.0
       graceful-fs: 4.2.11

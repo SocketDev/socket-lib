@@ -12,7 +12,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 // Repo root from the canonical paths module (1 path, 1 reference) — not a
@@ -24,7 +24,7 @@ import { runMain } from '../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 type PackageExports = Record<
   string,
@@ -347,6 +347,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/make-api-md.mts
 
   No flags. Regenerate whenever the exports map changes.`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

@@ -8,28 +8,39 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { getTreeManifest } from '../../../src/git/tree.mjs'
-import { spawnSync } from '../../../src/process/spawn/child.mjs'
+import {
+  makeFixtureHandle,
+  makeGitRepo,
+  snapshotRepo,
+} from '../fixture/git.mts'
 import { runWithTempDir } from '../util/temp-files.mjs'
 
-function initRepo(dir: string): void {
-  spawnSync('git', ['init'], { cwd: dir })
-  spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: dir })
-  spawnSync('git', ['config', 'user.email', 'test@example.com'], { cwd: dir })
-  spawnSync('git', ['config', 'commit.gpgsign', 'false'], { cwd: dir })
+import type { GitRepoFixture } from '../fixture/git.mts'
+
+let seed: GitRepoFixture
+
+function copyGitSeed(dir: string): GitRepoFixture {
+  snapshotRepo({ dir: seed.dir, into: dir })
+  return makeFixtureHandle({ dir, env: seed.env, root: dir })
 }
 
 describe('getTreeManifest', () => {
+  beforeAll(() => {
+    seed = makeGitRepo({ prefix: 'git-tree-seed-' })
+    seed.writeFile('alpha.txt', 'one\n')
+    seed.writeFile('sub/beta.txt', 'world\n')
+    seed.writeFile('café.txt', 'accent\n')
+    seed.git('add', '-A')
+    seed.git('commit', '-m', 'seed')
+  })
+  afterAll(() => seed?.cleanup())
+
   it('lists committed paths and is deterministic per ref', async () => {
     await runWithTempDir(async dir => {
-      initRepo(dir)
-      await fs.writeFile(path.join(dir, 'alpha.txt'), 'hello\n')
-      await fs.mkdir(path.join(dir, 'sub'))
-      await fs.writeFile(path.join(dir, 'sub', 'beta.txt'), 'world\n')
-      spawnSync('git', ['add', '-A'], { cwd: dir })
-      spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
+      copyGitSeed(dir)
       const m1 = await getTreeManifest('HEAD', { cwd: dir })
       expect(m1).toContain('alpha.txt')
       expect(m1).toContain('sub/beta.txt')
@@ -40,23 +51,17 @@ describe('getTreeManifest', () => {
 
   it('changes when the tree content changes (content-addressed)', async () => {
     await runWithTempDir(async dir => {
-      initRepo(dir)
-      await fs.writeFile(path.join(dir, 'alpha.txt'), 'one\n')
-      spawnSync('git', ['add', '-A'], { cwd: dir })
-      spawnSync('git', ['commit', '-m', 'first'], { cwd: dir })
+      const fixture = copyGitSeed(dir)
       const first = await getTreeManifest('HEAD', { cwd: dir })
       await fs.writeFile(path.join(dir, 'alpha.txt'), 'two\n')
-      spawnSync('git', ['commit', '-am', 'second'], { cwd: dir })
+      fixture.git('commit', '-am', 'second')
       expect(await getTreeManifest('HEAD', { cwd: dir })).not.toBe(first)
     })
   })
 
   it('rejects for an unknown ref (git exits non-zero → spawn rejects)', async () => {
     await runWithTempDir(async dir => {
-      initRepo(dir)
-      await fs.writeFile(path.join(dir, 'alpha.txt'), 'x\n')
-      spawnSync('git', ['add', '-A'], { cwd: dir })
-      spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
+      copyGitSeed(dir)
       await expect(
         getTreeManifest('deadbeefdeadbeefdeadbeefdeadbeefdeadbeef', {
           cwd: dir,
@@ -67,10 +72,7 @@ describe('getTreeManifest', () => {
 
   it('throws the empty-tree message for a present ref resolving to an empty tree', async () => {
     await runWithTempDir(async dir => {
-      initRepo(dir)
-      await fs.writeFile(path.join(dir, 'alpha.txt'), 'x\n')
-      spawnSync('git', ['add', '-A'], { cwd: dir })
-      spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
+      copyGitSeed(dir)
       // The well-known empty-tree object is present in every repo and exits 0
       // with zero output — the ONLY input that reaches the custom throw (an
       // unknown ref exits non-zero and rejects in spawn before it).
@@ -84,10 +86,7 @@ describe('getTreeManifest', () => {
 
   it('emits a non-ASCII path verbatim (config-independent, not \\NNN-escaped)', async () => {
     await runWithTempDir(async dir => {
-      initRepo(dir)
-      await fs.writeFile(path.join(dir, 'café.txt'), 'accent\n')
-      spawnSync('git', ['add', '-A'], { cwd: dir })
-      spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
+      copyGitSeed(dir)
       const manifest = await getTreeManifest('HEAD', { cwd: dir })
       expect(manifest).toContain('café.txt')
       expect(manifest).not.toContain('\\303\\251')

@@ -101,7 +101,7 @@ describe('fleet usage evidence', () => {
     try {
       const rosterDir = path.join(
         root,
-        '.claude/skills/fleet/cascading-fleet/lib',
+        '.claude/skills/fleet/cascading-commits/lib',
       )
       mkdirSync(rosterDir, { recursive: true })
       writeFileSync(

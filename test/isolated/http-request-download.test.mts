@@ -5,7 +5,7 @@
  *   per-worker heap ceiling and the source-line cap. The sha256-verification
  *   paths live in http-request-download-checksum.test.mts; the rest of the core
  *   surface (httpRequest) lives in http-request-core.test.mts. All files share
- *   the same test server via http-request-fixtures.mts.
+ *   the same test server via fixture/http-request.mts.
  */
 
 import { promises as fs } from 'node:fs'
@@ -21,7 +21,7 @@ import { Logger } from '../../src/logger/node.mjs'
 
 import { minTimerQuantum } from '../_shared/fleet/lib/timing.mts'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { fixture, setupHttpFixture } from './fixture/http-request.mjs'
 import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 setupHttpFixture()

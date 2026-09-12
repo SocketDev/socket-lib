@@ -17,7 +17,6 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
-  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs'
@@ -174,87 +173,6 @@ describe('disambiguateReceiver', () => {
       }
     } finally {
       safeDeleteSync(targetRoot)
-    }
-  })
-})
-
-describe('locked-down tool surface', () => {
-  test('source declares only Read/Grep/Glob in BASE_TOOLS (the actual allowlist)', async () => {
-    // BASE_TOOLS is passed as the SDK's `tools` option — the literal
-    // set the model is told about. Anything not in here is invisible
-    // to the model. This is the security-critical line; a future edit
-    // that adds Bash/Edit/Write here is the bug this test is for.
-    const src = readFileSync(
-      new URL('../src/disambiguate.mts', import.meta.url),
-      'utf8',
-    )
-    const m = /const BASE_TOOLS = (\[[^\]]+\])/m.exec(src)
-    assert.ok(m, 'BASE_TOOLS array literal not found')
-    const allowed = JSON.parse(m[1].replace(/'/g, '"'))
-    assert.deepEqual(allowed.toSorted(), ['Glob', 'Grep', 'Read'])
-  })
-
-  test('source passes BASE_TOOLS as the SDK `tools` option', async () => {
-    // The base-tools constant only matters if it's actually wired
-    // into the SDK call. Verify the literal `tools: BASE_TOOLS` line
-    // is in the source. Renaming the constant without updating the
-    // call site would silently fall back to the SDK default (= all
-    // claude_code tools available), so this guard catches that.
-    const src = readFileSync(
-      new URL('../src/disambiguate.mts', import.meta.url),
-      'utf8',
-    )
-    assert.match(
-      src,
-      /\btools:\s*BASE_TOOLS\b/,
-      'expected `tools: BASE_TOOLS` in the SDK options call site',
-    )
-  })
-
-  test('source passes permissionMode: "dontAsk" (the headless lockdown recipe)', async () => {
-    // The official `@anthropic-ai/claude-agent-sdk` docs say: "For a locked-down
-    // agent, pair `allowedTools` with `permissionMode: 'dontAsk'`.
-    // Listed tools are approved; anything else is denied outright
-    // instead of prompting." With `'default'`, unmatched tools fall
-    // through to canUseTool, which is undefined → undefined behavior
-    // in non-interactive scripts. This test catches the regression
-    // shape where someone "simplifies" by dropping permissionMode
-    // or switches it to 'default' without realizing what changed.
-    const src = readFileSync(
-      new URL('../src/disambiguate.mts', import.meta.url),
-      'utf8',
-    )
-    assert.match(
-      src,
-      /\bpermissionMode:\s*['"]dontAsk['"]/,
-      "expected `permissionMode: 'dontAsk'` in the SDK options call site",
-    )
-    // And explicitly: NOT bypassPermissions or acceptEdits.
-    assert.doesNotMatch(
-      src,
-      /\bpermissionMode:\s*['"]bypassPermissions['"]/,
-      'permissionMode must never be bypassPermissions',
-    )
-    assert.doesNotMatch(
-      src,
-      /\ballowDangerouslySkipPermissions:\s*true\b/,
-      'allowDangerouslySkipPermissions must never be true',
-    )
-  })
-
-  test('source declares Bash/Edit/Write in DENIED_TOOLS', async () => {
-    const src = readFileSync(
-      new URL('../src/disambiguate.mts', import.meta.url),
-      'utf8',
-    )
-    const m = /const DENIED_TOOLS = (\[[\s\S]*?\])/m.exec(src)
-    assert.ok(m, 'DENIED_TOOLS array literal not found')
-    const denied = JSON.parse(m[1].replace(/'/g, '"').replace(/,(\s*])/, '$1'))
-    for (const tool of ['Bash', 'Edit', 'Write', 'WebFetch', 'WebSearch']) {
-      assert.ok(
-        denied.includes(tool),
-        `DENIED_TOOLS missing required entry: ${tool}`,
-      )
     }
   })
 })

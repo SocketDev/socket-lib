@@ -24,7 +24,7 @@
  *     <dir,…>]
  */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -36,11 +36,15 @@ import {
 } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 import type { AcornNode } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 
-import { readConsumerEvidence } from './consumer-evidence.mts'
+import {
+  consumerEvidencePath,
+  readConsumerEvidence,
+} from './consumer-evidence.mts'
 
 import { renderReport } from './audit-api-usage/render.mts'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { runMain } from '../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
@@ -409,6 +413,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --json                    emit the report as JSON instead of terminal bars
   --consumers <dir,dir,…>   comma-separated consumer repo names (default: every fleet repo)`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {
@@ -424,6 +429,10 @@ function collectConsumerReferences(consumers: readonly string[]): UsageRef[] {
     i += 1
   ) {
     const repo = consumers[i]!
+    if (!existsSync(consumerEvidencePath(LIB_ROOT, repo))) {
+      getScriptLogger().warn(`skip (absent): ${repo}`)
+      continue
+    }
     const evidence = readConsumerEvidence(LIB_ROOT, repo)
     for (const entry of evidence.files) {
       const file = `./${entry.path}`

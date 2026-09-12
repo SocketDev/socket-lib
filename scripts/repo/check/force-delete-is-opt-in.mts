@@ -17,6 +17,10 @@ import path from 'node:path'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { isPathWithinRoot } from '@socketsecurity/lib-stable/paths/predicates'
 import process from 'node:process'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
+import { getScriptLogger } from '../../fleet/process/script-output.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const REPO_ROOT = path.resolve(
@@ -151,7 +155,9 @@ export function prepareDeleteFixtureRoot(repoRoot: string): string {
 export async function main(): Promise<void> {
   const isQuiet = process.argv.includes('--quiet')
   const { log, safe } = await loadBuilt()
-  const logger = log.getDefaultLogger()
+  const logger = isJsonRequested(process.argv.slice(2))
+    ? getScriptLogger()
+    : log.getDefaultLogger()
   const fixtureBase = prepareDeleteFixtureRoot(REPO_ROOT)
   if (!process.argv.includes('--probe-child')) {
     const fixture = mkdtempSync(path.join(fixtureBase, 'probe-'))
@@ -164,6 +170,7 @@ export async function main(): Promise<void> {
           fileURLToPath(import.meta.url),
           '--probe-child',
           ...(isQuiet ? ['--quiet'] : []),
+          ...(isJsonRequested(process.argv.slice(2)) ? ['--json'] : []),
         ],
         { cwd, stdio: 'inherit' },
       )
@@ -209,6 +216,13 @@ export async function main(): Promise<void> {
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  void main()
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'checks that deletion outside the working directory requires authorization',
+  help: 'Usage: node scripts/repo/check/force-delete-is-opt-in.mts [--quiet] [--json]',
+  json: 'result',
+}
+
+if (isMainModule(import.meta.url)) {
+  runMain(main, SCRIPT_META)
 }

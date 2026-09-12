@@ -7,7 +7,7 @@
  */
 
 import { isQuiet } from '../../flags/predicates.mts'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../../fleet/process/script-output.mts'
 
 import {
   findStubsReachableFromShippedCode,
@@ -20,7 +20,7 @@ import { runMain } from '../../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 function main(): void {
   const { stubbed } = applyUnexposedStubs(REPO_ROOT)
@@ -42,6 +42,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/build/post/apply-unexposed-stubs.mts [flags]
 
   --quiet, --silent   suppress the success summary`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

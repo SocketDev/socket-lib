@@ -462,8 +462,8 @@
   "schemaVersion": 1,
   "repoName": "socket-lib",
   "bundle": {
-    "ref": "fleet-pack-bd99fdd3d6a1735d0a060e3df6fd177e62efda4e",
-    "cascadeSha": "bd99fdd3d6a1735d0a060e3df6fd177e62efda4e"
+    "ref": "fleet-pack-011e1c67ce8860fdf7dca52a45e1a8d6620379e6",
+    "cascadeSha": "011e1c67ce8860fdf7dca52a45e1a8d6620379e6"
   },
   "repo": {
     "type": "solo"
@@ -483,10 +483,10 @@
     },
     "budgetAllowances": {
       "fast": {
-        "maxMs": 35000,
-        "reason": "Measured instrumented fast lane at 28333 ms with 6374 passing tests after replacing real TTL waits. Evidence: .cache/fleet/coverage/measurement/lane-fast/measurement.json. Allowance includes variation during release verification.",
-        "created": "2026-09-08",
-        "expires": "2026-10-08"
+        "maxMs": 55304,
+        "reason": "Measured 52669.804 ms at b7126df19f15c79a52da9aa2d8b3a4fcb3f0054f; 5% headroom; darwin/arm64, Node v26.8.2.",
+        "created": "2026-09-11",
+        "expires": "2026-10-11"
       }
     }
   },

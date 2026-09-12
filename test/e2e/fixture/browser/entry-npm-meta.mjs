@@ -62,15 +62,17 @@ export async function run(packument) {
 // surviving a page reload.
 function fakeStorage() {
   const map = new Map()
+  // oxlint-disable-next-line socket/prefer-undefined-over-null -- Web Storage requires null for missing entries.
+  const missingStorageValue = null
   return {
     get length() {
       return map.size
     },
     getItem(key) {
-      return map.has(key) ? map.get(key) : null
+      return map.has(key) ? map.get(key) : missingStorageValue
     },
     key(index) {
-      return [...map.keys()][index] ?? null
+      return [...map.keys()][index] ?? missingStorageValue
     },
     removeItem(key) {
       map.delete(key)

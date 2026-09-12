@@ -6,7 +6,7 @@
  *   original advanced surface so each test file fits within the per-worker v8
  *   heap ceiling — cumulative HTTP state retains memory faster than GC can
  *   reclaim it within a single file. Shares the test server with the sibling
- *   http-request-*.test.mts files via http-request-fixtures.mts.
+ *   http-request-*.test.mts files via fixture/http-request.mts.
  */
 
 import http from 'node:http'
@@ -30,7 +30,7 @@ import {
   fixture,
   listeningPort,
   setupHttpFixture,
-} from './http-request-fixtures.mjs'
+} from './fixture/http-request.mjs'
 import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 import type {
