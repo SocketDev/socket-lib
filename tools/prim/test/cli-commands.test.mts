@@ -69,12 +69,9 @@ function target(files: Record<string, string>): string {
 }
 
 /**
- * A primordials surface file written outside any target tree, passed via
- * `--surface` so the lookup order never enters the picture.
+ * A primordials surface file contained by the target tree.
  */
-function surface(names: string[]): string {
-  const root = mkdtempSync(path.join(os.tmpdir(), 'prim-cli-surface-'))
-  tmpDirs.push(root)
+function surface(root: string, names: string[]): string {
   const abs = path.join(root, 'primordials.ts')
   writeFileSync(
     abs,
@@ -132,7 +129,7 @@ describe('argument rejection', () => {
       '--target',
       root,
       '--surface',
-      surface(['ObjectKeys']),
+      surface(root, ['ObjectKeys']),
     ])
     expect(result.exited).toBe(true)
     expect(err()).toContain('unknown command: frobnicate')
@@ -173,7 +170,7 @@ describe('resolving the tree to scan', () => {
       '--dir',
       'build',
       '--surface',
-      surface(['ObjectKeys']),
+      surface(root, ['ObjectKeys']),
     ])
     expect(result.exited).toBe(false)
   })
@@ -261,7 +258,7 @@ describe('loading the surface', () => {
       path.join(root, 'absent.ts'),
     ])
     expect(result.exited).toBe(true)
-    expect(err()).toContain('--surface path not found')
+    expect(err()).toContain('Primordials surface is unavailable or external')
   })
 })
 
@@ -275,7 +272,7 @@ describe('the audit command', () => {
       '--target',
       root,
       '--surface',
-      surface(['ObjectKeys']),
+      surface(root, ['ObjectKeys']),
       ...extra,
     ])
   }
@@ -334,7 +331,13 @@ describe('the audit command with unreadable files', () => {
       'dist/broken.mts': 'const a: = = 1\n',
       'dist/fine.mjs': 'Object.keys(o)\n',
     })
-    await run(['audit', '--target', root, '--surface', surface(['ObjectKeys'])])
+    await run([
+      'audit',
+      '--target',
+      root,
+      '--surface',
+      surface(root, ['ObjectKeys']),
+    ])
     const text = err()
     expect(text).toContain('2 file(s) skipped')
     expect(text).toContain('parse-failed (1)')
@@ -351,7 +354,7 @@ describe('the audit command with unreadable files', () => {
       root,
       '--json',
       '--surface',
-      surface(['ObjectKeys']),
+      surface(root, ['ObjectKeys']),
     ])
     expect(err()).toBe('')
     expect(JSON.parse(out()).parseFailures).toBe(1)
@@ -366,7 +369,7 @@ describe('the mod command', () => {
       '--target',
       root,
       '--surface',
-      surface(['ObjectKeys']),
+      surface(root, ['ObjectKeys']),
       '--json',
     ])
     expect(result.exited).toBe(false)

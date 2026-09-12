@@ -67,6 +67,15 @@ const ARG_OPTIONS = {
   target: { type: 'string' },
 }
 
+const COMMANDS = new Set(['audit', 'lint', 'mod'])
+
+export function validateCommand(command) {
+  if (!COMMANDS.has(command)) {
+    fail(`unknown command: ${command}\n\n${HELP}`)
+  }
+  return command
+}
+
 export async function runCli(argv) {
   if (printRequestedHelp(argv)) {
     return
@@ -94,7 +103,7 @@ export async function runCli(argv) {
     return
   }
 
-  const command = positionals[0]
+  const command = validateCommand(positionals[0])
 
   const targetArg = values.target ?? '.'
   // `audit` inspects bundled output by default → `dist`. `mod` and
@@ -142,7 +151,6 @@ export async function runCli(argv) {
     return
   }
 
-  fail(`unknown command: ${command}\n\n${HELP}`)
   function runLintCommand(): void {
     const primordialSources = values['primordials-source']
     const findings = lintSource({
