@@ -46,6 +46,7 @@ import { ArrayPrototypePush } from '../../../../primordials/array.mjs'
 import { ObjectFreeze } from '../../../../primordials/object.mjs'
 import { RegExpPrototypeExec } from '../../../../primordials/regexp.mjs'
 import {
+  StringPrototypeCharCodeAt,
   StringPrototypeEndsWith,
   StringPrototypeIndexOf,
   StringPrototypeSlice,
@@ -120,7 +121,8 @@ export function indentOf(line: string): number {
   let indent = 0
   while (
     indent < line.length &&
-    (line[indent] === '\t' || line[indent] === ' ')
+    (StringPrototypeCharCodeAt(line, indent) === 9 /* '\t' */ ||
+      StringPrototypeCharCodeAt(line, indent) === 32) /* ' ' */
   ) {
     indent++
   }
@@ -355,7 +357,11 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
     }
 
     // New top-level section ends current section.
-    if (line[0] !== ' ' && line[0] !== '\t' && trimmed.length > 0) {
+    if (
+      StringPrototypeCharCodeAt(line, 0) !== 32 /* ' ' */ &&
+      StringPrototypeCharCodeAt(line, 0) !== 9 /* '\t' */ &&
+      trimmed.length > 0
+    ) {
       inPackages = false
       inSnapshots = false
       inImporters = false

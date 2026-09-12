@@ -102,10 +102,10 @@ export function consumeDependenciesMeta(
     const line = StringPrototypeSlice(content, pos, end)
     if (
       line.length < 4 ||
-      line[0] !== ' ' ||
-      line[1] !== ' ' ||
-      line[2] !== ' ' ||
-      line[3] !== ' '
+      StringPrototypeCharCodeAt(line, 0) !== 32 /* ' ' */ ||
+      StringPrototypeCharCodeAt(line, 1) !== 32 /* ' ' */ ||
+      StringPrototypeCharCodeAt(line, 2) !== 32 /* ' ' */ ||
+      StringPrototypeCharCodeAt(line, 3) !== 32 /* ' ' */
     ) {
       break
     }
@@ -126,10 +126,10 @@ export function consumeDependencyList(
     const line = StringPrototypeSlice(content, pos, end)
     if (
       line.length < 4 ||
-      line[0] !== ' ' ||
-      line[1] !== ' ' ||
-      line[2] !== ' ' ||
-      line[3] !== ' '
+      StringPrototypeCharCodeAt(line, 0) !== 32 /* ' ' */ ||
+      StringPrototypeCharCodeAt(line, 1) !== 32 /* ' ' */ ||
+      StringPrototypeCharCodeAt(line, 2) !== 32 /* ' ' */ ||
+      StringPrototypeCharCodeAt(line, 3) !== 32 /* ' ' */
     ) {
       break
     }
@@ -217,7 +217,11 @@ export function consumeEntryProperties(
     const eol = StringPrototypeIndexOf(content, '\n', pos)
     const end = eol === -1 ? content.length : eol
     const line = StringPrototypeSlice(content, pos, end)
-    if (line.length === 0 || (line[0] !== '\t' && line[0] !== ' ')) {
+    if (
+      line.length === 0 ||
+      (StringPrototypeCharCodeAt(line, 0) !== 9 /* '\t' */ &&
+        StringPrototypeCharCodeAt(line, 0) !== 32) /* ' ' */
+    ) {
       break
     }
     const propLine = StringPrototypeTrim(line)
@@ -236,7 +240,11 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
   const isBerry = StringPrototypeIndexOf(content, '__metadata:') !== -1
 
   function isIgnoredLine(line: string): boolean {
-    return !line || StringPrototypeTrim(line) === '' || line[0] === '#'
+    return (
+      !line ||
+      StringPrototypeTrim(line) === '' ||
+      StringPrototypeCharCodeAt(line, 0) === 35
+    ) /* '#' */
   }
 
   function appendEntry(entry: YarnEntryState): void {
@@ -275,7 +283,10 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
       pos = skipIndentedBlock(content, pos)
       continue
     }
-    if (line[0] === '\t' || line[0] === ' ') {
+    if (
+      StringPrototypeCharCodeAt(line, 0) === 9 /* '\t' */ ||
+      StringPrototypeCharCodeAt(line, 0) === 32 /* ' ' */
+    ) {
       continue
     }
     const trimmed = StringPrototypeTrim(line)
@@ -333,7 +344,11 @@ export function skipIndentedBlock(content: string, startPos: number): number {
     const eol = StringPrototypeIndexOf(content, '\n', pos)
     const end = eol === -1 ? content.length : eol
     const line = StringPrototypeSlice(content, pos, end)
-    if (line.length === 0 || (line[0] !== '\t' && line[0] !== ' ')) {
+    if (
+      line.length === 0 ||
+      (StringPrototypeCharCodeAt(line, 0) !== 9 /* '\t' */ &&
+        StringPrototypeCharCodeAt(line, 0) !== 32) /* ' ' */
+    ) {
       return pos
     }
     pos = end + 1

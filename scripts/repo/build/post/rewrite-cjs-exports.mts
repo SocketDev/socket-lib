@@ -215,7 +215,8 @@ function rewriteDefaultExport(content: string, output: MagicString): boolean {
     let removeEnd = exportCall.node.end
     while (
       removeEnd < content.length &&
-      (content[removeEnd] === '\n' || content[removeEnd] === ';')
+      (content.charCodeAt(removeEnd) === 10 /* '\n' */ ||
+        content.charCodeAt(removeEnd) === 59) /* ';' */
     ) {
       removeEnd += 1
     }
@@ -236,9 +237,11 @@ function assignmentStatementEnd(content: string, start: number): number {
   let end = start
   while (
     end < content.length &&
-    (content[end] === '\n' || content[end] === ' ' || content[end] === ';')
+    (content.charCodeAt(end) === 10 /* '\n' */ ||
+      content.charCodeAt(end) === 32 /* ' ' */ ||
+      content.charCodeAt(end) === 59) /* ';' */
   ) {
-    if (content[end] === ';') {
+    if (content.charCodeAt(end) === 59 /* ';' */) {
       return end + 1
     }
     end += 1

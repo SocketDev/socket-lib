@@ -138,7 +138,7 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
       // quote ends up adjacent to the value (lets extractCargoDepName
       // strip both quotes cleanly).
       const noComma =
-        trimmed[trimmed.length - 1] === ','
+        StringPrototypeCharCodeAt(trimmed, trimmed.length - 1) === 44 /* ',' */
           ? StringPrototypeSlice(trimmed, 0, -1)
           : trimmed
       const cleaned = extractCargoDepName(noComma)
@@ -185,12 +185,15 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
     pos = end + 1
 
     const trimmed = StringPrototypeTrim(line)
-    if (trimmed.length === 0 || trimmed[0] === '#') {
+    if (
+      trimmed.length === 0 ||
+      StringPrototypeCharCodeAt(trimmed, 0) === 35 /* '#' */
+    ) {
       continue
     }
 
     // Section header.
-    if (trimmed[0] === '[') {
+    if (StringPrototypeCharCodeAt(trimmed, 0) === 91 /* '[' */) {
       // Flush prior entry.
       if (currentEntry?.name) {
         const ref = freezeCargoEntry(currentEntry)
