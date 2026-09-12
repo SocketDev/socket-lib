@@ -561,9 +561,6 @@ importers:
       '@yarnpkg/extensions':
         specifier: 2.0.7
         version: 2.0.7(@yarnpkg/core@4.9.1(patch_hash=90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9)(typanion@3.14.0))
-      adm-zip:
-        specifier: 0.6.0
-        version: 0.6.0
       ast-v8-to-istanbul:
         specifier: 'catalog:'
         version: 1.0.5
@@ -597,6 +594,9 @@ importers:
       fast-sort:
         specifier: 3.4.1
         version: 3.4.1
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
       get-east-asian-width:
         specifier: 1.6.0
         version: 1.6.0
@@ -5810,10 +5810,6 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  adm-zip@0.6.0:
-    resolution: {integrity: sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==}
-    engines: {node: '>=14.0'}
-
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
@@ -9318,8 +9314,6 @@ snapshots:
       negotiator: 1.0.0
 
   acorn@8.16.0: {}
-
-  adm-zip@0.6.0: {}
 
   agent-base@7.1.4: {}
 

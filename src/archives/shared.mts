@@ -1,12 +1,11 @@
 /**
  * @file Private internals for `archives/*` modules — defaults, lazy module
- *   accessors (adm-zip, tar-fs, node:path), shared pre-extraction validators
+ *   accessors (tar-fs, node:path), shared pre-extraction validators
  *   (`assertArchiveExists`, `validatePathWithinBase`).
  */
 
 import { ErrorCtor } from '../primordials/error.mjs'
 import { StringPrototypeStartsWith } from '../primordials/string.mjs'
-import type AdmZipType from '../external/adm-zip.js'
 import type tarFsType from '../external/tar-fs.js'
 import { getNodePath } from '../node/path.mjs'
 import { getNodeFs } from '../node/fs.mjs'
@@ -21,7 +20,6 @@ export {
   DEFAULT_MAX_TOTAL_SIZE,
 } from './types.mjs'
 
-let admZip: typeof AdmZipType | undefined
 let tarFs: typeof tarFsType | undefined
 
 /**
@@ -29,9 +27,7 @@ let tarFs: typeof tarFsType | undefined
  * underlying extractor. Normalizes the "missing archive" surface across all
  * three extractors (zip/tar/tar.gz): each now throws a Node-style `ENOENT`
  * error with the archive path. Without this preflight, `zip` goes through
- * adm-zip and surfaces as `"Invalid filename"`, while `tar`/`tar.gz` surface
- * the raw Node `ENOENT` — inconsistent, and adm-zip's message didn't include
- * the path.
+ * the underlying extractor. The error includes the missing path.
  *
  * @private
  *
@@ -47,13 +43,6 @@ export function assertArchiveExists(archivePath: string): void {
     err.path = archivePath
     throw err
   }
-}
-
-export function getAdmZip() {
-  if (admZip === undefined) {
-    admZip = /*@__PURE__*/ require('../external/adm-zip.js')
-  }
-  return admZip!
 }
 
 export function getTarFs() {

@@ -2,7 +2,7 @@
  * @file Security tests for archive extraction utilities. Covers the hardening
  *   layers shared by extractZip/extractTar/extractTarGz/extractArchive:
  *
- *   - Path traversal protection: adm-zip normalization and base-dir containment
+ *   - Path traversal protection through base-directory containment
  *   - Zip bomb protection (per-file maxFileSize, aggregate maxTotalSize)
  *   - Symlink/hard-link rejection in tar and tar.gz archives
  *   - Combined end-to-end security validation through auto-detection
@@ -13,11 +13,10 @@ import path from 'node:path'
 import process from 'node:process'
 import { createGzip } from 'node:zlib'
 
-import AdmZip from '../../src/external/adm-zip.js'
-import type { AdmZipInstance } from '../../src/external/adm-zip.js'
 import { describe, expect, it } from 'vitest'
 
 import { createTarPack } from '../_shared/tar-pack.mts'
+import { setZipDeclaredSize, writeZipFixture } from '../_shared/zip.mts'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 
@@ -26,16 +25,6 @@ import { extractTar, extractTarGz } from '../../src/archives/tar.mjs'
 import { extractZip } from '../../src/archives/zip.mjs'
 
 import { runWithTempDir } from '../unit/util/temp-files.mjs'
-
-// Size guards inspect declared metadata before decompressing fixture bytes.
-function addDeclaredSizeFile(
-  zip: AdmZipInstance,
-  name: string,
-  size: number,
-): void {
-  zip.addFile(name, Buffer.from('fixture'))
-  zip.getEntry(name)!.header.size = size
-}
 
 // Suppress unhandled error warnings from tar-fs stream destruction.
 // The errors are properly caught by the pipeline, but Vitest tracks Error
@@ -52,24 +41,16 @@ process.on('uncaughtException', err => {
 describe('archives security features', () => {
   describe('path traversal protection', () => {
     it(
-      'should safely handle relative paths in zip files (adm-zip normalizes)',
+      'should reject relative paths in zip files',
       async () => {
         await runWithTempDir(async tempDir => {
           const zipPath = path.join(tempDir, 'relative.zip')
-          const zip = new AdmZip()
-
-          // adm-zip normalizes ../../ to safe paths automatically
-          zip.addFile('../../etc/passwd', Buffer.from('safe content'))
-
-          zip.writeZip(zipPath)
+          writeZipFixture(zipPath, { '../../etc/passwd': 'safe content' })
 
           const extractDir = path.join(tempDir, 'extract')
-          // Should extract safely (adm-zip normalizes to etc/passwd)
-          await extractZip(zipPath, extractDir)
-
-          // Verify it extracted to safe location
-          const files = await fs.readdir(extractDir, { recursive: true })
-          expect(files).toContain('etc')
+          await expect(extractZip(zipPath, extractDir)).rejects.toThrow(
+            /Path traversal attempt detected/,
+          )
         }, 'security-path-normalized-zip-')
       },
       tolerantTimeout(60_000),
@@ -80,9 +61,7 @@ describe('archives security features', () => {
       async () => {
         await runWithTempDir(async tempDir => {
           const zipPath = path.join(tempDir, 'test.zip')
-          const zip = new AdmZip()
-          zip.addFile('safe/file.txt', Buffer.from('content'))
-          zip.writeZip(zipPath)
+          writeZipFixture(zipPath, { 'safe/file.txt': 'content' })
 
           const extractDir = path.join(tempDir, 'extract')
           // This should work fine - normal extraction
@@ -105,11 +84,11 @@ describe('archives security features', () => {
       async () => {
         await runWithTempDir(async tempDir => {
           const bombZipPath = path.join(tempDir, 'bomb.zip')
-          const zip = new AdmZip()
-
-          addDeclaredSizeFile(zip, 'large-file.bin', 150 * 1024 * 1024)
-
-          zip.writeZip(bombZipPath)
+          const archive = writeZipFixture(bombZipPath, {
+            'large-file.bin': 'fixture',
+          })
+          setZipDeclaredSize(archive, 'large-file.bin', 150 * 1024 * 1024)
+          await fs.writeFile(bombZipPath, archive)
 
           const extractDir = path.join(tempDir, 'extract')
           await expect(extractZip(bombZipPath, extractDir)).rejects.toThrow(
@@ -125,15 +104,18 @@ describe('archives security features', () => {
       async () => {
         await runWithTempDir(async tempDir => {
           const bombZipPath = path.join(tempDir, 'bomb-total.zip')
-          const zip = new AdmZip()
-
           // Fifteen declared 80 MiB entries exceed the default 1 GiB total.
           // Each declared entry remains below the default 100 MiB limit.
+          const fixtures: Record<string, string> = {}
           for (let i = 0; i < 15; i++) {
-            addDeclaredSizeFile(zip, `file${i}.bin`, 80 * 1024 * 1024)
+            fixtures[`file${i}.bin`] = 'fixture'
           }
-
-          zip.writeZip(bombZipPath)
+          const archive = writeZipFixture(bombZipPath, fixtures)
+          const names = Object.keys(fixtures)
+          for (let i = 0, { length } = names; i < length; i += 1) {
+            setZipDeclaredSize(archive, names[i]!, 80 * 1024 * 1024)
+          }
+          await fs.writeFile(bombZipPath, archive)
 
           const extractDir = path.join(tempDir, 'extract')
           await expect(extractZip(bombZipPath, extractDir)).rejects.toThrow(
@@ -183,12 +165,8 @@ describe('archives security features', () => {
     it('should allow extraction with custom size limits', async () => {
       await runWithTempDir(async tempDir => {
         const zipPath = path.join(tempDir, 'custom.zip')
-        const zip = new AdmZip()
-
         const buffer = Buffer.alloc(5 * 1024)
-        zip.addFile('file.bin', buffer)
-
-        zip.writeZip(zipPath)
+        writeZipFixture(zipPath, { 'file.bin': buffer.toString('utf8') })
 
         const extractDir = path.join(tempDir, 'extract')
 
@@ -306,9 +284,7 @@ describe('archives security features', () => {
       await runWithTempDir(async tempDir => {
         // Test that valid archive passes all checks
         const validZipPath = path.join(tempDir, 'valid.zip')
-        const zip = new AdmZip()
-        zip.addFile('safe/file.txt', Buffer.from('safe content'))
-        zip.writeZip(validZipPath)
+        writeZipFixture(validZipPath, { 'safe/file.txt': 'safe content' })
 
         const extractDir = path.join(tempDir, 'extract')
         await extractZip(validZipPath, extractDir)
@@ -324,9 +300,9 @@ describe('archives security features', () => {
     it('should enforce security on extractArchive auto-detection', async () => {
       await runWithTempDir(async tempDir => {
         const zipPath = path.join(tempDir, 'archive.zip')
-        const zip = new AdmZip()
-        addDeclaredSizeFile(zip, 'large.bin', 150 * 1024 * 1024)
-        zip.writeZip(zipPath)
+        const archive = writeZipFixture(zipPath, { 'large.bin': 'fixture' })
+        setZipDeclaredSize(archive, 'large.bin', 150 * 1024 * 1024)
+        await fs.writeFile(zipPath, archive)
 
         const extractDir = path.join(tempDir, 'extract')
         await expect(extractArchive(zipPath, extractDir)).rejects.toThrow(

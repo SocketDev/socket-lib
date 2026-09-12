@@ -16,7 +16,7 @@ export const ArrayCtor: ArrayConstructor = Array
 export const ArrayBufferCtor: ArrayBufferConstructor = ArrayBuffer
 export const DataViewCtor: DataViewConstructor = DataView
 // Typed-array constructors. Same shape as Array — bundled externals
-// (npm-pack, adm-zip, tar-fs, etc.) reach for these directly.
+// (npm-pack, tar-fs, etc.) reach for these directly.
 export const Float32ArrayCtor: Float32ArrayConstructor = Float32Array
 export const Float64ArrayCtor: Float64ArrayConstructor = Float64Array
 export const Int8ArrayCtor: Int8ArrayConstructor = Int8Array

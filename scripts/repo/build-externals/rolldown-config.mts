@@ -111,7 +111,6 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
  */
 export function createForceNodeModulesPlugin(): Plugin {
   const packagesWithPathMappings = [
-    'adm-zip',
     'cacache',
     'make-fetch-happen',
     'fast-sort',
