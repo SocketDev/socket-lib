@@ -164,21 +164,63 @@ settings:
 
 catalogs:
   default:
+    '@babel/core':
+      specifier: 7.29.7
+      version: 7.29.7
+    '@babel/parser':
+      specifier: 7.29.8
+      version: 7.29.8
+    '@babel/traverse':
+      specifier: 7.29.8
+      version: 7.29.8
+    '@babel/types':
+      specifier: 7.29.8
+      version: 7.29.8
     '@bcoe/v8-coverage':
       specifier: 1.0.2
       version: 1.0.2
+    '@inquirer/checkbox':
+      specifier: 5.2.2
+      version: 5.2.2
+    '@inquirer/confirm':
+      specifier: 6.2.0
+      version: 6.2.0
+    '@inquirer/input':
+      specifier: 5.1.3
+      version: 5.1.3
+    '@inquirer/password':
+      specifier: 5.1.2
+      version: 5.1.2
+    '@inquirer/search':
+      specifier: 4.3.0
+      version: 4.3.0
+    '@inquirer/select':
+      specifier: 5.2.2
+      version: 5.2.2
     '@mdn/browser-compat-data':
       specifier: 8.1.0
       version: 8.1.0
+    '@npmcli/package-json':
+      specifier: 7.0.5
+      version: 7.0.5
+    '@perryts/perry':
+      specifier: 0.5.1220
+      version: 0.5.1220
     '@playwright/mcp':
       specifier: 0.0.80
       version: 0.0.80
     '@shadscan/cli':
       specifier: 0.17.0
       version: 0.17.0
+    '@socketregistry/is-unicode-supported':
+      specifier: 1.0.5
+      version: 1.0.5
     '@socketregistry/packageurl-js-stable':
       specifier: npm:@socketregistry/packageurl-js@1.5.2
       version: 1.5.2
+    '@socketregistry/yocto-spinner':
+      specifier: 1.0.25
+      version: 1.0.25
     '@socketsecurity/lib-stable':
       specifier: npm:@socketsecurity/lib@7.0.1
       version: 7.0.1
@@ -209,27 +251,60 @@ catalogs:
     '@vitiate/core':
       specifier: 0.3.1
       version: 0.3.1
+    '@yarnpkg/extensions':
+      specifier: 2.0.7
+      version: 2.0.7
     ast-v8-to-istanbul:
       specifier: 1.0.5
       version: 1.0.5
     c8:
       specifier: 12.0.0
       version: 12.0.0
+    cacache:
+      specifier: 20.0.4
+      version: 20.0.4
     chrome-devtools-mcp:
       specifier: 1.8.0
       version: 1.8.0
     compromise:
       specifier: 14.16.0
       version: 14.16.0
+    del:
+      specifier: 8.0.1
+      version: 8.0.1
     ecc-agentshield:
       specifier: 1.4.0
       version: 1.4.0
+    esbuild:
+      specifier: 0.28.2
+      version: 0.28.2
     fast-check:
       specifier: 4.9.0
       version: 4.9.0
+    fast-glob:
+      specifier: 3.3.3
+      version: 3.3.3
+    fast-sort:
+      specifier: 3.4.1
+      version: 3.4.1
+    fflate:
+      specifier: 0.8.3
+      version: 0.8.3
+    get-east-asian-width:
+      specifier: 1.6.0
+      version: 1.6.0
+    globals:
+      specifier: 17.11.0
+      version: 17.11.0
     html5parser:
       specifier: 3.0.0
       version: 3.0.0
+    libnpmexec:
+      specifier: 10.3.2
+      version: 10.3.2
+    libnpmpack:
+      specifier: 9.1.12
+      version: 9.1.12
     markdownlint-cli2:
       specifier: 0.23.2
       version: 0.23.2
@@ -257,6 +332,9 @@ catalogs:
     nock:
       specifier: 14.0.17
       version: 14.0.17
+    normalize-package-data:
+      specifier: 8.0.0
+      version: 8.0.0
     npm-high-impact:
       specifier: 1.13.0
       version: 1.13.0
@@ -278,6 +356,9 @@ catalogs:
     playwright-core:
       specifier: 1.63.0
       version: 1.63.0
+    pony-cause:
+      specifier: 2.1.11
+      version: 2.1.11
     portless:
       specifier: 0.15.6
       version: 0.15.6
@@ -290,9 +371,15 @@ catalogs:
     shell-quote:
       specifier: 1.10.0
       version: 1.10.0
+    spdx-correct:
+      specifier: 3.2.0
+      version: 3.2.0
     std-env:
       specifier: 4.2.0
       version: 4.2.0
+    streaming-iterables:
+      specifier: 8.0.1
+      version: 8.0.1
     svgo:
       specifier: 4.1.0
       version: 4.1.0
@@ -302,12 +389,18 @@ catalogs:
     typescript:
       specifier: 7.1.0-dev.20260904.1
       version: 7.1.0-dev.20260904.1
+    validate-npm-package-name:
+      specifier: 6.0.2
+      version: 6.0.2
     vitest:
       specifier: 5.0.0
       version: 5.0.0
     vitiate:
       specifier: 0.3.1
       version: 0.3.1
+    webpack:
+      specifier: 5.109.2
+      version: 5.109.2
 
 overrides:
   '@sinclair/typebox': 0.34.52
@@ -454,37 +547,37 @@ importers:
   .:
     devDependencies:
       '@babel/core':
-        specifier: 7.29.7
+        specifier: 'catalog:'
         version: 7.29.7(supports-color@10.2.2)
       '@babel/parser':
-        specifier: 7.29.8
+        specifier: 'catalog:'
         version: 7.29.8
       '@babel/traverse':
-        specifier: 7.29.8
+        specifier: 'catalog:'
         version: 7.29.8(supports-color@10.2.2)
       '@babel/types':
-        specifier: 7.29.8
+        specifier: 'catalog:'
         version: 7.29.8
       '@bcoe/v8-coverage':
         specifier: 'catalog:'
         version: 1.0.2
       '@inquirer/checkbox':
-        specifier: 5.2.2
+        specifier: 'catalog:'
         version: 5.2.2(@types/node@26.4.1)
       '@inquirer/confirm':
-        specifier: 6.2.0
+        specifier: 'catalog:'
         version: 6.2.0(@types/node@26.4.1)
       '@inquirer/input':
-        specifier: 5.1.3
+        specifier: 'catalog:'
         version: 5.1.3(@types/node@26.4.1)
       '@inquirer/password':
-        specifier: 5.1.2
+        specifier: 'catalog:'
         version: 5.1.2(@types/node@26.4.1)
       '@inquirer/search':
-        specifier: 4.3.0
+        specifier: 'catalog:'
         version: 4.3.0(@types/node@26.4.1)
       '@inquirer/select':
-        specifier: 5.2.2
+        specifier: 'catalog:'
         version: 5.2.2(@types/node@26.4.1)
       '@mdn/browser-compat-data':
         specifier: 'catalog:'
@@ -493,13 +586,13 @@ importers:
         specifier: 9.9.1
         version: 9.9.1(supports-color@10.2.2)
       '@npmcli/package-json':
-        specifier: 7.0.5
+        specifier: 'catalog:'
         version: 7.0.5
       '@npmcli/promise-spawn':
         specifier: 9.0.1
         version: 9.0.1
       '@perryts/perry':
-        specifier: 0.5.1220
+        specifier: 'catalog:'
         version: 0.5.1220
       '@playwright/mcp':
         specifier: 'catalog:'
@@ -511,7 +604,7 @@ importers:
         specifier: 0.34.52
         version: 0.34.52
       '@socketregistry/is-unicode-supported':
-        specifier: 1.0.5
+        specifier: 'catalog:'
         version: 1.0.5
       '@socketregistry/packageurl-js':
         specifier: 1.5.2
@@ -520,7 +613,7 @@ importers:
         specifier: 'catalog:'
         version: '@socketregistry/packageurl-js@1.5.2'
       '@socketregistry/yocto-spinner':
-        specifier: 1.0.25
+        specifier: 'catalog:'
         version: 1.0.25
       '@socketsecurity/lib':
         specifier: 7.0.1
@@ -559,7 +652,7 @@ importers:
         specifier: 'catalog:'
         version: 0.3.1(typescript@7.1.0-dev.20260904.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
       '@yarnpkg/extensions':
-        specifier: 2.0.7
+        specifier: 'catalog:'
         version: 2.0.7(@yarnpkg/core@4.9.1(patch_hash=90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9)(typanion@3.14.0))
       ast-v8-to-istanbul:
         specifier: 'catalog:'
@@ -568,7 +661,7 @@ importers:
         specifier: 'catalog:'
         version: 12.0.0
       cacache:
-        specifier: 20.0.4
+        specifier: 'catalog:'
         version: 20.0.4
       chrome-devtools-mcp:
         specifier: 'catalog:'
@@ -577,31 +670,31 @@ importers:
         specifier: 4.4.3
         version: 4.4.3(supports-color@10.2.2)
       del:
-        specifier: 8.0.1
+        specifier: 'catalog:'
         version: 8.0.1
       ecc-agentshield:
         specifier: 'catalog:'
         version: 1.4.0
       esbuild:
-        specifier: 0.28.2
+        specifier: 'catalog:'
         version: 0.28.2
       fast-check:
         specifier: 'catalog:'
         version: 4.9.0
       fast-glob:
-        specifier: 3.3.3
+        specifier: 'catalog:'
         version: 3.3.3
       fast-sort:
-        specifier: 3.4.1
+        specifier: 'catalog:'
         version: 3.4.1
       fflate:
-        specifier: 0.8.3
+        specifier: 'catalog:'
         version: 0.8.3
       get-east-asian-width:
-        specifier: 1.6.0
+        specifier: 'catalog:'
         version: 1.6.0
       globals:
-        specifier: 17.11.0
+        specifier: 'catalog:'
         version: 17.11.0
       has-flag:
         specifier: 5.0.1
@@ -610,10 +703,10 @@ importers:
         specifier: 'catalog:'
         version: 3.0.0
       libnpmexec:
-        specifier: 10.3.2
+        specifier: 'catalog:'
         version: 10.3.2(supports-color@10.2.2)
       libnpmpack:
-        specifier: 9.1.12
+        specifier: 'catalog:'
         version: 9.1.12(supports-color@10.2.2)
       local-prim:
         specifier: workspace:0.0.0
@@ -652,7 +745,7 @@ importers:
         specifier: 'catalog:'
         version: 14.0.17
       normalize-package-data:
-        specifier: 8.0.0
+        specifier: 'catalog:'
         version: 8.0.0
       npm-high-impact:
         specifier: 'catalog:'
@@ -688,7 +781,7 @@ importers:
         specifier: 'catalog:'
         version: 1.63.0
       pony-cause:
-        specifier: 2.1.11
+        specifier: 'catalog:'
         version: 2.1.11(patch_hash=39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8)
       portless:
         specifier: 'catalog:'
@@ -712,7 +805,7 @@ importers:
         specifier: 4.1.0
         version: 4.1.0
       spdx-correct:
-        specifier: 3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       spdx-expression-parse:
         specifier: 4.0.0
@@ -721,7 +814,7 @@ importers:
         specifier: 'catalog:'
         version: 4.2.0
       streaming-iterables:
-        specifier: 8.0.1
+        specifier: 'catalog:'
         version: 8.0.1
       supports-color:
         specifier: 10.2.2
@@ -748,7 +841,7 @@ importers:
         specifier: 'catalog:'
         version: 7.1.0-dev.20260904.1
       validate-npm-package-name:
-        specifier: 6.0.2
+        specifier: 'catalog:'
         version: 6.0.2
       vitest:
         specifier: 'catalog:'
@@ -757,7 +850,7 @@ importers:
         specifier: 'catalog:'
         version: 0.3.1(typescript@7.1.0-dev.20260904.1)(vite@8.2.2(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@5.0.0)
       webpack:
-        specifier: 5.109.2
+        specifier: 'catalog:'
         version: 5.109.2(@swc/core@1.15.43)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.26)
       which:
         specifier: 7.0.0
