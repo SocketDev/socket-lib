@@ -4,13 +4,13 @@
  *   trace, write, progress, clearLine, clearVisible). Split out of
  *   `logger.test.mts` to stay under the `socket/max-file-lines` cap; the core
  *   logging-level coverage stays in that sibling file. Shared harness lives in
- *   `logger-fixtures.ts`.
+ *   `fixture/logger.mts`.
  */
 
 import { describe, expect, it, vi } from 'vitest'
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
 import { Logger } from '../../src/logger/node.mjs'
-import { createCaptureStream, setupLoggerHarness } from './logger-fixtures.mjs'
+import { createCaptureStream, setupLoggerHarness } from './fixture/logger.mjs'
 
 describe('Logger methods', () => {
   const harness = setupLoggerHarness()

@@ -31,7 +31,11 @@ import process from 'node:process'
 
 import { parseArgs } from 'node:util'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptArgs,
+  getScriptLogger,
+  scriptStdio,
+} from '../fleet/process/script-output.mts'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { exportLeaves } from './audit-fleet-lib-usage.mts'
@@ -48,7 +52,7 @@ import { REPO_ROOT } from '../fleet/paths.mts'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 export interface ExposeResult {
   // Leaves removed from the stub list by this run.
@@ -120,6 +124,7 @@ function main(): void {
   // leaves, and the index arithmetic that avoids that has an off-by-one when
   // the flag is absent.
   const { positionals, values } = parseArgs({
+    args: getScriptArgs(),
     allowPositionals: true,
     options: {
       'dry-run': { type: 'boolean' },
@@ -193,7 +198,7 @@ function main(): void {
   // the failure the stub-vs-list check exists to catch.
   const build = spawnSync('pnpm', ['run', 'build'], {
     cwd: REPO_ROOT,
-    stdio: 'inherit',
+    stdio: scriptStdio('inherit'),
   })
   if (build.status !== 0) {
     logger.fail(
@@ -210,7 +215,7 @@ function main(): void {
     const subject = `fix(build-stubs): expose ${plan.exposed.join(', ')} for fleet consumers`
     const commit = spawnSync('git', ['commit', '-o', ...paths, '-m', subject], {
       cwd: REPO_ROOT,
-      stdio: 'inherit',
+      stdio: scriptStdio('inherit'),
     })
     if (commit.status !== 0) {
       logger.warn(
@@ -235,6 +240,7 @@ const SCRIPT_META: ScriptMeta = {
                 e.g. http-request/checksum-file
   --no-commit   skip committing the stub-list change
   --dry-run     report what would be exposed without writing or rebuilding`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

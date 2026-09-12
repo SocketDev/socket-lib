@@ -1,58 +1,69 @@
 'use strict'
 
-// npm-pack: Bundle npm package utilities together.
-// Includes: arborist, cacache, libnpmpack, make-fetch-happen, pacote,
-// npm-package-arg, normalize-package-data, semver, validate-npm-package-name.
-
-const pacoteIndex = require('pacote/lib/index.js')
-const { get: pacoteFetcherGet } = require('pacote/lib/fetcher.js')
-const libnpmpack = require('libnpmpack/lib/index.js')
-const cacacheGet = require('cacache/lib/get.js')
-const cacachePut = require('cacache/lib/put.js')
-const cacacheRm = require('cacache/lib/rm.js')
-const { lsStream } = require('cacache/lib/entry-index.js')
-const cacacheTmp = require('cacache/lib/util/tmp.js')
-const makeFetchHappen = require('make-fetch-happen/lib/index.js')
-const Arborist = require('@npmcli/arborist/lib/arborist/index.js')
-
-// From npm-core (consolidated).
-const npmPackageArg = require('npm-package-arg/lib/npa.js')
-const normalizePackageData = require('normalize-package-data/lib/normalize.js')
-const semver = require('semver')
-const validateNpmPackageName = require('validate-npm-package-name')
-
-// Re-create pacote surface with the methods we consume.
-const pacote = {
-  extract: (spec, dest, opts) => pacoteFetcherGet(spec, opts).extract(dest),
-  manifest: pacoteIndex.manifest,
-  packument: pacoteIndex.packument,
-  tarball: pacoteIndex.tarball,
+function defineLazyExport(name, load) {
+  Object.defineProperty(module.exports, name, {
+    configurable: true,
+    enumerable: true,
+    get: load,
+    set(value) {
+      Object.defineProperty(this, name, {
+        configurable: true,
+        enumerable: true,
+        value,
+        writable: true,
+      })
+    },
+  })
 }
 
-// Re-create cacache structure
-const cacache = {
-  get: cacacheGet,
-  ls: {
-    stream: lsStream,
-  },
-  put: cacachePut,
-  rm: {
-    entry: cacacheRm.entry,
-    all: cacacheRm.all,
-  },
-  tmp: {
-    withTmp: cacacheTmp.withTmp,
-  },
-}
-
-module.exports = {
-  Arborist,
-  cacache,
-  libnpmpack,
-  makeFetchHappen: { defaults: makeFetchHappen.defaults },
-  normalizePackageData,
-  npmPackageArg,
-  pacote,
-  semver,
-  validateNpmPackageName,
-}
+defineLazyExport(
+  'Arborist',
+  () =>
+    (module.exports.Arborist = require('@npmcli/arborist/lib/arborist/index.js')),
+)
+defineLazyExport('cacache', () => {
+  const cacacheRm = require('cacache/lib/rm.js')
+  return (module.exports.cacache = {
+    get: require('cacache/lib/get.js'),
+    ls: { stream: require('cacache/lib/entry-index.js').lsStream },
+    put: require('cacache/lib/put.js'),
+    rm: { entry: cacacheRm.entry, all: cacacheRm.all },
+    tmp: { withTmp: require('cacache/lib/util/tmp.js').withTmp },
+  })
+})
+defineLazyExport(
+  'libnpmpack',
+  () => (module.exports.libnpmpack = require('libnpmpack/lib/index.js')),
+)
+defineLazyExport(
+  'makeFetchHappen',
+  () =>
+    (module.exports.makeFetchHappen = {
+      defaults: require('make-fetch-happen/lib/index.js').defaults,
+    }),
+)
+defineLazyExport(
+  'normalizePackageData',
+  () =>
+    (module.exports.normalizePackageData = require('normalize-package-data/lib/normalize.js')),
+)
+defineLazyExport(
+  'npmPackageArg',
+  () => (module.exports.npmPackageArg = require('npm-package-arg/lib/npa.js')),
+)
+defineLazyExport('pacote', () => {
+  const pacoteIndex = require('pacote/lib/index.js')
+  const { get: pacoteFetcherGet } = require('pacote/lib/fetcher.js')
+  return (module.exports.pacote = {
+    extract: (spec, dest, opts) => pacoteFetcherGet(spec, opts).extract(dest),
+    manifest: pacoteIndex.manifest,
+    packument: pacoteIndex.packument,
+    tarball: pacoteIndex.tarball,
+  })
+})
+defineLazyExport('semver', () => (module.exports.semver = require('semver')))
+defineLazyExport(
+  'validateNpmPackageName',
+  () =>
+    (module.exports.validateNpmPackageName = require('validate-npm-package-name')),
+)

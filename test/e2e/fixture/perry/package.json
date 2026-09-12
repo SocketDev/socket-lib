@@ -1,5 +1,6 @@
 {
-  "name": "socket-lib-test-fixtures-perry",
+  "name": "local-perry",
+  "version": "0.0.0",
   "private": true,
   "perry": {
     "compilePackages": [

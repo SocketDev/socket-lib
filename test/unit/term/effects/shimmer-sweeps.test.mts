@@ -103,18 +103,18 @@ describe('effects/shimmer sweeps', () => {
   })
 
   describe('randomSweep', () => {
-    it('uses provided PRNG for direction at cycle boundaries', () => {
-      let nextRand = 0.1 // < 0.5 → ltr
-      const rng = () => nextRand
-      const f = randomSweep(10, 2, rng)
-      // First cycle: ltr, frame 0 should be -2
-      expect(f(0)).toBe(-2)
-      // Force rtl on next cycle
-      nextRand = 0.9
-      // Frame 14 starts a new cycle and rolls a fresh direction.
-      const cyclePos = f(14)
-      // RTL would start at 11; LTR at -2
-      expect([11, -2]).toContain(cyclePos)
+    it.each([
+      { random: 0.49, start: -2, next: -1 },
+      { random: 0.5, start: 11, next: 10 },
+    ])('selects the initial direction at random=$random', scenario => {
+      let calls = 0
+      const sweep = randomSweep(10, 2, () => {
+        calls += 1
+        return scenario.random
+      })
+      expect(sweep(0)).toBe(scenario.start)
+      expect(sweep(1)).toBe(scenario.next)
+      expect(calls).toBe(1)
     })
 
     it('is deterministic given a seeded PRNG', () => {

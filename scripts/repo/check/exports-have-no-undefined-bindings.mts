@@ -43,10 +43,11 @@ import path from 'node:path'
 import process from 'node:process'
 import { promisify } from 'node:util'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../fleet/process/script-output.mts'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { isAgent } from '@socketsecurity/lib-stable/env/agents'
 import { runMain } from '../../fleet/process/run-main.mts'
 import {
   findPathBack,
@@ -64,7 +65,7 @@ import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
 const execFileAsync = promisify(execFile)
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 const DIST_DIR = path.join(REPO_ROOT, 'dist')
 
@@ -388,7 +389,7 @@ export async function main(): Promise<void> {
     return
   }
 
-  if (!isQuiet) {
+  if (!isQuiet && !isAgent()) {
     logger.success(
       `[undefined-bindings] ${targets.length} public subpath(s) probed in isolation — every exported binding is defined.`,
     )
@@ -401,6 +402,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/check/exports-have-no-undefined-bindings.mts [flags]
 
   --quiet  print nothing on success`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

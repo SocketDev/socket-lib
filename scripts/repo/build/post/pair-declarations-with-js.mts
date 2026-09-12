@@ -34,7 +34,7 @@ import { readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../../fleet/process/script-output.mts'
 
 import { REPO_ROOT } from '../../../fleet/paths.mts'
 import { isMainModule } from '../../../fleet/process/is-main-module.mts'
@@ -42,7 +42,7 @@ import { runMain } from '../../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 const DTS_MTS_SUFFIX = '.d.mts'
 
@@ -144,6 +144,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/build/post/pair-declarations-with-js.mts [flags]
 
   --quiet  print nothing on success`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

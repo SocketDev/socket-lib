@@ -13,7 +13,10 @@ import path from 'node:path'
 
 import { rolldown } from 'rolldown'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptLogger,
+  scriptStdio,
+} from '../../fleet/process/script-output.mts'
 
 import { buildConfig } from '../../../.config/rolldown.config.mts'
 import { primBuildConfig } from '../../../.config/repo/rolldown.prim.config.mts'
@@ -27,7 +30,7 @@ const primRequire = createRequire(
   path.join(rootPath, 'tools/prim/package.json'),
 )
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 export interface BuildSourceOptions {
   quiet?: boolean | undefined
@@ -52,6 +55,7 @@ export async function buildSource(
       {
         args: ['scripts/repo/build/clean.mts', '--dist', '--quiet'],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
     ])
     if (exitCode !== 0) {
@@ -128,6 +132,7 @@ export async function runNodeBuildScript(
     {
       args: [scriptPath, ...verbosityFlags(options)],
       command: 'node',
+      options: { stdio: scriptStdio('inherit') },
     },
   ])
   if (exitCode !== 0 && options.quiet !== true) {
@@ -158,12 +163,14 @@ export async function buildTypes(
     commands.push({
       args: ['scripts/repo/build/clean.mts', '--types', '--quiet'],
       command: 'node',
+      options: { stdio: scriptStdio('inherit') },
     })
   }
 
   commands.push({
     args: ['node_modules/typescript/bin/tsc', '--project', 'tsconfig.dts.json'],
     command: 'node',
+    options: { stdio: scriptStdio('inherit') },
   })
 
   const exitCode = await runSequence(commands)

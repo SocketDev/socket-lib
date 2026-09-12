@@ -4,7 +4,7 @@
  *   keep each test file under the per-worker heap ceiling and the source-line
  *   cap. This file covers the sha256-verification paths; the progress, logger,
  *   and retry tests live in http-request-download.test.mts. Both files share
- *   the same test server via http-request-fixtures.mts.
+ *   the same test server via fixture/http-request.mts.
  */
 
 import crypto from 'node:crypto'
@@ -18,7 +18,7 @@ import { parseHash } from '../../src/crypto/integrity.mjs'
 import { fetchChecksumFile } from '../../src/http-request/checksum-file.mjs'
 import { httpDownload } from '../../src/http-request/download.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { fixture, setupHttpFixture } from './fixture/http-request.mjs'
 import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 setupHttpFixture()

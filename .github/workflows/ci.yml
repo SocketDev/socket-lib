@@ -3,7 +3,8 @@
 # under .github/actions/fleet/ (cascade-updated), referenced by ./ path — no
 # cross-repo reusable workflow, no first-party `uses:@sha`. Add repo-specific
 # jobs anywhere under `jobs:`.
-name: ⚡ CI
+name: 🧪 CI
+run-name: CI
 
 on:
   push:
@@ -37,7 +38,7 @@ jobs:
   # zizmor Actions audit (its own `strategy.job-total < 2` skip runs it in the
   # non-matrix check job, skips it in the test matrix).
   check:
-    name: 🔎 Check
+    name: Check
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -51,7 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SERVER_URL: ${{ github.server_url }}
           REPOSITORY: ${{ github.repository }}
-          TRIGGER_REF: ${{ github.ref }}
+          TRIGGER_REF: ${{ github.sha }}
           FETCH_DEPTH: '1'
         run: |
           set -euo pipefail
@@ -67,7 +68,8 @@ jobs:
             git fetch "${FETCH_ARGS[@]}"
           fi
           git checkout -q --detach FETCH_HEAD
-      - uses: ./.github/actions/fleet/setup-and-install
+      - name: Set up and install
+        uses: ./.github/actions/fleet/setup-and-install
         with:
           # Full history: the commit-history checks (AI-attribution,
           # release-boundary) read the default branch's history and refuse a
@@ -79,7 +81,8 @@ jobs:
           # key, hydration still pulls public GHCR anonymously.
           payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-      - uses: ./.github/actions/fleet/run-script
+      - name: Run script
+        uses: ./.github/actions/fleet/run-script
         env:
           GH_TOKEN: ${{ github.token }}
         with:
@@ -87,7 +90,7 @@ jobs:
           main-script: pnpm run check --all
 
   test:
-    name: 🧪 Test
+    name: Test (${{ matrix.os }})
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -112,7 +115,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SERVER_URL: ${{ github.server_url }}
           REPOSITORY: ${{ github.repository }}
-          TRIGGER_REF: ${{ github.ref }}
+          TRIGGER_REF: ${{ github.sha }}
           FETCH_DEPTH: ${{ github.event_name == 'pull_request' && 50 || 1 }}
         run: |
           set -euo pipefail
@@ -140,7 +143,8 @@ jobs:
           set -euo pipefail
           git fetch --no-tags --depth 50 origin \
             "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}" || true
-      - uses: ./.github/actions/fleet/setup-and-install
+      - name: Set up and install
+        uses: ./.github/actions/fleet/setup-and-install
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
           # Reuse the PR App for a contents:read token scoped to wheelhouse.
@@ -148,7 +152,8 @@ jobs:
           # key, hydration still pulls public GHCR anonymously.
           payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-      - uses: ./.github/actions/fleet/run-script
+      - name: Run script
+        uses: ./.github/actions/fleet/run-script
         env:
           # Authenticate build-time GitHub API reads (release listings,
           # prebuilt-artifact downloads). Unauthenticated calls share the
@@ -156,30 +161,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           setup-script: pnpm run build
-          # A pull request tests only what its diff touches; main and tags run
-          # the whole suite, because main is the commit a release cut verifies
-          # green and that guarantee should not depend on a diff being computed
-          # correctly. `--ci` escalates to the full suite by itself whenever it
-          # cannot work out the diff, so a shallow clone or a missing base ref
-          # costs CI minutes rather than coverage.
-          main-script:
-            ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' ||
-            'pnpm run test --all' }}
+          # The diff-aware suite escalates when it cannot resolve a safe scope.
+          # Coverage shards verify the complete suite on each pushed commit.
+          main-script: pnpm run test --ci
 
-  # Coverage gate. Runs on main pushes, tags and dispatch -- NOT on pull
-  # requests: the sweep is ~15 min, and main is what a release cuts from.
-  #
-  # This job is the reason .config/repo/socket-wheelhouse.json now carries a
-  # `cover.thresholds` block. Without thresholds, computeThresholdFailures
-  # returns no failures by construction, so `pnpm run cover` printed its
-  # percentages and exited 0 no matter how far coverage had fallen -- a gate
-  # that reports rather than gates. The floors are set at the measured
-  # aggregate, so they hold the line and are meant to be raised as it climbs.
-  cover:
-    name: 📊 Cover
+  cover-shards:
     if: github.event_name != 'pull_request'
+    outputs:
+      shard-count: ${{ strategy.job-total }}
+    name: Coverage collection (${{ matrix.shard }}/${{ strategy.job-total }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       # First step cannot call the local ./.github/actions/fleet/checkout
       # composite - nothing is checked out yet for GitHub to resolve
@@ -191,7 +187,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           SERVER_URL: ${{ github.server_url }}
           REPOSITORY: ${{ github.repository }}
-          TRIGGER_REF: ${{ github.ref }}
+          TRIGGER_REF: ${{ github.sha }}
           FETCH_DEPTH: '1'
         run: |
           set -euo pipefail
@@ -207,121 +203,116 @@ jobs:
             git fetch "${FETCH_ARGS[@]}"
           fi
           git checkout -q --detach FETCH_HEAD
-      - uses: ./.github/actions/fleet/setup-and-install
+      - name: Set up and install
+        uses: ./.github/actions/fleet/setup-and-install
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
           payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-      - id: coverage
+      - name: Run coverage
+        id: coverage_collection
         uses: ./.github/actions/fleet/run-script
         env:
-          # cover builds with source maps first; authenticate its build-time
-          # GitHub API reads, same as the test job.
           GH_TOKEN: ${{ github.token }}
+          COVERAGE_SHARD: ${{ matrix.shard }}
+          COVERAGE_SHARD_COUNT: ${{ strategy.job-total }}
         with:
           setup-script: pnpm run build
-          main-script: pnpm run cover
-      - name: Measure failed fast coverage lane
-        if: failure() && steps.coverage.outcome == 'failure'
-        timeout-minutes: 5
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p .cache/repo/coverage-diagnostics
-          pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/fast.log
-      - name: Mint diagnostic source read token
-        id: diagnostic-source-token
-        if: failure() && steps.coverage.outcome == 'failure'
-        uses: ./.github/actions/fleet/github-payload-app-token
-        with:
-          client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
-          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
-      - name: Measure demand-loaded network mocks
-        if: failure() && steps.coverage.outcome == 'failure'
-        timeout-minutes: 3
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PAYLOAD_TOKEN: ${{ steps.diagnostic-source-token.outputs.token }}
-          CANONICAL_COMMIT: f9e90fc7f80f2682441d4938570c9d5c593f7431 # test-setup-demand-load
-        run: |
-          set -euo pipefail
-          diagnostics=.cache/repo/coverage-diagnostics
-          cp -R .cache/fleet/coverage/measurement "$diagnostics/control"
-          cp test/fleet/scripts/setup.mts "$diagnostics/setup.before.mts"
-          cp .config/repo/socket-wheelhouse.json "$diagnostics/settings.before.json"
-          test ! -e test/fleet/_shared/lib/network-mocks.mts
-          GH_TOKEN="$PAYLOAD_TOKEN" gh api "repos/SocketDev/socket-wheelhouse/contents/template/base/universal/test/fleet/scripts/setup.mts?ref=${CANONICAL_COMMIT}" --jq .content | base64 --decode > "$diagnostics/setup.candidate.mts"
-          GH_TOKEN="$PAYLOAD_TOKEN" gh api "repos/SocketDev/socket-wheelhouse/contents/template/base/universal/test/fleet/_shared/lib/network-mocks.mts?ref=${CANONICAL_COMMIT}" --jq .content | base64 --decode > "$diagnostics/network-mocks.candidate.mts"
-          printf '%s  %s\n' 7dce0c8b69ce693ec251382e842cc81e2edaf63077c0c22a8f6ece12bb77f967 "$diagnostics/setup.candidate.mts" 70db56b163d15b03dd35315d457402212600f9a6cd31b87785977df46f0a28df "$diagnostics/network-mocks.candidate.mts" | sha256sum --check
-          cat > "$diagnostics/restore.mjs" <<'EOF'
-          import assert from 'node:assert/strict'
-          import { readFileSync, rmSync } from 'node:fs'
-          import { writeThroughMirrorLock } from '../../../scripts/fleet/fs/mirror-lock.mts'
-          const root = '.cache/repo/coverage-diagnostics'
-          const original = readFileSync(`${root}/setup.before.mts`)
-          writeThroughMirrorLock('test/fleet/scripts/setup.mts', original)
-          rmSync('test/fleet/_shared/lib/network-mocks.mts', { force: true })
-          assert.deepEqual(readFileSync('test/fleet/scripts/setup.mts'), original)
-          assert.deepEqual(readFileSync('.config/repo/socket-wheelhouse.json'), readFileSync(`${root}/settings.before.json`))
-          EOF
-          trap 'node "$diagnostics/restore.mjs"' EXIT
-          node --input-type=module <<'EOF'
-          import { readFileSync } from 'node:fs'
-          import { writeThroughMirrorLock } from './scripts/fleet/fs/mirror-lock.mts'
-          const root = '.cache/repo/coverage-diagnostics'
-          writeThroughMirrorLock('test/fleet/scripts/setup.mts', readFileSync(`${root}/setup.candidate.mts`))
-          writeThroughMirrorLock('test/fleet/_shared/lib/network-mocks.mts', readFileSync(`${root}/network-mocks.candidate.mts`))
-          EOF
-          measurement_status=0
-          pnpm run cover --measure --lane fast > "$diagnostics/candidate.log" 2>&1 || measurement_status=$?
-          cp -R .cache/fleet/coverage/measurement "$diagnostics/candidate"
-          node --input-type=module <<'EOF'
-          import assert from 'node:assert/strict'
-          import { readFileSync, writeFileSync } from 'node:fs'
-          const root = '.cache/repo/coverage-diagnostics'
-          const read = (variant, file) => JSON.parse(readFileSync(`${root}/${variant}/lane-fast/${file}`, 'utf8'))
-          const hitChanges = { lost: [], gained: [] }
-          for (const tier of ['main', 'isolated']) {
-            const control = read('control', `tests.${tier}.json`)
-            const candidate = read('candidate', `tests.${tier}.json`)
-            for (const key of ['numTotalTests', 'numPassedTests', 'numFailedTests', 'numPendingTests']) {
-              assert.equal(candidate[key], control[key], `${tier}:${key}`)
-            }
-            assert.deepEqual(candidate.testResults.map(test => test.name).sort(), control.testResults.map(test => test.name).sort())
-            const original = read('control', `coverage-final.${tier}.json`)
-            const changed = read('candidate', `coverage-final.${tier}.json`)
-            assert.deepEqual(Object.keys(changed).sort(), Object.keys(original).sort())
-            for (const path of Object.keys(original)) {
-              for (const key of ['statementMap', 'fnMap', 'branchMap']) {
-                assert.deepEqual(changed[path][key], original[path][key], `${tier}:${path}:${key}`)
-              }
-              for (const metric of ['s', 'f', 'b']) {
-                for (const key of Object.keys(original[path][metric])) {
-                  const before = [original[path][metric][key]].flat()
-                  const after = [changed[path][metric][key]].flat()
-                  before.forEach((count, index) => {
-                    const location = { tier, path, metric, key, index }
-                    if (count > 0 && after[index] === 0) hitChanges.lost.push(location)
-                    if (count === 0 && after[index] > 0) hitChanges.gained.push(location)
-                  })
-                }
-              }
-            }
-          }
-          const comparison = { control: read('control', 'measurement.json'), candidate: read('candidate', 'measurement.json'), identicalTestInventory: true, identicalCoverageMaps: true, hitChanges }
-          writeFileSync(`${root}/comparison.json`, JSON.stringify(comparison, null, 2) + '\n')
-          EOF
-          exit "$measurement_status"
-      - name: Upload coverage diagnostics
-        if: always() && steps.coverage.outcome == 'failure'
+          main-script: pnpm run cover:shard --shard="$COVERAGE_SHARD/$COVERAGE_SHARD_COUNT"
+      - name: Upload coverage collection
         uses: ./.github/actions/fleet/upload-artifact
         with:
-          name: failed-coverage-diagnostics
+          name: coverage-shard-${{ matrix.shard }}
+          path: .cache/fleet/coverage-shards/${{ matrix.shard }}
+      - name: Preserve coverage failure output
+        if: ${{ failure() && steps.coverage_collection.outcome == 'failure' }}
+        uses: ./.github/actions/fleet/upload-artifact
+        with:
+          name: coverage-shard-${{ matrix.shard }}-failure
           path: |
-            .cache/repo/coverage-diagnostics
-            .cache/fleet/coverage/measurement
             .cache/fleet/fleet-cover
+            .cache/fleet/coverage-shards/${{ matrix.shard }}
+          if-no-files-found: ignore
+
+  cover:
+    name: Cover
+    needs: [cover-shards]
+    if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Require successful coverage collection
+        shell: bash
+        env:
+          COLLECTION_RESULT: ${{ needs.cover-shards.result }}
+        run: |
+          if [ "$COLLECTION_RESULT" != success ]; then
+            echo "Coverage collection failed. Fix the failed collection jobs before aggregation."
+            exit 1
+          fi
+      - name: Bootstrap checkout
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          TRIGGER_REF: ${{ github.sha }}
+          FETCH_DEPTH: '1'
+        run: |
+          set -euo pipefail
+          git init -q
+          git config --local advice.detachedHead false
+          git remote remove origin 2>/dev/null || true
+          git remote add origin "${SERVER_URL}/${REPOSITORY}"
+          FETCH_ARGS=(--no-tags --prune --depth "${FETCH_DEPTH}" origin "${TRIGGER_REF}")
+          if [ -n "${GITHUB_TOKEN}" ]; then
+            AUTH_B64="$(printf 'x-access-token:%s' "${GITHUB_TOKEN}" | base64 | tr -d '\n')"
+            git -c "http.${SERVER_URL}/.extraheader=AUTHORIZATION: basic ${AUTH_B64}" fetch "${FETCH_ARGS[@]}"
+          else
+            git fetch "${FETCH_ARGS[@]}"
+          fi
+          git checkout -q --detach FETCH_HEAD
+      - name: Set up and install
+        uses: ./.github/actions/fleet/setup-and-install
+        with:
+          socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
+          payload-token-client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+      - name: Download coverage shard 1
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-1
+          path: .cache/fleet/coverage-shards/1
+      - name: Download coverage shard 2
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-2
+          path: .cache/fleet/coverage-shards/2
+      - name: Download coverage shard 3
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-3
+          path: .cache/fleet/coverage-shards/3
+      - name: Download coverage shard 4
+        uses: ./.github/actions/fleet/download-artifact
+        with:
+          name: coverage-shard-4
+          path: .cache/fleet/coverage-shards/4
+      - name: Run coverage
+        id: coverage_aggregate
+        uses: ./.github/actions/fleet/run-script
+        env:
+          COVERAGE_SHARD_COUNT: ${{ needs.cover-shards.outputs.shard-count }}
+          GH_TOKEN: ${{ github.token }}
+        with:
+          main-script: pnpm run cover:aggregate --shards="$COVERAGE_SHARD_COUNT"
+          setup-script: pnpm run build
+      - name: Preserve coverage failure output
+        if: ${{ failure() && steps.coverage_aggregate.outcome == 'failure' }}
+        uses: ./.github/actions/fleet/upload-artifact
+        with:
+          name: coverage-failure-output
+          path: |
+            .cache/fleet/fleet-cover
+            .cache/fleet/coverage
           if-no-files-found: ignore

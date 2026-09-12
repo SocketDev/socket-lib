@@ -13,9 +13,9 @@ import {
   getRegistryToken,
   parseWwwAuthenticate,
 } from '../../../src/oci/registry-token.mjs'
-import { makeFakeAdapter } from './http-fixtures.mts'
+import { makeFakeAdapter } from '../fixture/oci-http.mts'
 
-import type { FakeRoute } from './http-fixtures.mts'
+import type { FakeRoute } from '../fixture/oci-http.mts'
 
 describe('parseWwwAuthenticate', () => {
   it('parses a full Bearer challenge', () => {

@@ -36,7 +36,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { isQuiet } from '../flags/predicates.mts'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../fleet/process/script-output.mts'
 
 import {
   auditFleetLibUsage,
@@ -62,7 +62,7 @@ import { runMain } from '../../fleet/process/run-main.mts'
 import type { ReachableStubFinding } from '../build-stubs/dist-graph.mts'
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 const CHECK = '[stubbed-leaves-are-fleet-unused]'
 
@@ -222,6 +222,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/check/stubbed-leaves-are-fleet-unused.mts [flags]
 
   --quiet, --silent   suppress non-error output`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

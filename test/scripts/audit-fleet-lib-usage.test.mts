@@ -133,7 +133,7 @@ describe('fleet usage from a linked worktree', () => {
       )
       const rosterDir = path.join(
         worktree,
-        '.claude/skills/fleet/cascading-fleet/lib',
+        '.claude/skills/fleet/cascading-commits/lib',
       )
       mkdirSync(rosterDir, { recursive: true })
       writeFileSync(

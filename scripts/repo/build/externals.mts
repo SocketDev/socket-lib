@@ -8,22 +8,22 @@ import process from 'node:process'
 
 import { isQuiet } from '../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../fleet/process/script-output.mts'
 import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'
 
 import { buildExternals } from '../build-externals/orchestrator.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 async function main(): Promise<void> {
   // Check for verbose mode via isVerbose or manual check
   const verbose = process.argv.includes('--verbose')
-  const quiet = isQuiet()
+  const quiet = isQuiet() || isJsonRequested(process.argv.slice(2))
 
   try {
     const { bundledCount } = await buildExternals({ verbose, quiet })
@@ -48,6 +48,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --verbose             show detailed build output
   --quiet, --silent     suppress progress messages`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

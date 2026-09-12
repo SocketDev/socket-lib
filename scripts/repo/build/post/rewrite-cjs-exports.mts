@@ -13,7 +13,7 @@ import MagicString from 'magic-string'
 import { isQuiet } from '../../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../../fleet/process/script-output.mts'
 
 import { isMainModule } from '../../../fleet/process/is-main-module.mts'
 import { runMain } from '../../../fleet/process/run-main.mts'
@@ -22,7 +22,7 @@ import { REPO_ROOT } from '../../../fleet/paths.mts'
 
 import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 /**
  * The bundler-output AST as this file reads it: structurally, by the handful of
@@ -285,6 +285,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --verbose             name every rewritten file
   --quiet, --silent     suppress non-error output`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

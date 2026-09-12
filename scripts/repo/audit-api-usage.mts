@@ -39,6 +39,7 @@ import type { AcornNode } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 import { renderReport } from './audit-api-usage/render.mts'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { runMain } from '../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
@@ -408,6 +409,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --json                    emit the report as JSON instead of terminal bars
   --consumers <dir,dir,…>   comma-separated consumer repo names (default: every fleet repo)`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {
@@ -425,7 +427,7 @@ function collectConsumerReferences(consumers: readonly string[]): UsageRef[] {
     const repo = consumers[i]!
     const root = path.join(PROJECTS_DIR, repo)
     if (!existsSync(root)) {
-      logger.warn(`skip (absent): ${repo}`)
+      getScriptLogger().warn(`skip (absent): ${repo}`)
       continue
     }
     const files = listSourceFiles(root)

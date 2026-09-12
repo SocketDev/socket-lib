@@ -1,4 +1,5 @@
-name: 🧹 Prune Actions Storage
+name: 🧹 Sweep jobs
+run-name: Sweep jobs
 
 # Reclaims GitHub Actions storage on a weekly cadence, in two steps.
 #
@@ -16,7 +17,7 @@ name: 🧹 Prune Actions Storage
 # rebuilds cold.
 #
 # Byte-identical across the fleet (cascaded); edit
-# template/base/universal/.github/workflows/prune-workflow-runs.yml and re-cascade via
+# template/base/universal/.github/workflows/sweep-jobs.yml and re-cascade via
 # `pnpm run sync`.
 
 on:
@@ -49,6 +50,7 @@ concurrency:
 
 jobs:
   prune:
+    name: Sweep
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -76,7 +78,8 @@ jobs:
             git fetch "${FETCH_ARGS[@]}"
           fi
           git checkout -q --detach FETCH_HEAD
-      - uses: ./.github/actions/fleet/setup-and-install
+      - name: 'Set up and install'
+        uses: ./.github/actions/fleet/setup-and-install
         with:
           # The org secret is the single source for both SOCKET_API_TOKEN and
           # SOCKET_API_KEY; the setup action exports the value under both names.

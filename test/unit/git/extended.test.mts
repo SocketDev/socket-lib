@@ -25,7 +25,7 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawnSync } from '../../../src/process/spawn/child.mjs'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../util/temp-files.mjs'
-import { makeGitRepo } from '../../fleet/_shared/lib/git-fixture.mts'
+import { makeGitRepo } from '../fixture/git.mts'
 
 describe('git extended tests', () => {
   const projectRoot = normalizePath(process.cwd())

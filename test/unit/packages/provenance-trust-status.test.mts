@@ -7,11 +7,6 @@
 
 import { describe, expect, it } from 'vitest'
 
-// Published-snapshot binding used to BUILD an expected value inside
-// `expect(...)`. The system-under-test bindings still come from `src/`
-// below; this stable alias satisfies `socket/no-src-import-in-test-expect`.
-import { getTrustLevelName as stableGetTrustLevelName } from '@socketsecurity/lib-stable/packages/provenance'
-
 import {
   compareTrust,
   didTrustDecrease,
@@ -183,16 +178,15 @@ describe('packages/provenance — trust status', () => {
       'trustedPublisher',
       'stagedPublish',
     ])
-    // The index IS the level: TRUST_LEVELS[getTrustLevel(x)] === name.
-    for (const status of [
-      getTrustStatus(bareDoc),
-      getTrustStatus(provenanceOnlyDoc),
-      getTrustStatus(fullyTrustedDoc),
-      getTrustStatus(stagedPublishOnlyDoc),
-      getTrustStatus(stagedPublishDoc),
+    for (const [document, expected] of [
+      [bareDoc, 'none'],
+      [provenanceOnlyDoc, 'provenance'],
+      [fullyTrustedDoc, 'trustedPublisher'],
+      [stagedPublishOnlyDoc, 'stagedPublish'],
+      [stagedPublishDoc, 'stagedPublish'],
     ]) {
-      expect(TRUST_LEVELS[getTrustLevel(status)]).toBe(
-        stableGetTrustLevelName(status),
+      expect(TRUST_LEVELS[getTrustLevel(getTrustStatus(document))]).toBe(
+        expected,
       )
     }
   })

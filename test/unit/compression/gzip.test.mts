@@ -2,7 +2,7 @@
  * @file Unit tests for the gzip compression helpers plus the shared
  *   cross-format coverage (stripExt, cross-format negative cases). The brotli
  *   counterparts live in compression/brotli.test.mts; shared fixtures live in
- *   compression-fixtures.mts.
+ *   fixture/compression.mts.
  */
 
 import { Buffer } from 'node:buffer'
@@ -35,7 +35,7 @@ import {
   LARGE_TEXT,
   SMALL_TEXT,
   streamToBuffer,
-} from '../compression-fixtures.mts'
+} from '../fixture/compression.mts'
 
 let tmpDir: string
 
