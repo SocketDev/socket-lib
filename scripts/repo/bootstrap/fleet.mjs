@@ -1009,6 +1009,8 @@ const ALWAYS_TRACKED_PREFIXES = [
   'assets/fleet/socket-combomark-dark.svg',
   'assets/fleet/socket-combomark-light.svg',
   'patches/@socketsecurity__lib@7.0.1.patch',
+  'patches/brace-expansion@5.0.9.patch',
+  'patches/minimatch@10.2.6.patch',
   'patches/run-local-ci@0.18.1.patch',
   'patches/vitest@5.0.0.patch',
   'scripts/repo/bootstrap/',
@@ -1321,6 +1323,63 @@ function refreshFleetPackIgnores(config) {
     fleetAllowlist,
   })
   writeFileSync(gitignorePath, updated)
+}
+function readFleetTrackedPaths(dest) {
+  try {
+    return new Set(
+      execFileSync('git', ['ls-files', '--cached', '-z'], {
+        cwd: dest,
+        encoding: 'utf8',
+      })
+        .split('\0')
+        .filter(Boolean)
+        .map(normalizeBundlePath),
+    )
+  } catch {
+    return /* @__PURE__ */ new Set()
+  }
+}
+function refreshFleetPackCheckoutExcludes(config) {
+  const cfg = {
+    __proto__: null,
+    ...config,
+  }
+  let excludePath
+  try {
+    const gitPath = execFileSync(
+      'git',
+      ['rev-parse', '--git-path', 'info/exclude'],
+      {
+        cwd: cfg.dest,
+        encoding: 'utf8',
+      },
+    ).trim()
+    excludePath = path.resolve(cfg.dest, gitPath)
+  } catch {
+    return
+  }
+  const existing = existsSync(excludePath)
+    ? readFileSync(excludePath, 'utf8')
+    : ''
+  const begin = packBeginMarker()
+  const end = packEndMarker()
+  const start = existing.indexOf(begin)
+  const finish = start === -1 ? -1 : existing.indexOf(end, start + begin.length)
+  const withoutManaged =
+    start === -1
+      ? existing.trimEnd()
+      : `${existing.slice(0, start).trimEnd()}\n${finish === -1 ? '' : existing.slice(finish + end.length).trimStart()}`.trimEnd()
+  const block = [
+    begin,
+    ...HARNESS_ALIAS_PATHS,
+    ...fleetPackOwnedPaths(cfg.manifest),
+    end,
+  ].join('\n')
+  mkdirSync(path.dirname(excludePath), { recursive: true })
+  writeFileSync(
+    excludePath,
+    `${withoutManaged ? `${withoutManaged}\n` : ''}${block}\n`,
+  )
 }
 /**
  * Apply thin mode: refresh the gitignore block (refreshFleetPackIgnores), then
@@ -2348,7 +2407,7 @@ function spliceRepoHookEntry(settings, event, matcher, hook) {
  * skipped, so a bad producer entry can never displace freshly placed payload.
  * Returns the count of paths acted on (renamed or cleaned up).
  */
-function applyMovedPaths(dest, manifest) {
+function applyMovedPaths(dest, manifest, options) {
   const movedPaths = manifest.movedPaths
   if (!movedPaths || movedPaths.length === 0) return 0
   const shipped = Object.keys(manifest.files).map(rel =>
@@ -2362,7 +2421,14 @@ function applyMovedPaths(dest, manifest) {
     if (
       !from ||
       !to ||
-      shipped.some(f => f === from || f.startsWith(`${from}/`))
+      shipped.some(f => f === from || f.startsWith(`${from}/`)) ||
+      [...(options?.preservedPaths ?? [])].some(
+        file =>
+          file === from ||
+          file.startsWith(`${from}/`) ||
+          file === to ||
+          file.startsWith(`${to}/`),
+      )
     )
       continue
     const fromAbs = path.join(dest, from)
@@ -2387,7 +2453,7 @@ function applyMovedPaths(dest, manifest) {
  * walk. Belt: a tombstone the current manifest ships a file at/under is
  * skipped, so a bad producer entry can never delete freshly placed payload.
  */
-function removeTombstonedPaths(dest, manifest) {
+function removeTombstonedPaths(dest, manifest, options) {
   const removedPaths = manifest.removedPaths
   if (!removedPaths || removedPaths.length === 0) return 0
   const shipped = Object.keys(manifest.files).map(rel =>
@@ -2396,7 +2462,13 @@ function removeTombstonedPaths(dest, manifest) {
   let removed = 0
   for (let i = 0, { length } = removedPaths; i < length; i += 1) {
     const rel = normalizeBundlePath(removedPaths[i])
-    if (!rel || shipped.some(f => f === rel || f.startsWith(`${rel}/`)))
+    if (
+      !rel ||
+      shipped.some(f => f === rel || f.startsWith(`${rel}/`)) ||
+      [...(options?.preservedPaths ?? [])].some(
+        file => file === rel || file.startsWith(`${rel}/`),
+      )
+    )
       continue
     const abs = path.join(dest, rel)
     if (existsSync(abs)) {
@@ -2407,10 +2479,11 @@ function removeTombstonedPaths(dest, manifest) {
   return removed
 }
 function pruneStaleFleetFiles(dest, manifest, previousFiles, options) {
-  const { archiveManifest } = {
+  const opts = {
     __proto__: null,
     ...options,
   }
+  const { archiveManifest } = opts
   const candidates = new Set(previousFiles)
   for (const group of archiveManifest?.conditionalScopedFiles ?? [])
     for (const file of group.files) {
@@ -2433,7 +2506,13 @@ function pruneStaleFleetFiles(dest, manifest, previousFiles, options) {
   let pruned = 0
   for (const file of candidates) {
     const rel = normalizeBundlePath(file)
-    if (kept.has(rel)) continue
+    if (
+      kept.has(rel) ||
+      [...(opts.preservedPaths ?? [])].some(
+        file => file === rel || file.startsWith(`${rel}/`),
+      )
+    )
+      continue
     const abs = path.join(dest, rel)
     if (existsSync(abs)) {
       rm(abs, dest)
@@ -3792,18 +3871,52 @@ async function installFleet(config) {
       )
       return 0
     }
-    const installResult = installFiles(filesDir, dest, memberManifest, {
+    const automaticHydration = cfg.expectedReceipt !== void 0
+    const preservedPaths = automaticHydration
+      ? readFleetTrackedPaths(dest)
+      : void 0
+    const runtimeManifest = preservedPaths
+      ? {
+          ...memberManifest,
+          files: Object.fromEntries(
+            Object.entries(memberManifest.files).filter(
+              ([file]) => !preservedPaths.has(normalizeBundlePath(file)),
+            ),
+          ),
+          segments: memberManifest.segments?.filter(
+            segment => !preservedPaths.has(normalizeBundlePath(segment.path)),
+          ),
+          settingsSegment:
+            memberManifest.settingsSegment !== void 0 &&
+            preservedPaths.has(
+              normalizeBundlePath(memberManifest.settingsSegment.path),
+            )
+              ? void 0
+              : memberManifest.settingsSegment,
+          workspaceSegment: preservedPaths.has('pnpm-workspace.yaml')
+            ? void 0
+            : memberManifest.workspaceSegment,
+        }
+      : memberManifest
+    const installResult = installFiles(filesDir, dest, runtimeManifest, {
       refreshTracked: cfg.refreshTracked === true,
+      preservedPaths,
     })
-    untrackGeneratedOutputs(dest, manifest.generatedPaths)
+    if (!automaticHydration)
+      untrackGeneratedOutputs(dest, manifest.generatedPaths)
     const prunedCount = pruneStaleFleetFiles(
       dest,
-      memberManifest,
+      runtimeManifest,
       readAppliedFiles(dest),
-      { archiveManifest: manifest },
+      {
+        archiveManifest: manifest,
+        preservedPaths,
+      },
     )
-    const movedCount = applyMovedPaths(dest, manifest)
-    const tombstonedCount = removeTombstonedPaths(dest, manifest)
+    const movedCount = applyMovedPaths(dest, manifest, { preservedPaths })
+    const tombstonedCount = removeTombstonedPaths(dest, manifest, {
+      preservedPaths,
+    })
     const deliveredMovedFiles = {}
     for (const moved of manifest.movedPaths ?? []) {
       const to = normalizeBundlePath(moved.to)
@@ -3819,10 +3932,14 @@ async function installFleet(config) {
           },
         }
       : memberManifest
-    installSegments(segmentsDir, dest, manifest)
-    const settingsResult = installSettingsSegment(segmentsDir, dest, manifest)
+    installSegments(segmentsDir, dest, runtimeManifest)
+    const settingsResult = installSettingsSegment(
+      segmentsDir,
+      dest,
+      runtimeManifest,
+    )
     if (settingsResult !== 0) return settingsResult
-    const wsResult = installWorkspaceSegment(segmentsDir, dest, manifest)
+    const wsResult = installWorkspaceSegment(segmentsDir, dest, runtimeManifest)
     if (wsResult !== 0) return wsResult
     if (cfg.wire) wirePackageJson(dest)
     if (cfg.thin)
@@ -3831,11 +3948,11 @@ async function installFleet(config) {
         manifest: ignoreManifest,
       })
     else if (cfg.expectedReceipt !== void 0)
-      refreshFleetPackIgnores({
+      refreshFleetPackCheckoutExcludes({
         dest,
-        manifest: ignoreManifest,
+        manifest: runtimeManifest,
       })
-    const appliedFiles = fleetPackOwnedPaths(memberManifest)
+    const appliedFiles = fleetPackOwnedPaths(runtimeManifest)
     writeAppliedRef(dest, sourceRef)
     writeAppliedFiles(dest, appliedFiles)
     writeAppliedManifest(
@@ -3994,7 +4111,9 @@ export {
   readBuildShape,
   readDeclaredCapabilities,
   readEnsureCurrentReceipt,
+  readFleetTrackedPaths,
   readManifest,
+  refreshFleetPackCheckoutExcludes,
   refreshFleetPackIgnores,
   removeTombstonedPaths,
   resolveGreenPack,

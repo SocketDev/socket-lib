@@ -314,6 +314,11 @@ export declare function refreshFleetPackIgnores(config: {
   dest: string;
   manifest: FleetFileManifest;
 }): void;
+export declare function readFleetTrackedPaths(dest: string): Set<string>;
+export declare function refreshFleetPackCheckoutExcludes(config: {
+  dest: string;
+  manifest: FleetFileManifest;
+}): void;
 /**
  * Apply thin mode: refresh the gitignore block (refreshFleetPackIgnores), then
  * untrack those paths from git so the fetch action repopulates them going
@@ -613,7 +618,9 @@ export declare function fetchBundleSource(config: {
  * skipped, so a bad producer entry can never displace freshly placed payload.
  * Returns the count of paths acted on (renamed or cleaned up).
  */
-export declare function applyMovedPaths(dest: string, manifest: FleetFileManifest): number;
+export declare function applyMovedPaths(dest: string, manifest: FleetFileManifest, options?: {
+  preservedPaths?: ReadonlySet<string> | undefined;
+} | undefined): number;
 /**
  * Delete the manifest's TOMBSTONED paths (`removedPaths`) — files or whole
  * dirs a past bundle shipped that the wheelhouse has since moved/retired. The
@@ -624,7 +631,9 @@ export declare function applyMovedPaths(dest: string, manifest: FleetFileManifes
  * walk. Belt: a tombstone the current manifest ships a file at/under is
  * skipped, so a bad producer entry can never delete freshly placed payload.
  */
-export declare function removeTombstonedPaths(dest: string, manifest: FleetFileManifest): number;
+export declare function removeTombstonedPaths(dest: string, manifest: FleetFileManifest, options?: {
+  preservedPaths?: ReadonlySet<string> | undefined;
+} | undefined): number;
 /**
  * Prune stale fleet files so a fetch is a true SYNC (place + prune) — scoped
  * to what the bundle PREVIOUSLY owned. Only a file the last-applied manifest
@@ -640,6 +649,7 @@ export declare function removeTombstonedPaths(dest: string, manifest: FleetFileM
  */
 interface PruneStaleFleetFilesOptions {
   archiveManifest?: FleetFileManifest | undefined;
+  preservedPaths?: ReadonlySet<string> | undefined;
 }
 export declare function pruneStaleFleetFiles(dest: string, manifest: FleetFileManifest, previousFiles: readonly string[] | undefined, options?: PruneStaleFleetFilesOptions | undefined): number;
 //#endregion

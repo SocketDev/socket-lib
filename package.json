@@ -4053,7 +4053,9 @@
     "mcp:schemas:check": "node scripts/fleet/mcp/schemas.mts check",
     "mcp:schemas:save": "node scripts/fleet/mcp/schemas.mts save",
     "lockstep:assist": "node scripts/fleet/lockstep/assist/run.mts",
-    "worktree:create": "node scripts/fleet/worktree/create/run.mts"
+    "worktree:create": "node scripts/fleet/worktree/create/run.mts",
+    "release:hint": "node scripts/fleet/release/hint.mts",
+    "mcp:1password": "node scripts/fleet/mcp/1password/run.mts"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
