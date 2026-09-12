@@ -153,7 +153,11 @@ function sharedTemplateBasePath(root) {
 
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/helpers.mts
-const HYBRID_BUNDLE_PATHS = /* @__PURE__ */ new Set(['.gitignore', 'CLAUDE.md'])
+const HYBRID_BUNDLE_PATHS = /* @__PURE__ */ new Set([
+  '.gitattributes',
+  '.gitignore',
+  'CLAUDE.md',
+])
 /**
  * Normalize bundle-manifest paths to their portable `/` wire format.
  */

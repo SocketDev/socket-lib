@@ -462,8 +462,8 @@
   "schemaVersion": 1,
   "repoName": "socket-lib",
   "bundle": {
-    "ref": "fleet-pack-640caf6357228123da5770a7a803e33b369458d5",
-    "cascadeSha": "640caf6357228123da5770a7a803e33b369458d5"
+    "ref": "fleet-pack-e670893ac860d1aa90bcd8994759534ffc503adb",
+    "cascadeSha": "e670893ac860d1aa90bcd8994759534ffc503adb"
   },
   "repo": {
     "type": "solo"
