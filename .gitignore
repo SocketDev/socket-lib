@@ -2719,8 +2719,6 @@ docs/fleet/workflows/publishing.md
 docs/fleet/workflows/registry-settings.md
 docs/references/fleet/sfw-local-install.md
 opencode.json
-patches/brace-expansion@5.0.9.patch
-patches/minimatch@10.2.6.patch
 scripts/fleet/agent-orphan-sweep.mts
 scripts/fleet/ai-backends-status.mts
 scripts/fleet/ai-codify/cli.mts
@@ -4216,6 +4214,7 @@ dist/
 /.claude/*
 !/.claude/agents/
 !/.claude/commands/
+!/.claude/output-styles/
 !/.claude/skills/
 !/.claude/hooks/
 !/.claude/settings.json
