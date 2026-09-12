@@ -11,7 +11,10 @@ import {
 const fixtures: string[] = []
 function fixtureRoot(): string {
   const root = mkdtempSync(path.join(os.tmpdir(), 'consumer-evidence-'))
-  const rosterDir = path.join(root, '.claude/skills/fleet/cascading-fleet/lib')
+  const rosterDir = path.join(
+    root,
+    '.claude/skills/fleet/cascading-commits/lib',
+  )
   mkdirSync(rosterDir, { recursive: true })
   writeFileSync(
     path.join(rosterDir, 'fleet-repos.json'),

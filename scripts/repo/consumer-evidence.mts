@@ -93,7 +93,7 @@ export function readConsumerRoster(repoRoot: string): {
     '.claude',
     'skills',
     'fleet',
-    'cascading-fleet',
+    'cascading-commits',
     'lib',
     'fleet-repos.json',
   )
