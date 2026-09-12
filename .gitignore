@@ -192,7 +192,6 @@ opencode.json
 .claude/commands/fleet/update-hooks-dry.md
 .claude/commands/fleet/update-pricing.md
 .claude/commands/fleet/update-security.md
-.claude/hooks/fleet/_dist/fleet-pack.excluded.generated.cjs
 .claude/hooks/fleet/_dist/fleet-pack.generated.cjs
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-darwin-arm64
 .claude/hooks/fleet/_dist/launchers/dispatch-launcher-darwin-x64
@@ -2719,6 +2718,7 @@ docs/fleet/workflows/practices.md
 docs/fleet/workflows/publishing.md
 docs/fleet/workflows/registry-settings.md
 docs/references/fleet/sfw-local-install.md
+opencode.json
 patches/brace-expansion@5.0.9.patch
 patches/minimatch@10.2.6.patch
 scripts/fleet/agent-orphan-sweep.mts
@@ -2906,10 +2906,6 @@ scripts/fleet/build-hook-snapshot.mts
 scripts/fleet/build-oxlint-bundle.mts
 scripts/fleet/build-snapshot-launcher.mts
 scripts/fleet/build/infra/lib/external-tools-schema.json
-scripts/fleet/build/infra/lib/release-checksums/consumer.mts
-scripts/fleet/build/infra/lib/release-checksums/core.mts
-scripts/fleet/build/infra/lib/release-checksums/producer.mts
-scripts/fleet/build/infra/release-assets.schema.json
 scripts/fleet/bump.mts
 scripts/fleet/bump/invocation.mts
 scripts/fleet/bump/lockstep-write.mts
@@ -3438,6 +3434,8 @@ scripts/fleet/fs/tracked-globs.mts
 scripts/fleet/fs/unix-path.mts
 scripts/fleet/fsync-dist.mts
 scripts/fleet/fuzz/report-crash.mts
+scripts/fleet/gen/_shared/opencode/server.mts
+scripts/fleet/gen/_shared/opencode/tool.mts
 scripts/fleet/gen/agents-skills-mirror.mts
 scripts/fleet/gen/api-md.mts
 scripts/fleet/gen/aw-token-shapes.mts
@@ -3605,6 +3603,7 @@ scripts/fleet/lockstep/assist/run.mts
 scripts/fleet/lockstep/assist/verify.mts
 scripts/fleet/lockstep/auto-bump-apply.mts
 scripts/fleet/lockstep/auto-bump.mts
+scripts/fleet/lockstep/candidate/ancestry.mts
 scripts/fleet/lockstep/candidate/assist.mts
 scripts/fleet/lockstep/candidate/cli.mts
 scripts/fleet/lockstep/candidate/plan.mts
@@ -3624,6 +3623,7 @@ scripts/fleet/lockstep/types.mts
 scripts/fleet/lockstep/verification/accept.mts
 scripts/fleet/lockstep/verification/inputs.mts
 scripts/fleet/lockstep/verification/schema.mts
+scripts/fleet/mcp/1password/run.mts
 scripts/fleet/mcp/chrome-devtools/run.mts
 scripts/fleet/mcp/claude-registration.mts
 scripts/fleet/mcp/config.mts
@@ -3832,13 +3832,13 @@ scripts/fleet/registry-liveness-gate.mjs
 scripts/fleet/registry-publish-date.mts
 scripts/fleet/release/changelog-path.mts
 scripts/fleet/release/channels.mts
-scripts/fleet/release/create.mts
 scripts/fleet/release/gap-recovery.mts
 scripts/fleet/release/git/reconcile.mts
 scripts/fleet/release/github/config.mts
 scripts/fleet/release/github/enabled.mts
 scripts/fleet/release/github/reconcile.mts
 scripts/fleet/release/github/remote.mts
+scripts/fleet/release/hint.mts
 scripts/fleet/release/member-probe.mts
 scripts/fleet/release/npm-only-provenance.mts
 scripts/fleet/release/pipeline/deps.mts
