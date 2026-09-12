@@ -68,6 +68,8 @@ export function coverageDiagnosticPaths(repoRoot: string) {
   }
 }
 
-export function sourcePrimordialsDir(root: string = REPO_ROOT): string {
+export function sourcePrimordialsDir({
+  root = REPO_ROOT,
+}: { root?: string | undefined } = {}): string {
   return normalizePath(path.join(root, 'src', 'primordials'))
 }

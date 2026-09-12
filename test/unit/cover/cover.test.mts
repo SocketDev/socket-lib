@@ -11,7 +11,7 @@ describe('runQuiet', () => {
 
   it('delegates command execution to the coverage runner', async () => {
     vi.mocked(runQuietCommand).mockResolvedValue({
-      code: 0,
+      exitCode: 0,
       stderr: '',
       stdout: '',
     })

@@ -129,7 +129,7 @@ export async function transformPrimordials(
   // `loadPrimordialsSurface` concatenates every leaf in the directory
   // and parses the unified output as a single primordials surface.
   const repoRoot = path.dirname(distRoot)
-  const srcPrimordialsDir = sourcePrimordialsDir(repoRoot)
+  const srcPrimordialsDir = sourcePrimordialsDir({ root: repoRoot })
   const surface = readSurface(repoRoot, srcPrimordialsDir)
 
   // Per-leaf specifier: walk up from the bundle to dist/, then down to

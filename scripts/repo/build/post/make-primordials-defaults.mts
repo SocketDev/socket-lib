@@ -33,7 +33,7 @@ import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 const logger = getScriptLogger()
 
 const rootPath = REPO_ROOT
-const primordialsDir = sourcePrimordialsDir(rootPath)
+const primordialsDir = sourcePrimordialsDir({ root: rootPath })
 const outputPath = path.join(
   rootPath,
   'src',
