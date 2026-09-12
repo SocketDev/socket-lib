@@ -1,36 +1,25 @@
-import process from 'node:process'
-import path from 'node:path'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+import { runQuietCommand } from '../../../scripts/fleet/cover-run.mts'
 import { runQuiet } from '../../../scripts/fleet/cover.mts'
 
-vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'))
+vi.mock(import('../../../scripts/fleet/cover-run.mts'))
 
 describe('runQuiet', () => {
   afterEach(() => {
-    vi.unstubAllEnvs()
-    vi.mocked(spawn).mockReset()
+    vi.mocked(runQuietCommand).mockReset()
   })
 
-  it('runs pnpm through the current Node executable', async () => {
-    vi.stubEnv('npm_execpath', '/tmp/pnpm.cjs')
-    vi.mocked(spawn).mockResolvedValue({
+  it('delegates command execution to the coverage runner', async () => {
+    vi.mocked(runQuietCommand).mockResolvedValue({
       code: 0,
       stderr: '',
       stdout: '',
-    } as Awaited<ReturnType<typeof spawn>>)
+    })
 
     await runQuiet(['exec', 'vitest', 'run'], { cwd: '/tmp' })
 
-    expect(spawn).toHaveBeenCalledWith(
-      process.execPath,
-      ['/tmp/pnpm.cjs', 'exec', 'vitest', 'run'],
-      expect.objectContaining({
-        cwd: '/tmp',
-        env: expect.objectContaining({
-          PATH: expect.stringContaining(path.dirname(process.execPath)),
-        }),
-      }),
-    )
+    expect(runQuietCommand).toHaveBeenCalledWith(['exec', 'vitest', 'run'], {
+      cwd: '/tmp',
+    })
   })
 })
