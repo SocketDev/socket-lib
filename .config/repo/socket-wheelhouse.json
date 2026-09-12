@@ -680,6 +680,7 @@
     "lanes": {
       "mid": [
         "test/fleet/integration/comment-voice.test.mts",
+        "test/repo/unit/check/stubbed-leaves-are-fleet-unused.test.mts",
         "test/scripts/browser-exports-have-no-node-builtins.test.mts",
         "test/scripts/dist-graph.test.mts",
         "test/scripts/docs-imports-resolve.test.mts",
@@ -687,7 +688,6 @@
         "test/scripts/pair-declarations-with-js.test.mts",
         "test/scripts/reexports-have-no-import-cycles.test.mts",
         "test/scripts/settings.test.mts",
-        "test/scripts/stubbed-leaves-are-fleet-unused.test.mts",
         "test/scripts/sync-npm-api-spec.test.mts",
         "test/scripts/unexposed.test.mts",
         "test/unit/ai/agent/detect.test.mts",

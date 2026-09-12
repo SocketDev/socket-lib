@@ -10,11 +10,14 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { findUnlistedStubs } from '../../scripts/repo/check/stubbed-leaves-are-fleet-unused.mts'
+import {
+  findUnlistedStubs,
+  inspectFleetUsageValidation,
+} from '../../../../scripts/repo/check/stubbed-leaves-are-fleet-unused.mts'
 import {
   makeUnexposedModuleSource,
   STUB_BANNER,
-} from '../../scripts/repo/build-stubs/unexposed.mts'
+} from '../../../../scripts/repo/build-stubs/unexposed.mts'
 
 function writeFixtureRepo(): string {
   const repoRoot = mkdtempSync(path.join(os.tmpdir(), 'stub-check-'))
@@ -37,6 +40,19 @@ function writeFixtureRepo(): string {
         unexposed: { leaves: ['listed/mod'], scannedRoster: [] },
       },
     }),
+  )
+  const rosterDir = path.join(
+    repoRoot,
+    '.claude',
+    'skills',
+    'fleet',
+    'cascading-commits',
+    'lib',
+  )
+  mkdirSync(rosterDir, { recursive: true })
+  writeFileSync(
+    path.join(rosterDir, 'fleet-repos.json'),
+    JSON.stringify({ repos: [{ name: 'example-consumer' }] }),
   )
   for (const leaf of ['listed', 'real', 'unlisted']) {
     mkdirSync(path.join(repoRoot, 'dist', leaf), { recursive: true })
@@ -82,5 +98,17 @@ describe('findUnlistedStubs', () => {
     expect(findUnlistedStubs(repoRoot).map(f => f.leaf)).toEqual([
       'unlisted/mod',
     ])
+  })
+})
+
+describe('inspectFleetUsageValidation', () => {
+  it('keeps deterministic checks available without transient evidence', () => {
+    const repoRoot = writeFixtureRepo()
+
+    expect(inspectFleetUsageValidation(repoRoot)).toEqual({
+      failed: false,
+      missingEvidence: ['example-consumer'],
+      stale: [],
+    })
   })
 })

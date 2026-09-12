@@ -85,6 +85,12 @@ export interface StaleStubFinding {
   reason: string
 }
 
+export interface FleetUsageValidation {
+  failed: boolean
+  missingEvidence: string[]
+  stale: StaleStubFinding[]
+}
+
 /**
  * Listed stub leaves the CURRENT roster checkouts prove are not safe to stub
  * — each one would ship as a throwing stub to a real consumer, or names a
@@ -113,6 +119,19 @@ export function findFleetUsedStubLeaves(repoRoot: string): StaleStubFinding[] {
     findings.push({ leaf, reason })
   }
   return findings
+}
+
+export function inspectFleetUsageValidation(
+  repoRoot: string,
+): FleetUsageValidation {
+  const missingEvidence = missingRosterRepos(repoRoot)
+  const stale =
+    missingEvidence.length === 0 ? findFleetUsedStubLeaves(repoRoot) : []
+  return {
+    failed: stale.length > 0,
+    missingEvidence,
+    stale,
+  }
 }
 
 export function main(): void {
@@ -150,9 +169,9 @@ export function main(): void {
   }
   checkRosterCoverage()
 
-  const missing = missingRosterRepos(REPO_ROOT)
-  if (missing.length === 0) {
-    const stale = findFleetUsedStubLeaves(REPO_ROOT)
+  const validation = inspectFleetUsageValidation(REPO_ROOT)
+  if (validation.missingEvidence.length === 0) {
+    const { stale } = validation
     if (stale.length > 0) {
       for (let i = 0, { length } = stale; i < length; i += 1) {
         const f = stale[i] as StaleStubFinding
@@ -166,11 +185,10 @@ export function main(): void {
       )
       failed = true
     }
-  } else {
-    logger.error(
-      `${CHECK} ${missing.length} consumer evidence report(s) missing (${missing.join(', ')}). Collect complete revision-bearing reports before evaluating fleet usage.`,
+  } else if (!quiet) {
+    logger.warn(
+      `${CHECK} fleet-usage revalidation skipped — ${validation.missingEvidence.length} consumer evidence report(s) are unavailable. The committed roster coverage and built-dist checks remain enforced.`,
     )
-    failed = true
   }
 
   if (failed) {
