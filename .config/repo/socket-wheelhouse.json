@@ -473,7 +473,7 @@
     "typeThreshold": 99,
     "thresholds": {
       "statements": 96,
-      "branches": 91,
+      "branches": 92,
       "functions": 97,
       "lines": 96
     },
