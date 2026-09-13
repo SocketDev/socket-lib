@@ -4,7 +4,7 @@
  *   limits that record documents. No imports and no side effects, which is
  *   load-bearing: `npm/registry/tarball/shared` reads the defaults from here
  *   on the BROWSER path, and the sibling `archives/shared` cannot serve them
- *   because it also owns the adm-zip / tar-fs / `node:fs` accessors.
+ *   because it also owns the tar-fs / `node:fs` accessors.
  */
 
 /**

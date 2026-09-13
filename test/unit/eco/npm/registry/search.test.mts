@@ -23,7 +23,7 @@ import {
   failingHttp,
   recordingHttp,
   sleep,
-} from './http-fixtures.mjs'
+} from '../../../fixture/npm-registry-http.mjs'
 
 const SEARCH_PAGE = {
   objects: [{ package: { name: '@example/pkg', version: '1.0.0' } }],

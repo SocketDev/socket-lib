@@ -5,7 +5,7 @@
  *   This file covers httpJson and httpText; the core surface (httpRequest,
  *   httpDownload, parseChecksums, fetchChecksums) lives in
  *   http-request-core.test.mts. Both files share the same test server via
- *   http-request-fixtures.mts.
+ *   fixture/http-request.mts.
  */
 
 import http from 'node:http'
@@ -19,7 +19,7 @@ import {
   fixture,
   listeningPort,
   setupHttpFixture,
-} from './http-request-fixtures.mjs'
+} from './fixture/http-request.mjs'
 
 setupHttpFixture()
 

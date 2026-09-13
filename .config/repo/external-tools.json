@@ -120,16 +120,11 @@
           "integrity": "sha512-vZdptPsQPYnBvRR3S+6bikfk3WdkE+0d1a0CoPmSY8QPdfOG3jC4JxdTMN0FvHUzwR5iZQhfomJWq73F/PDWgg=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-08-26",
-        "removable": "2026-09-02",
-        "version": "1.15.1"
-      }
+      "origin": "gh-asset"
     },
     "sfw-free": {
       "notes": [
-        "SFW (Socket Firewall) free flavor (public, SocketDev/sfw-free). Ships a 7-platform set: linux-{x64,arm64}{,-musl}, darwin-{x64,arm64}, win-x64. win-arm64 is intentionally absent — upstream does not yet build it. SFW is a required dependency of the install flow, so consumers on win-arm64 skip SFW-dependent steps until upstream support lands.",
+        "SFW (Socket Firewall) free flavor (public, SocketDev/sfw-free). Ships a 7-platform set: linux-{x64,arm64}{,-musl}, darwin-{x64,arm64}, win-x64. Windows 11 ARM64 setup uses the verified win32-x64 asset through x64 emulation when a native asset is unavailable. SFW remains mandatory and must execute successfully before installation continues.",
         "Installed when neither SOCKET_API_KEY nor SOCKET_API_TOKEN is set; the enterprise flavor (sfw-enterprise) is selected when one of those is present. The two flavors share a version and install to the same `sfw` binary name."
       ],
       "description": "Socket Firewall (free tier) — package manager command wrapper",
@@ -166,12 +161,7 @@
           "integrity": "sha512-ZRuz2N0CmEXJuyhADFyqXU3bBDPp6UmDuXBSMoxcFyzUO/q3/5QRgVCimyOU09cG1XS9TRGvPSyL5y6sFN6D2A=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-08-26",
-        "removable": "2026-09-02",
-        "version": "1.15.1"
-      }
+      "origin": "gh-asset"
     },
     "uv": {
       "notes": [
@@ -180,28 +170,32 @@
       ],
       "description": "uv — Astral Python package/project manager (pinned, SRI-verified)",
       "repository": "github:astral-sh/uv",
-      "version": "0.12.8",
+      "version": "0.12.9",
       "binaryName": "uv",
       "platforms": {
         "darwin-arm64": {
           "asset": "uv-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-mxKACg22ALu6YSyQRIifXjEtmOULwsQiNTT34sckQUhJoMxfJokHL8IeFyDyEG++AorMGtsdjzqUzXRpUdF1uQ=="
+          "integrity": "sha512-tl/z5hF4bIO9hR3b5NrEgjoOsdDTKYiCIdLpfAj1KvvSid7psCVvH64zingxdtFiGSmD9wHWjWyTtMp79HocnA=="
         },
         "darwin-x64": {
           "asset": "uv-x86_64-apple-darwin.tar.gz",
-          "integrity": "sha512-LaIX3vLiqs1KVVHEIRkADG21uDxANGz3CWZmj7gCnlwafHJmGs9xIizKbWAtL2RZDS4P1BZQxq2PP923xLOKfg=="
+          "integrity": "sha512-BWKy9k2jR3EQcPBRbTY/0ZB4C3HUlmgr5fL4OBNl6CnjKLz2RdskHT01I19hdi5qGh4HC6IpIDsdCIBADKfymw=="
         },
         "linux-arm64": {
           "asset": "uv-aarch64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-Yyr1MJSMv3X9zH1Om5p6nFnkIeiyC+CL2EeC5yIT3l+4GT6Ym8o68NFrRzwNSPIBZrtGE7nZRxqDksF2WPyHkg=="
+          "integrity": "sha512-BrrJYbNu+N1cAmRFzXPAFjHhyOx/4poEtgEueN6mcQZHZFC4VUZzmJGxdiEVSLXRa0qYEEzTos5smUA0htmvzA=="
         },
         "linux-x64": {
           "asset": "uv-x86_64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-sSzyI7T2TSw32n5F3Qks+oPG9VwMwi97GmalXPKa7YrBtRc4MX6YINwL53gdJo96n3AvCrO3XzvAj+8QP69djQ=="
+          "integrity": "sha512-gf6Ot90syNl1Mvvu48hS3DDdhSwCEOq6x9xLf08Ojxs1tWWQ8PBr4oDBaY1cTP4lxZX2nxD6fKsuii1p1gS6WA=="
+        },
+        "win32-arm64": {
+          "asset": "uv-aarch64-pc-windows-msvc.zip",
+          "integrity": "sha512-53kiRH2Ngxdr1v6C6ougI+9ep+qFlSEE/C94Do5BCkVONqFcpry1XlHVGNWWEPRWNaM7wyzGFyrdLyXkRUCKVw=="
         },
         "win32-x64": {
           "asset": "uv-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-TYAiHQd7ElvH8s8t819rlW4nOpuMCgEV2s/HWN1rj7N+jdx7Koact1+ItDYXQgKxir+J36+lDWTyRGxRgS9QIw=="
+          "integrity": "sha512-ncP08GYr0ka7l0ehQB7LeN/Pg0TbM7JS+FwqSLUyVtlnwvf/rq1zbKzO24dJwrCaOXBxMQvAcY+Tt1dXDtUcSw=="
         }
       },
       "origin": "gh-asset"

@@ -3,8 +3,8 @@ import path from 'node:path'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { makeGitRepo } from '../fleet/_shared/lib/git-fixture.mts'
-import type { GitRepoFixture } from '../fleet/_shared/lib/git-fixture.mts'
+import { makeGitRepo } from './fixture/git.mts'
+import type { GitRepoFixture } from './fixture/git.mts'
 
 import {
   getChangedFiles,

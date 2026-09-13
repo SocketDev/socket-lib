@@ -42,10 +42,10 @@ describe('bootstrap session fetch', () => {
     expect(planFetch(repoRoot)).toEqual({ action: 'no-fetcher' })
   })
 
-  it('plans the local bootstrap fetcher when the payload is absent', () => {
+  it('plans the local bootstrap current-bundle check', () => {
     const fleet = writeFixture('scripts/repo/bootstrap/fleet.mjs', '')
 
-    expect(planFetch(repoRoot)).toEqual({ action: 'fetch', fleet })
+    expect(planFetch(repoRoot)).toEqual({ action: 'ensure', fleet })
   })
 
   it('warns without blocking when the fetcher is missing', () => {
@@ -62,7 +62,7 @@ describe('bootstrap session fetch', () => {
       'scripts/repo/bootstrap/fleet.mjs',
       [
         "import { mkdirSync, writeFileSync } from 'node:fs'",
-        "if (process.argv[2] !== '--if-current') process.exit(12)",
+        "if (process.argv[2] !== '--ensure-current') process.exit(12)",
         "mkdirSync('.claude/hooks/fleet', { recursive: true })",
         "writeFileSync('.claude/hooks/fleet/index.cjs', '')",
         "process.stdout.write('fixture progress')",
@@ -73,7 +73,10 @@ describe('bootstrap session fetch', () => {
     const stdout = vi.spyOn(process.stdout, 'write').mockReturnValue(true)
 
     expect(ensurePayload(repoRoot)).toBe(0)
-    expect(planFetch(repoRoot)).toEqual({ action: 'present' })
+    expect(planFetch(repoRoot)).toEqual({
+      action: 'ensure',
+      fleet: path.join(repoRoot, 'scripts', 'repo', 'bootstrap', 'fleet.mjs'),
+    })
     expect(stderr).not.toHaveBeenCalled()
     expect(stdout).not.toHaveBeenCalled()
   })

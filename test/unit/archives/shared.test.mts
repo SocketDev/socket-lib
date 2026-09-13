@@ -2,9 +2,7 @@
  * @file Tests for archives/shared — the shared archive guard rails.
  *   `validatePathWithinBase` is the unit that actually enforces the traversal
  *   guarantee for both the zip and tar extractors, so it is tested here
- *   directly. Driving it through a zip fixture is not possible: adm-zip strips
- *   `../` when an entry is added, so such a test passes because the fixture is
- *   harmless, not because the guard fired.
+ *   directly.
  */
 
 import { mkdtempSync, writeFileSync } from 'node:fs'
@@ -15,7 +13,6 @@ import { afterAll, describe, expect, it } from 'vitest'
 
 import {
   assertArchiveExists,
-  getAdmZip,
   getTarFs,
   validatePathWithinBase,
 } from '../../../src/archives/shared.mjs'
@@ -127,15 +124,6 @@ describe('validatePathWithinBase', () => {
 })
 
 describe('lazy library loaders', () => {
-  it('getAdmZip returns the library and memoizes it', () => {
-    // Lazy so importing the archives surface does not pull the bundled zip
-    // library into every consumer's graph; memoized so repeated extracts do
-    // not re-require it.
-    const first = getAdmZip()
-    expect(first).toBeDefined()
-    expect(getAdmZip()).toBe(first)
-  })
-
   it('getTarFs returns the library and memoizes it', () => {
     const first = getTarFs()
     expect(first).toBeDefined()

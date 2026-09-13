@@ -25,7 +25,6 @@ export const externalPackages = [
   { name: 'normalize-package-data', bundle: false },
   { name: 'semver', bundle: true },
   // Utilities
-  { name: 'adm-zip', bundle: true },
   { name: 'debug', bundle: true },
   { name: 'tar-fs', bundle: true },
   // p-map: Standalone bundle. ESM-only package, bundled before pico-pack.

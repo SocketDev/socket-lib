@@ -157,6 +157,7 @@ describe('disambiguateReceiver with the SDK loaded', () => {
       const arg = lastQueryArg as {
         options: {
           allowedTools: string[]
+          allowDangerouslySkipPermissions?: boolean | undefined
           cwd: string
           disallowedTools: string[]
           permissionMode: string
@@ -166,7 +167,16 @@ describe('disambiguateReceiver with the SDK loaded', () => {
       }
       expect(arg.options.tools).toEqual(['Read', 'Grep', 'Glob'])
       expect(arg.options.allowedTools).toEqual(['Read', 'Grep', 'Glob'])
-      expect(arg.options.disallowedTools).toContain('Bash')
+      expect(arg.options.disallowedTools).toEqual(
+        expect.arrayContaining([
+          'Bash',
+          'Edit',
+          'Write',
+          'WebFetch',
+          'WebSearch',
+        ]),
+      )
+      expect(arg.options.allowDangerouslySkipPermissions).not.toBe(true)
       expect(arg.options.permissionMode).toBe('dontAsk')
       expect(arg.options.cwd).toBe(targetRoot)
       expect(arg.prompt).toContain('range')

@@ -13,10 +13,10 @@ import {
   parseManifest,
   pickPlatformManifestDigest,
 } from '../../../src/oci/manifest.mjs'
-import { makeFakeAdapter } from './http-fixtures.mts'
+import { makeFakeAdapter } from '../fixture/oci-http.mts'
 
 import type { OciManifest } from '../../../src/oci/types.mjs'
-import type { FakeRoute } from './http-fixtures.mts'
+import type { FakeRoute } from '../fixture/oci-http.mts'
 
 // OCI / Docker distribution-spec media types — the external spec oracle, held
 // as literals here rather than imported from the client under test.

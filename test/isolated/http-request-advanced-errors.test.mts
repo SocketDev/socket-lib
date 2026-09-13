@@ -6,7 +6,7 @@
  *   fits within the per-worker v8 heap ceiling — cumulative HTTP state retains
  *   memory faster than GC can reclaim it within a single file. Shares the test
  *   server with the sibling http-request-*.test.mts files via
- *   http-request-fixtures.mts.
+ *   fixture/http-request.mts.
  */
 
 import { createWriteStream, promises as fs } from 'node:fs'
@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest'
 import { enrichErrorMessage } from '../../src/http-request/errors.mjs'
 import { httpRequest } from '../../src/http-request/request.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { fixture, setupHttpFixture } from './fixture/http-request.mjs'
 import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 import type {

@@ -4,7 +4,7 @@
  *   http-request-advanced-2.test.mts to keep each test file under the file-size
  *   cap and scoped to a single domain (header parsing/redaction). Shares the
  *   test server with the sibling http-request-*.test.mts files via
- *   http-request-fixtures.
+ *   fixture/http-request.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -14,7 +14,7 @@ import {
   sanitizeHeaders,
 } from '../../src/http-request/headers.mjs'
 
-import { setupHttpFixture } from './http-request-fixtures.mjs'
+import { setupHttpFixture } from './fixture/http-request.mjs'
 
 setupHttpFixture()
 

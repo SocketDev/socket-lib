@@ -1,7 +1,7 @@
 /**
  * @file Fleet-canonical platform predicates and platform-aware name helpers for
- *   tests. Re-exports the single-source-of-truth `isWin32()` + `normalizePath` from
- *   `@socketsecurity/lib-stable` so tests have one import surface and any
+ *   tests. Re-exports the single-source-of-truth `isWin32()` + `normalizePath`
+ *   from `@socketsecurity/lib-stable` so tests have one import surface and any
  *   future change to the canonical detection flows through one place. Pairs
  *   with `./timing.mts` (Windows-tolerant timing budgets), `./tags.mts`
  *   (test-title prefixes), and `./env.mts` (env-flag helpers). Adoption is

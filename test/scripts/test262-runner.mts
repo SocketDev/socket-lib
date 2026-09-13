@@ -9,7 +9,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../scripts/fleet/process/script-output.mts'
 
 import { isMainModule } from '../../scripts/fleet/process/is-main-module.mts'
 import { runMain } from '../../scripts/fleet/process/run-main.mts'
@@ -24,7 +24,7 @@ import type { RunResult } from './test262/types.mts'
 
 const CONCURRENCY = 8
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 const thisDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(thisDir, '..', '..')
@@ -83,6 +83,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node test/scripts/test262-runner.mts [flags]
 
   --only <substring>    run only features whose name contains <substring>`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

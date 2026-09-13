@@ -18,8 +18,9 @@
 import { compareStr } from '@socketsecurity/lib-stable/sorts/strings'
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { sourcePrimordialsDir } from '../../_shared/paths.mts'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../../fleet/process/script-output.mts'
 
 import globals from 'globals'
 
@@ -29,10 +30,10 @@ import { runMain } from '../../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 const rootPath = REPO_ROOT
-const primordialsDir = path.join(rootPath, 'src', 'primordials')
+const primordialsDir = sourcePrimordialsDir({ root: rootPath })
 const outputPath = path.join(
   rootPath,
   'src',
@@ -215,6 +216,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/build/post/make-primordials-defaults.mts
 
   No flags. Re-run whenever globals bumps or src/primordials/ exports change.`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

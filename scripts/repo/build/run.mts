@@ -11,8 +11,13 @@ import process from 'node:process'
 import { watch } from 'rolldown'
 
 import { isQuiet } from '../flags/predicates.mts'
+import { getEnvValue } from '@socketsecurity/lib-stable/env/rewire'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptArgs,
+  getScriptLogger,
+  scriptStdio,
+} from '../../fleet/process/script-output.mts'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
@@ -32,11 +37,11 @@ import {
 import { verifyDist } from './verify-dist.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
 
 import type { BuildSourceResult } from './steps.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 /**
  * Build source code with rolldown. Returns { exitCode, buildTime } for external
@@ -169,6 +174,7 @@ async function main(): Promise<void> {
   try {
     // Parse arguments
     const { values } = parseArgs({
+      args: getScriptArgs(),
       options: {
         src: {
           type: 'boolean',
@@ -221,14 +227,14 @@ async function main(): Promise<void> {
       watch: Boolean(values['watch']),
     }
 
-    const quiet = isQuiet(values)
+    const quiet = isQuiet(values) || isJsonRequested(process.argv.slice(2))
 
     function shouldSkipBuild(): boolean {
       // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
       // runs explicit build/test/check steps, so the install-time `prepare`
       // build is redundant work that only adds latency to every `pnpm install`
       // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
-      if (flags.needed && process.env['CI'] === 'true') {
+      if (flags.needed && getEnvValue('CI') === 'true') {
         if (!quiet) {
           logger.info(
             'CI detected — skipping prepare-time build (CI builds explicitly)',
@@ -292,6 +298,7 @@ const SCRIPT_META = {
   --analyze    show bundle size analysis
   --quiet, --silent   suppress progress messages
   --verbose    show detailed build output`,
+  json: 'result',
 } as const
 
 if (isMainModule(import.meta.url)) {
@@ -318,6 +325,7 @@ async function buildCompletePackage(flags: {
     {
       args: validateArgs,
       command: 'node',
+      options: { stdio: scriptStdio('inherit') },
     },
   ])
 
@@ -332,6 +340,7 @@ async function buildCompletePackage(flags: {
     {
       args: ['scripts/repo/build/clean.mts', '--dist', '--types', '--quiet'],
       command: 'node',
+      options: { stdio: scriptStdio('inherit') },
     },
   ])
   if (exitCode !== 0) {

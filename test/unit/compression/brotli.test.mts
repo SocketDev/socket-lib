@@ -40,7 +40,7 @@ import {
   LARGE_TEXT,
   SMALL_TEXT,
   streamToBuffer,
-} from '../compression-fixtures.mts'
+} from '../fixture/compression.mts'
 
 let tmpDir: string
 

@@ -13,10 +13,10 @@ import path from 'node:path'
 import process from 'node:process'
 import { createGzip } from 'node:zlib'
 
-import AdmZip from '../../src/external/adm-zip.js'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { createTarPack } from '../_shared/tar-pack.mts'
+import { writeZipFixture } from '../_shared/zip.mts'
 
 import { detectArchiveFormat } from '../../src/archives/detect.mjs'
 import { extractArchive } from '../../src/archives/extract.mjs'
@@ -39,18 +39,18 @@ beforeAll(async () => {
   await fs.mkdir(tempDir, { recursive: true })
 
   testZipPath = path.join(tempDir, 'test-archive.zip')
-  const zip = new AdmZip()
-  zip.addFile('file1.txt', Buffer.from('content1'))
-  zip.addFile('dir/file2.txt', Buffer.from('content2'))
-  zip.addFile('dir/nested/file3.txt', Buffer.from('content3'))
-  zip.writeZip(testZipPath)
+  writeZipFixture(testZipPath, {
+    'dir/file2.txt': 'content2',
+    'dir/nested/file3.txt': 'content3',
+    'file1.txt': 'content1',
+  })
 
   testZipWithStripPath = path.join(tempDir, 'test-strip.zip')
-  const zipStrip = new AdmZip()
-  zipStrip.addFile('prefix/file1.txt', Buffer.from('strip-content1'))
-  zipStrip.addFile('prefix/dir/file2.txt', Buffer.from('strip-content2'))
-  zipStrip.addFile('prefix/dir/nested/file3.txt', Buffer.from('strip-content3'))
-  zipStrip.writeZip(testZipWithStripPath)
+  writeZipFixture(testZipWithStripPath, {
+    'prefix/dir/file2.txt': 'strip-content2',
+    'prefix/dir/nested/file3.txt': 'strip-content3',
+    'prefix/file1.txt': 'strip-content1',
+  })
 
   testTarPath = path.join(tempDir, 'test-archive.tar')
   const pack = createTarPack()
@@ -229,7 +229,7 @@ describe('archives', () => {
         const nonexistentPath = path.join(tempDir, 'nonexistent.zip')
         // All three extractors normalize "missing archive" to ENOENT
         // via the shared `assertArchiveExists` preflight — previously
-        // extractZip surfaced adm-zip's generic "Invalid filename"
+        // extractZip preserves a Node-style missing-file error.
         // while tar/tar.gz surfaced the raw Node ENOENT. Assert on
         // `.code === 'ENOENT'` so the test catches a semantic
         // regression rather than merely any rejection.

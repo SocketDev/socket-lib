@@ -1,24 +1,12 @@
-/**
- * @file Load the set of primordials currently exported by
- *   `@socketsecurity/lib/primordials` (or any primordials-shaped source file
- *   passed via --surface). Three ways to resolve the surface:
- *
- *   1. Explicit `--surface <path>` flag — overrides everything else. Use this to
- *      point at Node.js's `lib/internal/per_context/primordials.js`, a vendored
- *      copy, or any other primordials file.
- *   2. From a sibling socket-lib checkout (its `src/primordials/` directory after
- *      the split, with a `src/primordials.ts` legacy fallback). Used during
- *      fleet development — picks up unreleased exports.
- *   3. From the installed `@socketsecurity/lib/dist/primordials/` (or legacy
- *      `dist/primordials.js`). Used when running the audit on a target that has
- *      lib as a dep. Either way, we parse out the `export const Foo` symbol
- *      names — no type info needed. For non-ESM surfaces (Node's per_context
- *      primordials use `primordials.X = ...` assignments), we also recognize
- *      that form.
- */
-
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+} from 'node:fs'
 import path from 'node:path'
+import { isPathWithinRoot } from '@socketsecurity/lib-stable/paths/predicates'
 
 import { GLOBAL_RECORD } from './globals.mts'
 
@@ -200,17 +188,8 @@ export function deriveNodeBootstrapSurface() {
 /**
  * Find a usable primordials source.
  *
- * Lookup order:
- *
- * 1. Explicit `surfacePath` argument (from `--surface <path>` CLI flag).
- * 2. `<targetRoot>/../socket-lib/src/primordials/` (sibling, post-split directory
- *    layout).
- * 3. `<targetRoot>/../socket-lib/src/primordials.ts` (sibling, legacy single-file
- *    layout).
- * 4. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials/` (installed,
- *    post-split).
- * 5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js` —
- *    installed, legacy.
+ * Explicit sources remain inside the target. Otherwise use its installed
+ * package.
  *
  * @param {string} targetRoot - The repo being audited.
  * @param {string} [surfacePath] - Explicit path to a primordials source file.
@@ -222,35 +201,16 @@ export function loadPrimordialsSurface(
   surfacePath?: string | undefined,
 ) {
   if (surfacePath) {
-    const resolved = path.resolve(surfacePath)
-    if (!existsSync(resolved)) {
-      throw new Error(`--surface path not found: ${resolved}`)
+    const resolved = path.resolve(targetRoot, surfacePath)
+    if (
+      !existsSync(resolved) ||
+      !isPathWithinRoot(realpathSync(resolved), realpathSync(targetRoot))
+    ) {
+      throw new Error(
+        `Primordials surface is unavailable or external. Where: ${resolved}. Saw a missing or external source; wanted a source inside ${targetRoot}. Fix: provide a contained --surface path.`,
+      )
     }
     return { __proto__: null, source: resolved, ...parseExports(resolved) }
-  }
-  const siblingDir = path.resolve(
-    targetRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials',
-  )
-  if (existsSync(siblingDir)) {
-    return { __proto__: null, source: siblingDir, ...parseExports(siblingDir) }
-  }
-  const siblingLegacy = path.resolve(
-    targetRoot,
-    '..',
-    'socket-lib',
-    'src',
-    'primordials.ts',
-  )
-  if (existsSync(siblingLegacy)) {
-    return {
-      __proto__: null,
-      source: siblingLegacy,
-      ...parseExports(siblingLegacy),
-    }
   }
   const installedDir = path.join(
     targetRoot,
@@ -283,7 +243,7 @@ export function loadPrimordialsSurface(
     }
   }
   throw new Error(
-    `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
+    `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${installedDir}\n  ${installedLegacy}\n` +
       `Pass --surface <path> to specify a primordials source explicitly.`,
   )
 }
@@ -377,6 +337,9 @@ export function readSurfaceSources(
         continue
       }
       const full = path.join(sourcePath, name)
+      if (!isPathWithinRoot(realpathSync(full), realpathSync(sourcePath))) {
+        throw new Error(`Primordial leaf escapes its source directory: ${full}`)
+      }
       if (!statSync(full).isFile()) {
         continue
       }

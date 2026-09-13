@@ -1,42 +1,9 @@
-/*
- * @file Repo check — every leaf compiled out of the published build is
- *   provably unreachable and fleet-unused. Three legs, all against what
- *   actually ships:
- *
- *   (a) reachability: no stub may sit in the require graph of a dist module
- *       that ships real code, seeded from EVERY condition of every exports
- *       entry. This is the only leg that needs no sibling checkout, so it is
- *       the one that still runs in CI. It exists because 6.7.0 shipped
- *       http-request/browser as a throwing stub: the fleet imports
- *       `http-request`, whose `browser` condition resolves to that separate
- *       leaf, so no specifier ever named it and legs (b)/(c) read clean while
- *       every SDK browser bundle threw before touching `fetch`.
- *
- *   (b) dist bytes: a built dist module carrying the build-stub banner must
- *       be named in .config/repo/socket-wheelhouse.json — a stub
- *       outside the committed allowlist means the build compiled out a leaf
- *       nobody signed off on. Skipped when dist/ is absent (unbuilt tree).
- *
- *   (c) fleet usage: the committed stub list must still be graph-safe against
- *       the CURRENT roster checkouts — a listed leaf a fleet repo now imports
- *       (directly, or transitively via a used module's relative imports)
- *       would ship as a throwing stub to a real consumer. Skipped loudly when
- *       any roster checkout is missing on disk (CI has no siblings; the
- *       pre-push gate on a full checkout set is the enforcer).
- *
- *   Leg (c) exists because 6.5.1 shipped npm/meta as a throwing stub while
- *   socket-registry imported it — the audit snapshot predated the consumer,
- *   the list went stale, and nothing between build and publish re-checked it.
- *
- * Usage: node scripts/repo/check/stubbed-leaves-are-fleet-unused.mts [--quiet]
- */
-
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
 import { isQuiet } from '../flags/predicates.mts'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../../fleet/process/script-output.mts'
 
 import {
   auditFleetLibUsage,
@@ -62,7 +29,7 @@ import { runMain } from '../../fleet/process/run-main.mts'
 import type { ReachableStubFinding } from '../build-stubs/dist-graph.mts'
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 const CHECK = '[stubbed-leaves-are-fleet-unused]'
 
@@ -118,6 +85,12 @@ export interface StaleStubFinding {
   reason: string
 }
 
+export interface FleetUsageValidation {
+  failed: boolean
+  missingEvidence: string[]
+  stale: StaleStubFinding[]
+}
+
 /**
  * Listed stub leaves the CURRENT roster checkouts prove are not safe to stub
  * — each one would ship as a throwing stub to a real consumer, or names a
@@ -146,6 +119,19 @@ export function findFleetUsedStubLeaves(repoRoot: string): StaleStubFinding[] {
     findings.push({ leaf, reason })
   }
   return findings
+}
+
+export function inspectFleetUsageValidation(
+  repoRoot: string,
+): FleetUsageValidation {
+  const missingEvidence = missingRosterRepos(repoRoot)
+  const stale =
+    missingEvidence.length === 0 ? findFleetUsedStubLeaves(repoRoot) : []
+  return {
+    failed: stale.length > 0,
+    missingEvidence,
+    stale,
+  }
 }
 
 export function main(): void {
@@ -183,9 +169,9 @@ export function main(): void {
   }
   checkRosterCoverage()
 
-  const missing = missingRosterRepos(REPO_ROOT)
-  if (missing.length === 0) {
-    const stale = findFleetUsedStubLeaves(REPO_ROOT)
+  const validation = inspectFleetUsageValidation(REPO_ROOT)
+  if (validation.missingEvidence.length === 0) {
+    const { stale } = validation
     if (stale.length > 0) {
       for (let i = 0, { length } = stale; i < length; i += 1) {
         const f = stale[i] as StaleStubFinding
@@ -201,7 +187,7 @@ export function main(): void {
     }
   } else if (!quiet) {
     logger.warn(
-      `${CHECK} ${missing.length} roster checkout(s) missing (${missing.join(', ')}) — fleet-usage leg skipped.`,
+      `${CHECK} fleet-usage revalidation skipped — ${validation.missingEvidence.length} consumer evidence report(s) are unavailable. The committed roster coverage and built-dist checks remain enforced.`,
     )
   }
 
@@ -222,6 +208,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/check/stubbed-leaves-are-fleet-unused.mts [flags]
 
   --quiet, --silent   suppress non-error output`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

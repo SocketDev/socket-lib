@@ -244,7 +244,7 @@ export function splitFieldPath(field: string): string[] {
   let current = ''
   for (let i = 0, { length } = field; i < length; i += 1) {
     const char = field[i]!
-    if (char === '\\' && field[i + 1] === '.') {
+    if (char === '\\' && field.charCodeAt(i + 1) === 46 /* '.' */) {
       current += '.'
       i += 1
       continue

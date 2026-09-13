@@ -5,7 +5,7 @@
  *   keep each worker within the v8 heap ceiling — cumulative HTTP state retains
  *   memory faster than GC can reclaim it within a single test file. Shares the
  *   test server with the sibling http-request-*.test.mts files via
- *   http-request-fixtures.mts.
+ *   fixture/http-request.mts.
  */
 
 import { Readable } from 'node:stream'
@@ -16,7 +16,7 @@ import type { HttpHookResponseInfo } from '../../src/http-request/request-types.
 
 import { httpRequest } from '../../src/http-request/request.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { fixture, setupHttpFixture } from './fixture/http-request.mjs'
 
 setupHttpFixture()
 

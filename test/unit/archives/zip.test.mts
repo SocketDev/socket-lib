@@ -4,19 +4,22 @@
  *   pre-extraction validation loop every archive walks: entry size limits, the
  *   cumulative total, `strip`, and path-traversal rejection. Fixtures are real
  *   zips built with the same library the extractor uses, so the entry headers
- *   the size checks read are genuine. Path traversal is covered against
- *   `validatePathWithinBase` directly, in shared.test.mts: adm-zip strips
- *   `../` when an entry is added, so a fixture built with it cannot express a
- *   malicious entry name — a test written that way passes for the wrong
- *   reason.
+ *   the size checks read are genuine.
  */
 
-import { existsSync, mkdtempSync, readFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import AdmZip from '../../../src/external/adm-zip.js'
 import { afterAll, describe, expect, it } from 'vitest'
+
+import { writeZipFixture } from '../../_shared/zip.mts'
 
 import { extractZip } from '../../../src/archives/zip.mjs'
 
@@ -40,12 +43,8 @@ function tmpDir(): string {
  * Write a zip containing `entries` (entryName → contents) and return its path.
  */
 function makeZip(entries: Record<string, string>): string {
-  const zip = new AdmZip()
-  for (const [name, body] of Object.entries(entries)) {
-    zip.addFile(name, Buffer.from(body, 'utf8'))
-  }
   const file = path.join(tmpDir(), 'archive.zip')
-  zip.writeZip(file)
+  writeZipFixture(file, entries)
   return file
 }
 
@@ -126,16 +125,38 @@ describe('extractZip', () => {
   it('skips directory entries', () => {
     // A zip may carry explicit directory records; the validation loop passes
     // over them rather than treating them as zero-byte files.
-    const zip = new AdmZip()
-    zip.addFile('adir/', Buffer.alloc(0))
-    zip.addFile('adir/inner.txt', Buffer.from('inner', 'utf8'))
     const archive = path.join(tmpDir(), 'withdir.zip')
-    zip.writeZip(archive)
+    writeZipFixture(archive, { 'adir/': '', 'adir/inner.txt': 'inner' })
     const out = tmpDir()
     return extractZip(archive, out).then(() => {
       expect(readFileSync(path.join(out, 'adir', 'inner.txt'), 'utf8')).toBe(
         'inner',
       )
     })
+  })
+
+  it('rejects an existing destination symlink before overwrite', async () => {
+    const archive = makeZip({ 'asset.txt': 'attacker content' })
+    const out = tmpDir()
+    const outside = path.join(tmpDir(), 'outside.txt')
+    writeFileSync(outside, 'original')
+    symlinkSync(outside, path.join(out, 'asset.txt'))
+
+    await expect(extractZip(archive, out)).rejects.toThrow(
+      /Archive destination is a symlink/,
+    )
+    expect(readFileSync(outside, 'utf8')).toBe('original')
+  })
+
+  it('rejects a symlink in a destination path component', async () => {
+    const archive = makeZip({ 'nested/asset.txt': 'attacker content' })
+    const out = tmpDir()
+    const outside = tmpDir()
+    symlinkSync(outside, path.join(out, 'nested'))
+
+    await expect(extractZip(archive, out)).rejects.toThrow(
+      /Archive destination component is unsafe/,
+    )
+    expect(existsSync(path.join(outside, 'asset.txt'))).toBe(false)
   })
 })

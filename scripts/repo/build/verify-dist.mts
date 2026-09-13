@@ -20,11 +20,17 @@ import process from 'node:process'
 import { parse } from '@babel/parser'
 
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptArgs,
+  getScriptLogger,
+} from '../../fleet/process/script-output.mts'
 
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { runMain } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 /**
  * Collect every `.js` file under `dir` (recursive).
@@ -238,15 +244,23 @@ export async function verifyDist(distDir: string): Promise<number> {
   return 0
 }
 
-// Allow running standalone: `node scripts/repo/build/verify-dist.mts [distDir]`.
-if (process.argv[1]?.endsWith('verify-dist.mts')) {
-  const distDir = path.resolve(process.argv[2] ?? 'dist')
-  verifyDist(distDir).then(code => {
-    if (code === 0) {
-      logger.success('dist integrity OK')
-    }
-    process.exitCode = code
-  })
+async function main(): Promise<number> {
+  const distDir = path.resolve(getScriptArgs()[0] ?? 'dist')
+  const code = await verifyDist(distDir)
+  if (code === 0) {
+    logger.success('dist integrity OK')
+  }
+  return code
+}
+
+const SCRIPT_META: ScriptMeta = {
+  describe: 'verifies distribution syntax and declared dependencies',
+  help: 'Usage: node scripts/repo/build/verify-dist.mts [distDir] [--json]',
+  json: 'result',
+}
+
+if (isMainModule(import.meta.url)) {
+  runMain(main, SCRIPT_META)
 }
 
 function appendAstChildren(node: object, stack: unknown[]): void {

@@ -10,6 +10,7 @@
  */
 
 import {
+  StringPrototypeCharCodeAt,
   StringPrototypeIndexOf,
   StringPrototypeSlice,
   StringPrototypeSplit,
@@ -21,7 +22,10 @@ export interface PnpmPackageId {
 }
 
 export function parsePnpmPackageIdV5(pkgId: string): PnpmPackageId {
-  const withoutSlash = pkgId[0] === '/' ? StringPrototypeSlice(pkgId, 1) : pkgId
+  const withoutSlash =
+    StringPrototypeCharCodeAt(pkgId, 0) === 47 /* '/' */
+      ? StringPrototypeSlice(pkgId, 1)
+      : pkgId
   const underscoreIdx = StringPrototypeIndexOf(withoutSlash, '_')
   const withoutPeerSuffix =
     underscoreIdx !== -1

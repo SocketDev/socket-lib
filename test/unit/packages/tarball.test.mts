@@ -2,7 +2,6 @@ import { existsSync, promises as fs, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import nock from 'nock'
@@ -17,11 +16,11 @@ import { normalizePath } from '../../../src/paths/normalize.mjs'
 import { describeNetworkOnly } from '../util/platform-suites.mjs'
 import { runWithTempDir } from '../util/temp-files.mjs'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
+import { TEST_UNIT_NPM_FIXTURE_DIR } from '../../../scripts/repo/_shared/paths.mts'
 
 type ExtractCallback = (destPath: string) => Promise<unknown>
 
-const testDir = path.dirname(fileURLToPath(import.meta.url))
-const fixturesDir = path.resolve(testDir, '../../fixtures/npm')
+const fixturesDir = TEST_UNIT_NPM_FIXTURE_DIR
 const localRequire = createRequire(import.meta.url)
 
 // is-number@7.0.0 fixtures: the packument's `dist.integrity` / `dist.shasum`

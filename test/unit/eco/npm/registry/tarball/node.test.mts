@@ -202,13 +202,25 @@ describe('extractNpmTarball', () => {
 
   test('writes the file contents through intact', async () => {
     const bytes = await makePackageTarball()
+    const entries = await readEntriesInBrowser(bytes)
     await runWithTempDir(async tempDir => {
       const outputDir = await extractNpmTarball(
         bytes,
         path.join(tempDir, 'out'),
       )
-      const source = await readFile(path.join(outputDir, 'index.mjs'), 'utf8')
-      assert.equal(source, 'export const answer = 42\n')
+      const output = await Promise.all(
+        entries.map(async entry => ({
+          bytes: await readFile(path.join(outputDir, entry.name)),
+          name: entry.name,
+        })),
+      )
+      assert.deepEqual(
+        output,
+        entries.map(entry => ({
+          bytes: Buffer.from(entry.bytes),
+          name: entry.name,
+        })),
+      )
     })
   })
 

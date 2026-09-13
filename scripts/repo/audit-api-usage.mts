@@ -36,9 +36,15 @@ import {
 } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 import type { AcornNode } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 
+import {
+  consumerEvidencePath,
+  readConsumerEvidence,
+} from './consumer-evidence.mts'
+
 import { renderReport } from './audit-api-usage/render.mts'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { runMain } from '../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
@@ -50,9 +56,8 @@ const logger = getDefaultLogger()
 const PKG = '@socketsecurity/lib'
 const PKG_STABLE = '@socketsecurity/lib-stable'
 
-// Consumer repos live as siblings of socket-lib. Default set = every fleet repo
-// that consumes the lib, plus the wheelhouse.
-const PROJECTS_DIR = path.resolve(import.meta.dirname, '../../..')
+// Consumer evidence covers every declared consumer and the wheelhouse.
+const LIB_ROOT = path.resolve(import.meta.dirname, '../..')
 const DEFAULT_CONSUMERS = [
   'socket-addon',
   'socket-bin',
@@ -355,7 +360,7 @@ function main(): number {
     .map(r => ({
       __proto__: null,
       repo: r.repo,
-      file: path.relative(path.join(PROJECTS_DIR, r.repo), r.file),
+      file: r.file,
       subpath: r.subpath,
     }))
 
@@ -408,6 +413,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --json                    emit the report as JSON instead of terminal bars
   --consumers <dir,dir,…>   comma-separated consumer repo names (default: every fleet repo)`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {
@@ -423,15 +429,14 @@ function collectConsumerReferences(consumers: readonly string[]): UsageRef[] {
     i += 1
   ) {
     const repo = consumers[i]!
-    const root = path.join(PROJECTS_DIR, repo)
-    if (!existsSync(root)) {
-      logger.warn(`skip (absent): ${repo}`)
+    if (!existsSync(consumerEvidencePath(LIB_ROOT, repo))) {
+      getScriptLogger().warn(`skip (absent): ${repo}`)
       continue
     }
-    const files = listSourceFiles(root)
-    for (let j = 0, flen = files.length; j < flen; j += 1) {
-      const file = files[j]!
-      const source = readFileSync(file, 'utf8')
+    const evidence = readConsumerEvidence(LIB_ROOT, repo)
+    for (const entry of evidence.files) {
+      const file = `./${entry.path}`
+      const source = entry.text
       // Fast-path pre-filter only; not inferring behavior — it skips files
       // that cannot contain a lib specifier before the real AST walk in
       // collectRefs.

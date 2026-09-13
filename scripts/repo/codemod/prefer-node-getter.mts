@@ -22,7 +22,10 @@ import path from 'node:path'
 import process from 'node:process'
 import { parseArgs } from 'node:util'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptArgs,
+  getScriptLogger,
+} from '../../fleet/process/script-output.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
 import { runMain } from '../../fleet/process/run-main.mts'
@@ -30,7 +33,7 @@ import { REPO_ROOT } from '../../fleet/paths.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 /**
  * Builtin specifier to the accessor that wraps it, paired with the `src/node/`
@@ -198,6 +201,7 @@ export function rewriteSource(source: string, filePath: string): string {
 
 function main(): void {
   const { positionals, values } = parseArgs({
+    args: getScriptArgs(),
     allowPositionals: true,
     options: { 'dry-run': { type: 'boolean' } },
   })
@@ -237,6 +241,7 @@ const SCRIPT_META: ScriptMeta = {
 
   file        a source file importing a wrapped node: builtin
   --dry-run   report what would change without writing`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

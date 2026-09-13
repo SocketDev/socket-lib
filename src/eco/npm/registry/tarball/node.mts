@@ -22,7 +22,7 @@
  *   `extractArchive` from `../../archives/extract` would work too, and it is
  *   the dispatcher a caller reaches for when the format is unknown. It is
  *   deliberately NOT used: it can also open zips, so importing it pulls
- *   `../../archives/zip` and adm-zip into the require graph of every consumer.
+ *   `../../archives/zip` and its ZIP codec into every consumer's require graph.
  *   An npm tarball is always a gzipped tar, already proven so before anything
  *   touches disk, and there is nothing left for a format detector to decide.
  *   Cross-platform: nothing shells out to a `tar` binary, every path is built

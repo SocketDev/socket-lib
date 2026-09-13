@@ -74,7 +74,7 @@ export async function bundlePackage(
       }
     } else {
       // No src/external file, so in dev mode check for local
-      // workspace/sibling versions.
+      // workspace versions.
       const localPath = await getLocalPackagePath(packageName, rootDir)
       if (localPath) {
         if (!quiet) {

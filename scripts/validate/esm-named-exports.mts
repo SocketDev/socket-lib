@@ -9,6 +9,8 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
+import { runMain } from '../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 
@@ -20,13 +22,11 @@ const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
 const { isQuiet } = require('../repo/flags/predicates.mts')
-const {
-  getDefaultLogger,
-} = require('@socketsecurity/lib-stable/logger/default')
+const { getScriptLogger } = require('../fleet/process/script-output.mts')
 const { normalizePath } = require('@socketsecurity/lib-stable/paths/normalize')
 const { pluralize } = require('@socketsecurity/lib-stable/words/pluralize')
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 /**
  * Check if a module exports named exports in an ESM-compatible way. Good:
@@ -204,9 +204,12 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe: 'validates ESM-compatible named distribution exports',
+  help: 'Usage: node scripts/validate/esm-named-exports.mts [--verbose] [--quiet] [--json]',
+  json: 'result',
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch(error => {
-    logger.fail(`Validation failed: ${error.message}`)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

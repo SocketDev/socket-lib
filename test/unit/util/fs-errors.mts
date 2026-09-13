@@ -15,7 +15,7 @@
 
 // oxlint-disable-next-line socket/prefer-node-builtin-imports -- vi.spyOn needs the whole node:fs namespace object to swap sync methods; cherry-picked named bindings are read-only and unspyable.
 import * as fsBuiltin from 'node:fs'
-import * as fsPromisesBuiltin from 'node:fs/promises'
+import fsPromisesBuiltin from 'node:fs/promises'
 
 import { vi } from 'vitest'
 

@@ -293,7 +293,7 @@ export function leadingCommentEnd(source: string): number {
       pos = close + 2
       // Consume the trailing newline so the inserted import goes on a
       // fresh line.
-      if (source[pos] === '\n') {
+      if (source.charCodeAt(pos) === 10 /* '\n' */) {
         pos++
       }
     } else {

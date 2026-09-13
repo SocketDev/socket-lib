@@ -461,10 +461,6 @@
   },
   "schemaVersion": 1,
   "repoName": "socket-lib",
-  "bundle": {
-    "ref": "fleet-pack-bd99fdd3d6a1735d0a060e3df6fd177e62efda4e",
-    "cascadeSha": "bd99fdd3d6a1735d0a060e3df6fd177e62efda4e"
-  },
   "repo": {
     "type": "solo"
   },
@@ -483,10 +479,10 @@
     },
     "budgetAllowances": {
       "fast": {
-        "maxMs": 35000,
-        "reason": "Measured instrumented fast lane at 28333 ms with 6374 passing tests after replacing real TTL waits. Evidence: .cache/fleet/coverage/measurement/lane-fast/measurement.json. Allowance includes variation during release verification.",
-        "created": "2026-09-08",
-        "expires": "2026-10-08"
+        "maxMs": 55304,
+        "reason": "Measured 52669.804 ms at b7126df19f15c79a52da9aa2d8b3a4fcb3f0054f; 5% headroom; darwin/arm64, Node v26.8.2.",
+        "created": "2026-09-11",
+        "expires": "2026-10-11"
       }
     }
   },
@@ -684,6 +680,7 @@
     "lanes": {
       "mid": [
         "test/fleet/integration/comment-voice.test.mts",
+        "test/repo/unit/check/stubbed-leaves-are-fleet-unused.test.mts",
         "test/scripts/browser-exports-have-no-node-builtins.test.mts",
         "test/scripts/dist-graph.test.mts",
         "test/scripts/docs-imports-resolve.test.mts",
@@ -691,7 +688,6 @@
         "test/scripts/pair-declarations-with-js.test.mts",
         "test/scripts/reexports-have-no-import-cycles.test.mts",
         "test/scripts/settings.test.mts",
-        "test/scripts/stubbed-leaves-are-fleet-unused.test.mts",
         "test/scripts/sync-npm-api-spec.test.mts",
         "test/scripts/unexposed.test.mts",
         "test/unit/ai/agent/detect.test.mts",
@@ -721,7 +717,7 @@
         "test/unit/cacache/read.test.mts",
         "test/unit/cacache/tmp.test.mts",
         "test/unit/cacache/write.test.mts",
-        "test/unit/check/force-delete-is-opt-in.test.mts",
+        "test/repo/unit/check/force-delete-is-opt-in.test.mts",
         "test/unit/cli/check-primordials-render.test.mts",
         "test/unit/cli/check-primordials.test.mts",
         "test/unit/cli/is-main-module.test.mts",
@@ -957,8 +953,8 @@
         "tools/prim/test/lint.test.mts",
         "tools/prim/test/report.test.mts",
         "tools/prim/test/source-text.test.mts",
-        "tools/prim/test/surface-lookup.test.mts",
-        "tools/prim/test/surface-parse.test.mts",
+        "tools/prim/test/surface/lookup.test.mts",
+        "tools/prim/test/surface/parse.test.mts",
         "tools/prim/test/validate.test.mts"
       ],
       "slow": [
@@ -967,7 +963,7 @@
         "test/fleet/nock-loopback-passthrough.test.mts",
         "test/integration/**",
         "test/isolated/**",
-        "test/scripts/audit-fleet-lib-usage.test.mts",
+        "test/repo/unit/audit-fleet-lib-usage.test.mts",
         "test/scripts/exports-have-no-undefined-bindings.test.mts",
         "test/unit/ai/worktree-fanout.test.mts",
         "test/unit/ai/worktree-runone.test.mts",

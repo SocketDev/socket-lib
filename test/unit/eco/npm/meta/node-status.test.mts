@@ -12,7 +12,7 @@ import { describe, test } from 'vitest'
 
 import { PackumentNotFoundError } from '../../../../../src/eco/npm/meta-cache/node.mjs'
 import { extractHttpStatus } from '../../../../../src/eco/npm/meta/node.mjs'
-import { makeHttpResponseError } from '../meta-fixtures.mjs'
+import { makeHttpResponseError } from '../../../fixture/npm-meta.mjs'
 
 describe('extractHttpStatus', () => {
   test('reads the status off an HttpResponseError', () => {

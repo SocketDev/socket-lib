@@ -7,7 +7,7 @@ Per-repo CLAUDE.md detail extracted to fit the 40KB whole-file cap. The CLAUDE.m
 Core infrastructure library for Socket.dev security tools.
 
 - **Internal imports:** relative paths (e.g. `'../constants/packages'`). Path aliases are intentionally avoided.
-- **Vendored externals:** `cacache`, `make-fetch-happen`, `fast-sort`, `pacote`, `adm-zip`, `tar-fs`, `picomatch` live in `src/external/` and are remapped via `tsconfig.json` `paths`. Import them by bare package name.
+- **Vendored externals:** `cacache`, `make-fetch-happen`, `fast-sort`, `pacote`, `tar-fs`, `picomatch` live in `src/external/` and are remapped via `tsconfig.json` `paths`. Import them by bare package name.
 
 ## Commands
 

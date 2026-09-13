@@ -29,6 +29,9 @@ import { globSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { pathToFileURL } from 'node:url'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { runMain } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
 const ROOT = path.resolve(import.meta.dirname, '..', '..', '..')
 
@@ -222,8 +225,12 @@ async function main(): Promise<number> {
   return 1
 }
 
-if (process.argv[1] && import.meta.filename === process.argv[1]) {
-  void (async () => {
-    process.exitCode = await main()
-  })()
+const SCRIPT_META: ScriptMeta = {
+  describe: 'checks that documented package imports resolve',
+  help: 'Usage: node scripts/repo/check/docs-imports-resolve.mts [--json]',
+  json: 'native',
+}
+
+if (isMainModule(import.meta.url)) {
+  runMain(main, SCRIPT_META)
 }

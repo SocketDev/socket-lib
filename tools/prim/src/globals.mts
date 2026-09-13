@@ -127,7 +127,7 @@ export const UNAMBIGUOUS_PROTOTYPE_METHODS = new Map([
   // ─── Array only ─────────────────────────────────────────────────────
   ['copyWithin', 'Array'],
   ['fill', 'Array'],
-  // `findLast` / `findLastIndex` deliberately omitted — adm-zip ships its
+  // `findLast` / `findLastIndex` deliberately omitted — dependencies ship their
   // own `Utils.findLast(arr, predicate)` utility with a DIFFERENT signature
   // (predicate is arg 2, not arg 1), and rewriting `Utils.findLast(...)` to
   // `ArrayPrototypeFindLast(Utils, ...)` blows up at runtime. Promote back

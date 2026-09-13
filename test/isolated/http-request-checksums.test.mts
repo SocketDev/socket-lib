@@ -4,7 +4,7 @@
  *   each test file under the per-worker heap ceiling and the source-line cap.
  *   This file covers parseChecksumFile and fetchChecksumFile; the rest of the
  *   core surface (httpRequest) lives in http-request-core.test.mts. Both files
- *   share the same test server via http-request-fixtures.mts.
+ *   share the same test server via fixture/http-request.mts.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -15,7 +15,7 @@ import {
 } from '../../src/http-request/checksum-file.mjs'
 import { isIntegrity } from '../../src/crypto/integrity.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { fixture, setupHttpFixture } from './fixture/http-request.mjs'
 
 setupHttpFixture()
 

@@ -11,7 +11,7 @@ description: >-
 
 inputs:
   client-id:
-    description: 'PR App Client ID — pass vars.SOCKET_PR_CLIENT_ID.'
+    description: 'PR App Client ID — pass secrets.SOCKET_PR_CLIENT_ID.'
     required: true
   private-key:
     description: 'PR App private key — pass secrets.SOCKET_PR_APP_PRIVATE_KEY.'
@@ -43,7 +43,8 @@ runs:
     # downloads the fleet release bundle and nothing more. A contents:read
     # request is a subset of a contents:write app grant, so the minter's
     # preflight accepts the PR App contents grant; this token remains read-only.
-    - id: app-token
+    - name: Create payload app token
+      id: app-token
       shell: bash
       env:
         APP_PRIVATE_KEY: ${{ inputs.private-key }}

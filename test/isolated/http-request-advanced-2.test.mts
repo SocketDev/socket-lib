@@ -28,7 +28,7 @@
  *   from the original advanced surface so each test file is scoped to a
  *   reasonable surface — splits also let bisection of future runaway tests land
  *   faster. Shares the test server with the sibling http-request-*.test.mts
- *   files via http-request-fixtures.mts.
+ *   files via fixture/http-request.mts.
  */
 
 import http from 'node:http'
@@ -47,7 +47,7 @@ import {
   listeningPort,
   makeRawRequest,
   setupHttpFixture,
-} from './http-request-fixtures.mjs'
+} from './fixture/http-request.mjs'
 
 import type { IncomingResponse } from '../../src/http-request/request-types.mjs'
 
