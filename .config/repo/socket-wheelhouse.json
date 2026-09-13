@@ -481,8 +481,8 @@
         "expires": "2026-10-13"
       },
       "mid": {
-        "maxMs": 60000,
-        "reason": "Publish coverage passed 6,597 tests but the mid-lane child exceeded 30,000 ms at 42,780 ms in run 34772746748; Linux x64, Node v26.5.0.",
+        "maxMs": 180000,
+        "reason": "Publish coverage passed 6,597 tests but main consumed 56,667 ms and left isolated 3,333 ms in run 34773809254; the combined Linux x64 Node v26.5.0 wall was 111,263 ms.",
         "created": "2026-09-13",
         "expires": "2026-10-13"
       }
