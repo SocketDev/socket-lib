@@ -479,6 +479,12 @@
         "reason": "Publish CI completed 6,615 tests but report finalization exceeded both 55,304 ms and 90,000 ms fast-lane allowances at 31bf3f45a and 2ddabf2c2; Linux x64, Node v26.5.0.",
         "created": "2026-09-13",
         "expires": "2026-10-13"
+      },
+      "mid": {
+        "maxMs": 60000,
+        "reason": "Publish coverage passed 6,597 tests but the mid-lane child exceeded 30,000 ms at 42,780 ms in run 34772746748; Linux x64, Node v26.5.0.",
+        "created": "2026-09-13",
+        "expires": "2026-10-13"
       }
     }
   },
