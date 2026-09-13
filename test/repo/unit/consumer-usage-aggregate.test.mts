@@ -76,13 +76,14 @@ function fixtureRoot(): string {
 
 function aggregateFor(root: string): ConsumerUsageAggregate {
   const payload = {
-    schemaVersion: 1 as const,
+    schemaVersion: 2 as const,
     complete: true as const,
     producerRevision: REVISION,
     generatedAt: new Date(NOW).toISOString(),
     roster: consumerRosterIdentity(root),
     sources: { revisionCount: 1, digest: SOURCES },
     usedLeafSpecifiers: ['@socketsecurity/lib-stable/entry'],
+    plannedApiReferences: [],
   }
   return { ...payload, contentDigest: consumerAggregateContentDigest(payload) }
 }
@@ -103,7 +104,7 @@ test('accepts complete evidence for a non-default roster owner', () => {
 
 test.each([
   { complete: false },
-  { schemaVersion: 2 },
+  { schemaVersion: 1 },
   { producerRevision: 'c'.repeat(40) },
   { generatedAt: 'invalid' },
   { generatedAt: new Date(NOW - AGGREGATE_MAX_AGE_MS - 1).toISOString() },
@@ -175,7 +176,7 @@ test('content digest ignores object insertion order and uses schema key order', 
 test('matches the shared producer canonical digest vector', () => {
   expect(
     consumerAggregateContentDigest({
-      schemaVersion: 1,
+      schemaVersion: 2,
       complete: true,
       producerRevision: '0123456789abcdef0123456789abcdef01234567',
       generatedAt: '2026-09-12T12:00:00.000Z',
@@ -190,9 +191,16 @@ test('matches the shared producer canonical digest vector', () => {
           'sha256:ac1755ce2fd356bc9c40dca0b5fc91578b82cb1c598ad33d394645e4b94d001a',
       },
       usedLeafSpecifiers: ['@socketsecurity/lib-stable/errors/message'],
+      plannedApiReferences: [
+        {
+          api: 'getDefaultLogger',
+          targetVersion: '7.0.2',
+          pathHint: 'logger/default',
+        },
+      ],
     }),
   ).toBe(
-    'sha256:a09f40cbcd243f00b3c5337e551f0b404dce60b28ced9ca67209b571c7ed8ee7',
+    'sha256:80572b4104c0194e3ac0489b6fbf751a94d1ae5e7d2a88a62e816a8723186ffd',
   )
 })
 

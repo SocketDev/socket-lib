@@ -25,6 +25,8 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { consumerSourceTargets } from './consumer-usage/planned.mts'
+
 import { unexposedLeavesPath } from './build-stubs/unexposed.mts'
 import {
   keptLeafEntries,
@@ -292,6 +294,18 @@ export function srcFileForLeaf(
   repoRoot: string,
   leaf: string,
 ): string | undefined {
+  const manifest = JSON.parse(
+    readFileSync(path.join(repoRoot, 'package.json'), 'utf8'),
+  ) as {
+    exports?: Record<string, unknown> | undefined
+  }
+  const mapped = consumerSourceTargets(
+    repoRoot,
+    manifest.exports?.[`./${leaf}`],
+  )
+  if (mapped.length > 0) {
+    return mapped[0]
+  }
   const candidates = [
     path.join(repoRoot, 'src', `${leaf}.ts`),
     path.join(repoRoot, 'src', `${leaf}.mts`),

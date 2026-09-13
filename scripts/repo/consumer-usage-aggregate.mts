@@ -5,15 +5,21 @@ import { SOCKET_GITHUB_ORGS } from '../fleet/constants/socket-scopes.mts'
 import { exportLeaves, keptLeaves } from './audit-fleet-lib-usage.mts'
 import type { FleetLibUsageReport } from './audit-fleet-lib-usage.mts'
 import { readConsumerRoster } from './consumer-evidence.mts'
+import {
+  plannedConsumerLeaves,
+  validatePlannedApiReferences,
+} from './consumer-usage/planned.mts'
+import type { PlannedApiReference } from './consumer-usage/planned.mts'
 
 export interface ConsumerUsageAggregate {
-  schemaVersion: 1
+  schemaVersion: 2
   complete: true
   producerRevision: string
   generatedAt: string
   roster: { memberCount: number; digest: string }
   sources: { revisionCount: number; digest: string }
   usedLeafSpecifiers: string[]
+  plannedApiReferences: PlannedApiReference[]
   contentDigest: string
 }
 
@@ -97,6 +103,14 @@ export function consumerAggregateContentDigest(
         digest: aggregate.sources.digest,
       },
       usedLeafSpecifiers: aggregate.usedLeafSpecifiers,
+      plannedApiReferences: aggregate.plannedApiReferences.map(reference => ({
+        __proto__: null,
+        api: reference.api,
+        targetVersion: reference.targetVersion,
+        ...(reference.pathHint === undefined
+          ? {}
+          : { pathHint: reference.pathHint }),
+      })),
     }),
   )
 }
@@ -110,6 +124,7 @@ function validateAggregateStructure(value: unknown): ConsumerUsageAggregate {
     'roster',
     'sources',
     'usedLeafSpecifiers',
+    'plannedApiReferences',
     'contentDigest',
   ])
   const roster = aggregateRecord(record['roster'], ['memberCount', 'digest'])
@@ -117,7 +132,7 @@ function validateAggregateStructure(value: unknown): ConsumerUsageAggregate {
     'revisionCount',
     'digest',
   ])
-  if (record['schemaVersion'] !== 1 || record['complete'] !== true) {
+  if (record['schemaVersion'] !== 2 || record['complete'] !== true) {
     invalidAggregate('unsupported or incomplete evidence')
   }
   for (const digest of [
@@ -150,6 +165,7 @@ function validateAggregateStructure(value: unknown): ConsumerUsageAggregate {
   ) {
     invalidAggregate('an invalid timestamp or specifier list')
   }
+  validatePlannedApiReferences(record['plannedApiReferences'])
   return value as ConsumerUsageAggregate
 }
 
@@ -227,10 +243,10 @@ export function aggregateFleetUsageReport(
   repoRoot: string,
   aggregate: ConsumerUsageAggregate,
 ): FleetLibUsageReport {
-  const used = consumerAggregateUsedLeaves(
-    repoRoot,
-    aggregate.usedLeafSpecifiers,
-  )
+  const used = new Set([
+    ...consumerAggregateUsedLeaves(repoRoot, aggregate.usedLeafSpecifiers),
+    ...plannedConsumerLeaves(repoRoot, aggregate.plannedApiReferences),
+  ])
   const leaves: FleetLibUsageReport['leaves'] = {}
   for (const leaf of used) {
     leaves[leaf] = { named: [], namespace: true, repos: [], typeOnlyNamed: [] }

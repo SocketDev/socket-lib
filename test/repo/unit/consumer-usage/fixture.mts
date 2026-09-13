@@ -38,13 +38,14 @@ export function makeUsageFixture(generatedAt: number = USAGE_NOW): {
   )
   writeFileSync(path.join(root, '.config/repo/socket-wheelhouse.json'), '{}')
   const payload = {
-    schemaVersion: 1 as const,
+    schemaVersion: 2 as const,
     complete: true as const,
     producerRevision: 'a'.repeat(40),
     generatedAt: new Date(generatedAt).toISOString(),
     roster: consumerRosterIdentity(root),
     sources: { revisionCount: 1, digest: `sha256:${'b'.repeat(64)}` },
     usedLeafSpecifiers: ['@socketsecurity/lib-stable/entry'],
+    plannedApiReferences: [],
   }
   const aggregate = {
     ...payload,
