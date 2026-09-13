@@ -12,6 +12,7 @@ import {
 } from '../audit-fleet-lib-usage.mts'
 import { aggregateFleetUsageReport } from '../consumer-usage-aggregate.mts'
 import { writeUnexposedLeaves } from '../build-stubs/settings.mts'
+import { readUnexposedLeaves } from '../build-stubs/unexposed.mts'
 
 const logger = getScriptLogger()
 
@@ -20,10 +21,11 @@ export function writeConsumerStubList(
   aggregate: Parameters<typeof aggregateFleetUsageReport>[1],
 ): void {
   const report = aggregateFleetUsageReport(repoRoot, aggregate)
+  const safe = new Set(graphSafeStubCandidates(repoRoot, report))
   writeUnexposedLeaves(
     repoRoot,
     {
-      leaves: graphSafeStubCandidates(repoRoot, report),
+      leaves: readUnexposedLeaves(repoRoot).filter(leaf => safe.has(leaf)),
       scannedRoster: rosterRepoNames(repoRoot).toSorted(),
     },
     writeFileSync,

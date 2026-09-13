@@ -13,13 +13,22 @@ afterEach(() => {
   }
 })
 
-test('writes verified candidates while preserving unrelated settings', () => {
+test('removes newly used stubs while preserving unrelated settings', () => {
   const { root, verified } = makeUsageFixture()
   roots.push(root)
   const settingsPath = path.join(root, '.config/repo/socket-wheelhouse.json')
   writeFileSync(
     settingsPath,
-    JSON.stringify({ bundle: { ref: 'verified-pack' }, repoOwned: true }),
+    JSON.stringify({
+      bundle: { ref: 'verified-pack' },
+      repoOwned: true,
+      buildStubs: {
+        unexposed: {
+          leaves: ['entry'],
+          scannedRoster: ['stale-consumer'],
+        },
+      },
+    }),
   )
 
   writeConsumerStubList(root, verified.aggregate)
