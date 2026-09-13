@@ -50,7 +50,7 @@ import {
   VLT as stableVLT,
   YARN as stableYARN,
   YARN_CLASSIC as stableYARN_CLASSIC,
-} from '@socketsecurity/lib-stable/constants/package-managers'
+} from '@socketsecurity/lib-stable/eco/npm/constants/package-managers'
 import { describe, expect, it } from 'vitest'
 
 describe('constants/package-managers', () => {
