@@ -114,3 +114,9 @@ export function missingConsumerEvidence(
 ): string[] {
   return repos.filter(repo => !existsSync(consumerEvidencePath(repoRoot, repo)))
 }
+
+export function readExternalConsumerNames(repoRoot: string): string[] {
+  return readConsumerRoster(repoRoot)
+    .repos.map(member => member.name)
+    .filter(name => name !== 'socket-lib')
+}

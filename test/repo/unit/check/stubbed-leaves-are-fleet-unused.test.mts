@@ -7,20 +7,69 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import process from 'node:process'
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 import {
   findUnlistedStubs,
   inspectFleetUsageValidation,
+  main,
 } from '../../../../scripts/repo/check/stubbed-leaves-are-fleet-unused.mts'
 import {
   makeUnexposedModuleSource,
   STUB_BANNER,
 } from '../../../../scripts/repo/build-stubs/unexposed.mts'
 
+const state = vi.hoisted(() => ({
+  root: '',
+  quiet: false,
+  error: vi.fn(),
+  log: vi.fn(),
+  warn: vi.fn(),
+}))
+vi.mock(import('../../../../scripts/fleet/paths.mts'), async importOriginal => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    get REPO_ROOT() {
+      return state.root || actual.REPO_ROOT
+    },
+  }
+})
+vi.mock(
+  import('../../../../scripts/repo/flags/predicates.mts'),
+  async importOriginal => {
+    const actual = await importOriginal()
+    return { ...actual, isQuiet: () => state.quiet }
+  },
+)
+vi.mock(
+  import('../../../../scripts/fleet/process/script-output.mts'),
+  async importOriginal => {
+    const actual = await importOriginal()
+    const logger = actual.getScriptLogger()
+    vi.spyOn(logger, 'error').mockImplementation(state.error)
+    vi.spyOn(logger, 'log').mockImplementation(state.log)
+    vi.spyOn(logger, 'warn').mockImplementation(state.warn)
+    return { ...actual, getScriptLogger: () => logger }
+  },
+)
+
+const fixtures: string[] = []
+afterEach(() => {
+  state.root = ''
+  state.quiet = false
+  vi.clearAllMocks()
+  for (const root of fixtures.splice(0)) {
+    safeDeleteSync(root)
+  }
+})
+
 function writeFixtureRepo(): string {
   const repoRoot = mkdtempSync(path.join(os.tmpdir(), 'stub-check-'))
+  fixtures.push(repoRoot)
   writeFileSync(
     path.join(repoRoot, 'package.json'),
     JSON.stringify({
@@ -102,13 +151,40 @@ describe('findUnlistedStubs', () => {
 })
 
 describe('inspectFleetUsageValidation', () => {
-  it('keeps deterministic checks available without transient evidence', () => {
+  it('fails fleet usage validation when consumer evidence is missing', () => {
     const repoRoot = writeFixtureRepo()
 
-    expect(inspectFleetUsageValidation(repoRoot)).toEqual({
-      failed: false,
-      missingEvidence: ['example-consumer'],
-      stale: [],
-    })
+    expect(() => inspectFleetUsageValidation(repoRoot)).toThrow()
   })
+  it.each([false, true])(
+    'main fails without success output when quiet=%s and evidence is missing',
+    quiet => {
+      const repoRoot = writeFixtureRepo()
+      writeFileSync(
+        path.join(repoRoot, 'package.json'),
+        JSON.stringify({ exports: {} }),
+      )
+      writeFileSync(
+        path.join(repoRoot, '.config/repo/socket-wheelhouse.json'),
+        JSON.stringify({
+          buildStubs: {
+            unexposed: { leaves: [], scannedRoster: ['example-consumer'] },
+          },
+        }),
+      )
+      safeDeleteSync(path.join(repoRoot, 'dist'))
+      state.root = repoRoot
+      state.quiet = quiet
+      const originalExitCode = process.exitCode
+      try {
+        process.exitCode = 0
+        main()
+        expect(process.exitCode).toBe(1)
+        expect(state.error).toHaveBeenCalledTimes(1)
+        expect(state.log).not.toHaveBeenCalled()
+      } finally {
+        process.exitCode = originalExitCode
+      }
+    },
+  )
 })
