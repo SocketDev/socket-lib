@@ -70,18 +70,18 @@ describe('repository CLI JSON output', () => {
     expect(result.stderr.length).toBeGreaterThan(0)
   })
 
-  it('preserves a native audit report despite consumer diagnostics', () => {
+  it('rejects an audit when consumer evidence is unavailable', () => {
     const result = runCli('repo/audit-api-usage.mts', [
       '--json',
       '--consumers',
       'example-absent-consumer',
     ])
-    expect(result.status).toBe(0)
-    const report = JSON.parse(result.stdout)
-    expect(report.total).toBeGreaterThan(0)
-    expect(report.adopted).toBe(0)
-    expect(report.unused).toBe(report.total)
-    expect(report.unusedList).toHaveLength(report.total)
-    expect(result.stderr.length).toBeGreaterThan(0)
+    expect(result.status).toBe(1)
+    expect(JSON.parse(result.stdout)).toEqual({
+      ok: false,
+      exitCode: 1,
+      error: expect.any(String),
+    })
+    expect(result.stderr).toBe('')
   })
 })
