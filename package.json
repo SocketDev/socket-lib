@@ -4049,7 +4049,7 @@
     "setup:ci:remote": "node scripts/fleet/ci/remote/setup.mts",
     "audit:consumer-source": "node scripts/fleet/audit/consumer-source.mts",
     "ai:odai:diagnose": "node scripts/fleet/ai/odai/run.mts diagnose",
-    "update:chrome": "node scripts/fleet/ai/odai/run.mts verify-chrome",
+    "update:chrome": "node scripts/fleet/update/chrome.mts",
     "mcp:schemas:check": "node scripts/fleet/mcp/schemas.mts check",
     "mcp:schemas:save": "node scripts/fleet/mcp/schemas.mts save",
     "lockstep:assist": "node scripts/fleet/lockstep/assist/run.mts",
@@ -4058,7 +4058,8 @@
     "mcp:1password": "node scripts/fleet/mcp/1password/run.mts",
     "slack:auth": "node scripts/fleet/mcp/connect.mts slack --client claude --reauthenticate",
     "slack:token": "node scripts/fleet/setup/slack-token.mts",
-    "remote:github:release": "node scripts/fleet/release/github/remote.mts"
+    "remote:github:release": "node scripts/fleet/release/github/remote.mts",
+    "github:browser": "node scripts/fleet/browser/github-auth.mts"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
