@@ -408,8 +408,9 @@ if (isMainModule(import.meta.url)) {
 
 export function collectConsumerReferences(
   consumers: readonly string[],
-  repoRoot: string = LIB_ROOT,
+  options: { repoRoot?: string | undefined } = {},
 ): UsageRef[] {
+  const repoRoot = options.repoRoot ?? LIB_ROOT
   // Walk every consumer, collecting refs, skipping socket-lib's own tree.
   const allRefs: UsageRef[] = []
   for (

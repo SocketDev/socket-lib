@@ -33,7 +33,9 @@ afterEach(() => {
 
 test('rejects unavailable evidence instead of reporting no consumer references', () => {
   const root = makeConsumerFixture()
-  expect(() => collectConsumerReferences(['example-consumer'], root)).toThrow()
+  expect(() =>
+    collectConsumerReferences(['example-consumer'], { repoRoot: root }),
+  ).toThrow()
 })
 
 test('accepts a complete snapshot with no consumer references', () => {
@@ -51,5 +53,7 @@ test('accepts a complete snapshot with no consumer references', () => {
       files: [{ path: 'src/example.ts', text: 'export const example = 1' }],
     }),
   )
-  expect(collectConsumerReferences(['example-consumer'], root)).toEqual([])
+  expect(
+    collectConsumerReferences(['example-consumer'], { repoRoot: root }),
+  ).toEqual([])
 })

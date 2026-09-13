@@ -24,7 +24,7 @@ function installedFixture() {
 
 test('revalidates fresh aggregate and manifest bytes offline', () => {
   const { root, verified } = installedFixture()
-  expect(readInstalledConsumerUsage(root, USAGE_NOW)).toEqual(
+  expect(readInstalledConsumerUsage(root, { now: USAGE_NOW })).toEqual(
     verified.aggregate,
   )
 })
@@ -40,7 +40,7 @@ test.each(['manifestDigest', 'layerDigest', 'sourcesDigest'] as const)(
         [field]: `sha256:${'c'.repeat(64)}`,
       }),
     )
-    expect(() => readInstalledConsumerUsage(root, USAGE_NOW)).toThrow()
+    expect(() => readInstalledConsumerUsage(root, { now: USAGE_NOW })).toThrow()
   },
 )
 
@@ -50,14 +50,16 @@ test.each(['aggregate', 'manifest'] as const)(
     const { root } = installedFixture()
     const file = consumerUsageCachePaths(root)[field]
     writeFileSync(file, `${readFileSync(file, 'utf8')}\n`)
-    expect(() => readInstalledConsumerUsage(root, USAGE_NOW)).toThrow()
+    expect(() => readInstalledConsumerUsage(root, { now: USAGE_NOW })).toThrow()
   },
 )
 
 test('rejects stale cached evidence', () => {
   const { root } = installedFixture()
   expect(() =>
-    readInstalledConsumerUsage(root, USAGE_NOW + AGGREGATE_MAX_AGE_MS + 1),
+    readInstalledConsumerUsage(root, {
+      now: USAGE_NOW + AGGREGATE_MAX_AGE_MS + 1,
+    }),
   ).toThrow()
 })
 
@@ -80,7 +82,7 @@ test('rejects a future-dated verification receipt', () => {
       verifiedAt: new Date(USAGE_NOW + AGGREGATE_MAX_AGE_MS).toISOString(),
     }),
   )
-  expect(() => readInstalledConsumerUsage(root, USAGE_NOW)).toThrow()
+  expect(() => readInstalledConsumerUsage(root, { now: USAGE_NOW })).toThrow()
 })
 
 test.each(['sources', 'wrong-content'])(
@@ -98,6 +100,6 @@ test.each(['sources', 'wrong-content'])(
         immutableTag: `lib-usage-${verified.aggregate.producerRevision}-${digest}`,
       }),
     )
-    expect(() => readInstalledConsumerUsage(root, USAGE_NOW)).toThrow()
+    expect(() => readInstalledConsumerUsage(root, { now: USAGE_NOW })).toThrow()
   },
 )

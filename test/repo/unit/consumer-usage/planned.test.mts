@@ -112,7 +112,7 @@ test('planned APIs make a build-stubbed leaf fail the usage gate', () => {
     ],
   })
   expect(
-    findFleetUsedStubLeaves(root, report).map(finding => finding.leaf),
+    findFleetUsedStubLeaves(root, { report }).map(finding => finding.leaf),
   ).toEqual(['current'])
 })
 
@@ -151,7 +151,7 @@ test('planned moved leaves retain their source dependencies in the stub gate', (
     plannedApiReferences: [{ api: 'plannedApi', targetVersion: '7.0.2' }],
   })
   expect(
-    findFleetUsedStubLeaves(root, report).map(finding => finding.leaf),
+    findFleetUsedStubLeaves(root, { report }).map(finding => finding.leaf),
   ).toEqual(['other'])
 })
 

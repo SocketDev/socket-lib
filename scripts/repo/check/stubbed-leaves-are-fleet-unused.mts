@@ -99,8 +99,9 @@ export interface FleetUsageValidation {
  */
 export function findFleetUsedStubLeaves(
   repoRoot: string,
-  report: FleetLibUsageReport = auditFleetLibUsage(repoRoot),
+  options: { report?: FleetLibUsageReport | undefined } = {},
 ): StaleStubFinding[] {
+  const report = options.report ?? auditFleetLibUsage(repoRoot)
   const safe = new Set(graphSafeStubCandidates(repoRoot, report))
   const publicLeaves = new Set(exportLeaves(repoRoot))
   const listed = readUnexposedLeaves(repoRoot)
@@ -131,10 +132,9 @@ export function inspectFleetUsageValidation(
   repoRoot: string,
 ): FleetUsageValidation {
   const aggregate = readInstalledConsumerUsage(repoRoot)
-  const stale = findFleetUsedStubLeaves(
-    repoRoot,
-    aggregateFleetUsageReport(repoRoot, aggregate),
-  )
+  const stale = findFleetUsedStubLeaves(repoRoot, {
+    report: aggregateFleetUsageReport(repoRoot, aggregate),
+  })
   return {
     failed: stale.length > 0,
     stale,

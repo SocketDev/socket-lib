@@ -100,8 +100,9 @@ function validateUsageReceiptIdentity(value: object): void {
 
 export function readInstalledConsumerUsage(
   repoRoot: string,
-  now: number = Date.now(),
+  options: { now?: number | undefined } = {},
 ): ConsumerUsageAggregate {
+  const now = options.now ?? Date.now()
   const paths = consumerUsageCachePaths(repoRoot)
   let bytes: Buffer
   let receipt: ConsumerUsageReceipt

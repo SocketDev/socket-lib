@@ -154,10 +154,9 @@ test('keeps directly used leaves and their local relative dependencies live', ()
     aggregateFor(root),
     CONTEXT,
   )
-  const findings = findFleetUsedStubLeaves(
-    root,
-    aggregateFleetUsageReport(root, aggregate),
-  )
+  const findings = findFleetUsedStubLeaves(root, {
+    report: aggregateFleetUsageReport(root, aggregate),
+  })
   expect(findings.map(finding => finding.leaf)).toEqual(['entry', 'dependency'])
   expect(
     findings.every(finding => !finding.reason.includes('example-consumer')),
