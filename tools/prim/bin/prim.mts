@@ -5,16 +5,15 @@
 
 import process from 'node:process'
 
-import { isMainModule } from '../../../scripts/fleet/process/is-main-module.mts'
-import { runMain } from '../../../scripts/fleet/process/run-main.mts'
-import type { ScriptMeta } from '../../../scripts/fleet/process/run-main.mts'
+import { isMainModule } from '../../../src/cli/is-main-module.mjs'
+import { runMain } from '../../../src/cli/main.mjs'
+import type { ScriptMeta } from '../../../src/cli/main.mjs'
 import { runCli } from '../src/cli.mts'
 import { HELP } from '../src/describe.mts'
 
 const SCRIPT_META: ScriptMeta = {
   describe: 'audits and migrates JavaScript built-in usage to primordials',
   help: HELP,
-  json: 'native',
 }
 
 async function main(): Promise<void> {
