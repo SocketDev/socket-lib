@@ -34,7 +34,6 @@ import { verifyDist } from './verify-dist.mts'
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
 import { runMain } from '../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 import type { BuildSourceResult } from './steps.mts'
 
 const logger = getDefaultLogger()
@@ -280,9 +279,10 @@ async function main(): Promise<void> {
   }
 }
 
-const SCRIPT_META: ScriptMeta = {
+const SCRIPT_META = {
   describe:
     'bundle runner — rolldown for source + externals builds, TypeScript 7 for declarations',
+  heavyJob: 'build',
   help: `Usage: node scripts/repo/build/run.mts [flags]
 
   --src        build source code only
@@ -292,7 +292,7 @@ const SCRIPT_META: ScriptMeta = {
   --analyze    show bundle size analysis
   --quiet, --silent   suppress progress messages
   --verbose    show detailed build output`,
-}
+} as const
 
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
