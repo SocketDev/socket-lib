@@ -154,11 +154,7 @@ describe('inspectFleetUsageValidation', () => {
   it('fails fleet usage validation when consumer evidence is missing', () => {
     const repoRoot = writeFixtureRepo()
 
-    expect(inspectFleetUsageValidation(repoRoot)).toEqual({
-      failed: true,
-      missingEvidence: ['example-consumer'],
-      stale: [],
-    })
+    expect(() => inspectFleetUsageValidation(repoRoot)).toThrow()
   })
   it.each([false, true])(
     'main fails without success output when quiet=%s and evidence is missing',

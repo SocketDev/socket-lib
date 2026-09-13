@@ -9,9 +9,10 @@ import {
   auditFleetLibUsage,
   exportLeaves,
   graphSafeStubCandidates,
-  missingRosterRepos,
   rosterRepoNames,
 } from '../audit-fleet-lib-usage.mts'
+import { aggregateFleetUsageReport } from '../consumer-usage-aggregate.mts'
+import { readInstalledConsumerUsage } from '../consumer-usage/cache.mts'
 import {
   findStubsReachableFromShippedCode,
   reachableStubErrorMessage,
@@ -27,6 +28,7 @@ import { isMainModule } from '../../fleet/process/is-main-module.mts'
 import { runMain } from '../../fleet/process/run-main.mts'
 
 import type { ReachableStubFinding } from '../build-stubs/dist-graph.mts'
+import type { FleetLibUsageReport } from '../audit-fleet-lib-usage.mts'
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
 const logger = getScriptLogger()
@@ -87,7 +89,6 @@ export interface StaleStubFinding {
 
 export interface FleetUsageValidation {
   failed: boolean
-  missingEvidence: string[]
   stale: StaleStubFinding[]
 }
 
@@ -96,8 +97,10 @@ export interface FleetUsageValidation {
  * — each one would ship as a throwing stub to a real consumer, or names a
  * leaf that is no longer a public src-backed module.
  */
-export function findFleetUsedStubLeaves(repoRoot: string): StaleStubFinding[] {
-  const report = auditFleetLibUsage(repoRoot)
+export function findFleetUsedStubLeaves(
+  repoRoot: string,
+  report: FleetLibUsageReport = auditFleetLibUsage(repoRoot),
+): StaleStubFinding[] {
   const safe = new Set(graphSafeStubCandidates(repoRoot, report))
   const publicLeaves = new Set(exportLeaves(repoRoot))
   const listed = readUnexposedLeaves(repoRoot)
@@ -110,7 +113,10 @@ export function findFleetUsedStubLeaves(repoRoot: string): StaleStubFinding[] {
     const usage = report.leaves[leaf]
     let reason: string
     if (usage) {
-      reason = `imported by ${usage.repos.join(', ')}`
+      reason =
+        usage.repos.length > 0
+          ? `imported by ${usage.repos.join(', ')}`
+          : 'imported according to verified aggregate evidence'
     } else if (!publicLeaves.has(leaf)) {
       reason = 'no longer in the exports map'
     } else {
@@ -124,12 +130,13 @@ export function findFleetUsedStubLeaves(repoRoot: string): StaleStubFinding[] {
 export function inspectFleetUsageValidation(
   repoRoot: string,
 ): FleetUsageValidation {
-  const missingEvidence = missingRosterRepos(repoRoot)
-  const stale =
-    missingEvidence.length === 0 ? findFleetUsedStubLeaves(repoRoot) : []
+  const aggregate = readInstalledConsumerUsage(repoRoot)
+  const stale = findFleetUsedStubLeaves(
+    repoRoot,
+    aggregateFleetUsageReport(repoRoot, aggregate),
+  )
   return {
-    failed: missingEvidence.length > 0 || stale.length > 0,
-    missingEvidence,
+    failed: stale.length > 0,
     stale,
   }
 }
@@ -169,8 +176,8 @@ export function main(): void {
   }
   checkRosterCoverage()
 
-  const validation = inspectFleetUsageValidation(REPO_ROOT)
-  if (validation.missingEvidence.length === 0) {
+  try {
+    const validation = inspectFleetUsageValidation(REPO_ROOT)
     const { stale } = validation
     if (stale.length > 0) {
       for (let i = 0, { length } = stale; i < length; i += 1) {
@@ -185,12 +192,13 @@ export function main(): void {
       )
       failed = true
     }
-  } else {
+    failed ||= validation.failed
+  } catch (error) {
     logger.error(
-      `${CHECK} consumer usage is unknown. Where: .cache/consumer-evidence. Saw ${validation.missingEvidence.length} missing report(s) (${validation.missingEvidence.join(', ')}); wanted complete revision-bearing evidence for every consumer. Fix: run pnpm run audit:consumer-source in each consumer, then import through Wheelhouse pnpm run cascade:consumer-evidence --target <consumer> --consumer-evidence-to <socket-lib>.`,
+      `${CHECK} ${error instanceof Error ? error.message : 'Consumer evidence verification failed. Run pnpm run audit:consumer-usage.'}`,
     )
+    failed = true
   }
-  failed ||= validation.failed
 
   if (failed) {
     process.exitCode = 1
