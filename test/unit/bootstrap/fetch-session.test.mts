@@ -62,7 +62,7 @@ describe('bootstrap session fetch', () => {
       'scripts/repo/bootstrap/fleet.mjs',
       [
         "import { mkdirSync, writeFileSync } from 'node:fs'",
-        "if (process.argv[2] !== '--ensure-current') process.exit(12)",
+        "if (process.argv[2] !== '--quiet') process.exit(12)",
         "mkdirSync('.claude/hooks/fleet', { recursive: true })",
         "writeFileSync('.claude/hooks/fleet/index.cjs', '')",
         "process.stdout.write('fixture progress')",

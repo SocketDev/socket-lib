@@ -152,6 +152,18 @@ describe('runMainAsync — meta handling', () => {
     expect(process.exitCode).toBe(0)
   })
 
+  it('answers --describe --json with the entry identity', async () => {
+    setArgv('--describe', '--json')
+    const main = vi.fn()
+    await runMainAsync(main, META)
+    expect(main).not.toHaveBeenCalled()
+    expect(JSON.parse(logSpy.mock.calls[0]![0] as string)).toMatchObject({
+      description: 'does one thing well',
+      name: 'thing.mts',
+    })
+    expect(process.exitCode).toBe(0)
+  })
+
   it('answers --help with describe + usage without running main', async () => {
     setArgv('--help')
     const main = vi.fn()

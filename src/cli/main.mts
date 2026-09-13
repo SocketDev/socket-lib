@@ -15,6 +15,7 @@
 
 import { errorMessage } from '../errors/message.mjs'
 import { getDefaultLogger } from '../logger/default.mjs'
+import { getNodeFs } from '../node/fs.mjs'
 import { getNodeProcess } from '../node/process.mjs'
 
 /**
@@ -28,6 +29,21 @@ export function bareDoubleDashMessage(scriptName: string): string {
     '  Saw:   flags after `--`. The argv parser truncates there, so those ' +
     'flags were NOT applied and the script ran with its defaults.\n' +
     `  Fix:   drop the \`--\`, e.g. \`pnpm run ${scriptName} --dry-run\`.`
+  )
+}
+
+export function describeManifestText(meta: ScriptMeta): string {
+  const nodeProcess = getNodeProcess()
+  return JSON.stringify(
+    {
+      $schema:
+        'https://raw.githubusercontent.com/SocketDev/socket-wheelhouse/main/schemas/cli-describe.schema.json',
+      description: meta.describe,
+      name: scriptBasename(nodeProcess.argv[1]),
+      version: scriptVersion(),
+    },
+    undefined,
+    2,
   )
 }
 
@@ -140,7 +156,11 @@ export async function runMainAsync(
     // and while another holder has the repo lock.
     const request = helpRequest(argv)
     if (request) {
-      logger.log(helpText(request, meta))
+      logger.log(
+        request === 'describe' && argv.includes('--json')
+          ? describeManifestText(meta)
+          : helpText(request, meta),
+      )
       nodeProcess.exitCode = 0
       return
     }
@@ -168,5 +188,21 @@ export async function runMainAsync(
   } catch (e) {
     logger.error(errorMessage(e))
     nodeProcess.exitCode = 1
+  }
+}
+
+export function scriptBasename(filePath: string | undefined): string {
+  return filePath?.split(/[\\/]/u).pop() || 'script'
+}
+
+export function scriptVersion(): string {
+  try {
+    const fs = getNodeFs()
+    const parsed = JSON.parse(fs.readFileSync('package.json', 'utf8')) as {
+      version?: string | undefined
+    }
+    return parsed.version || '0.0.0'
+  } catch {
+    return '0.0.0'
   }
 }

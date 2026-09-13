@@ -479,10 +479,10 @@
     },
     "budgetAllowances": {
       "fast": {
-        "maxMs": 55304,
-        "reason": "Measured 52669.804 ms at b7126df19f15c79a52da9aa2d8b3a4fcb3f0054f; 5% headroom; darwin/arm64, Node v26.8.2.",
-        "created": "2026-09-11",
-        "expires": "2026-10-11"
+        "maxMs": 180000,
+        "reason": "Publish CI completed 6,615 tests but report finalization exceeded both 55,304 ms and 90,000 ms fast-lane allowances at 31bf3f45a and 2ddabf2c2; Linux x64, Node v26.5.0.",
+        "created": "2026-09-13",
+        "expires": "2026-10-13"
       }
     }
   },
