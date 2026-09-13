@@ -18,7 +18,7 @@ import type { VerifiedConsumerUsage } from '../../../../scripts/repo/consumer-us
 
 export const USAGE_NOW = Date.parse('2026-09-12T12:00:00.000Z')
 
-export function makeUsageFixture(): {
+export function makeUsageFixture(generatedAt: number = USAGE_NOW): {
   root: string
   verified: VerifiedConsumerUsage
 } {
@@ -41,7 +41,7 @@ export function makeUsageFixture(): {
     schemaVersion: 1 as const,
     complete: true as const,
     producerRevision: 'a'.repeat(40),
-    generatedAt: new Date(USAGE_NOW).toISOString(),
+    generatedAt: new Date(generatedAt).toISOString(),
     roster: consumerRosterIdentity(root),
     sources: { revisionCount: 1, digest: `sha256:${'b'.repeat(64)}` },
     usedLeafSpecifiers: ['@socketsecurity/lib-stable/entry'],
@@ -80,13 +80,13 @@ export function makeUsageFixture(): {
         repository: `${USAGE_REGISTRY}/${USAGE_REPOSITORY}`,
         immutableTag: consumerUsageImmutableTag(
           payload.producerRevision,
-          payload.sources.digest,
+          aggregate.contentDigest,
         ),
         manifestDigest: `sha256:${sha256Hex(manifestBytes)}`,
         layerDigest,
         producerRevision: payload.producerRevision,
         sourcesDigest: payload.sources.digest,
-        verifiedAt: new Date(USAGE_NOW).toISOString(),
+        verifiedAt: new Date(generatedAt).toISOString(),
       },
     },
   }

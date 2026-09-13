@@ -86,7 +86,7 @@ function validateUsageReceiptIdentity(value: object): void {
   if (
     typeof revision !== 'string' ||
     typeof sources !== 'string' ||
-    tag !== consumerUsageImmutableTag(revision, sources) ||
+    typeof tag !== 'string' ||
     repository !== `${USAGE_REGISTRY}/${USAGE_REPOSITORY}` ||
     typeof verifiedAt !== 'string' ||
     !Number.isFinite(Date.parse(verifiedAt)) ||
@@ -135,6 +135,17 @@ export function readInstalledConsumerUsage(
       now,
     },
   )
+  if (
+    receipt.immutableTag !==
+    consumerUsageImmutableTag(
+      aggregate.producerRevision,
+      aggregate.contentDigest,
+    )
+  ) {
+    throw new Error(
+      'Consumer usage receipt tag does not bind its aggregate content. Fix: run pnpm run audit:consumer-usage.',
+    )
+  }
   const verifiedAt = Date.parse(receipt.verifiedAt)
   if (
     verifiedAt > now + AGGREGATE_FUTURE_SKEW_MS ||

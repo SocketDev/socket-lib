@@ -48,7 +48,7 @@ function transportFixture(change?: 'immutable' | 'blob' | 'header') {
   return { root, verified, httpFn }
 }
 
-test('downloads anonymously and verifies the sources-bound immutable artifact', async () => {
+test('downloads anonymously and verifies the content-bound immutable artifact', async () => {
   vi.stubEnv('GH_TOKEN', 'YOUR_GITHUB_TOKEN')
   const { root, verified, httpFn } = transportFixture()
   const result = await fetchConsumerUsageAggregate(root, {
@@ -58,7 +58,7 @@ test('downloads anonymously and verifies the sources-bound immutable artifact', 
   expect(result).toEqual(verified)
   expect(httpFn.mock.calls[0]?.[1]).toBeUndefined()
   expect(httpFn.mock.calls.map(call => call[0])).toContain(
-    `https://ghcr.io/v2/socketdev/socket-wheelhouse-lib-usage/manifests/lib-usage-${'a'.repeat(40)}-${'b'.repeat(64)}`,
+    `https://ghcr.io/v2/socketdev/socket-wheelhouse-lib-usage/manifests/lib-usage-${verified.aggregate.producerRevision}-${verified.aggregate.contentDigest.slice(7)}`,
   )
   expect(JSON.stringify(httpFn.mock.calls)).not.toContain('YOUR_GITHUB_TOKEN')
 })
@@ -87,4 +87,25 @@ test.each([
       Buffer.from(JSON.stringify({ ...manifest, ...change })),
     ),
   ).toThrow()
+})
+
+test('refreshing unchanged source revisions creates a distinct immutable tag', () => {
+  const original = makeUsageFixture()
+  const refreshed = makeUsageFixture(USAGE_NOW + 60 * 60 * 1000)
+  roots.push(original.root, refreshed.root)
+  expect(refreshed.verified.aggregate.producerRevision).toBe(
+    original.verified.aggregate.producerRevision,
+  )
+  expect(refreshed.verified.receipt.sourcesDigest).toBe(
+    original.verified.receipt.sourcesDigest,
+  )
+  expect(refreshed.verified.aggregate.contentDigest).not.toBe(
+    original.verified.aggregate.contentDigest,
+  )
+  expect(refreshed.verified.receipt.immutableTag).not.toBe(
+    original.verified.receipt.immutableTag,
+  )
+  expect(refreshed.verified.receipt.immutableTag).toBe(
+    `lib-usage-${refreshed.verified.aggregate.producerRevision}-${refreshed.verified.aggregate.contentDigest.slice(7)}`,
+  )
 })

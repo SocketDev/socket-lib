@@ -41,15 +41,15 @@ function usageRegistryError(reason: string): never {
 
 export function consumerUsageImmutableTag(
   revision: string,
-  sourceSetDigest: string,
+  contentDigest: string,
 ): string {
   if (
     !/^[a-f0-9]{40}$/.test(revision) ||
-    !/^sha256:[a-f0-9]{64}$/.test(sourceSetDigest)
+    !/^sha256:[a-f0-9]{64}$/.test(contentDigest)
   ) {
     usageRegistryError('invalid immutable identity')
   }
-  return `lib-usage-${revision}-${sourceSetDigest.slice('sha256:'.length)}`
+  return `lib-usage-${revision}-${contentDigest.slice('sha256:'.length)}`
 }
 
 export function inspectUsageManifest(body: Buffer): {
@@ -201,9 +201,14 @@ export async function fetchConsumerUsageAggregate(
   if (typeof sourceSetDigest !== 'string') {
     usageRegistryError('an absent source-set digest')
   }
+  const aggregate = validateConsumerUsageAggregate(repoRoot, raw, {
+    producerRevision: identity.producerRevision,
+    sourceSetDigest,
+    now: opts?.now ?? Date.now(),
+  })
   const immutableTag = consumerUsageImmutableTag(
     identity.producerRevision,
-    sourceSetDigest,
+    aggregate.contentDigest,
   )
   const immutable = await fetchOciManifestEnvelope(
     USAGE_REPOSITORY,
@@ -215,11 +220,6 @@ export async function fetchConsumerUsageAggregate(
   if (!green.body.equals(immutable.body)) {
     usageRegistryError('different green and immutable manifests')
   }
-  const aggregate = validateConsumerUsageAggregate(repoRoot, raw, {
-    producerRevision: identity.producerRevision,
-    sourceSetDigest,
-    now: opts?.now ?? Date.now(),
-  })
   return {
     aggregate,
     bytes,

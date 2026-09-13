@@ -82,3 +82,22 @@ test('rejects a future-dated verification receipt', () => {
   )
   expect(() => readInstalledConsumerUsage(root, USAGE_NOW)).toThrow()
 })
+
+test.each(['sources', 'wrong-content'])(
+  'rejects an immutable tag bound to %s instead of aggregate content',
+  kind => {
+    const { root, verified } = installedFixture()
+    const digest =
+      kind === 'sources'
+        ? verified.receipt.sourcesDigest.slice(7)
+        : 'c'.repeat(64)
+    writeFileSync(
+      consumerUsageCachePaths(root).receipt,
+      JSON.stringify({
+        ...verified.receipt,
+        immutableTag: `lib-usage-${verified.aggregate.producerRevision}-${digest}`,
+      }),
+    )
+    expect(() => readInstalledConsumerUsage(root, USAGE_NOW)).toThrow()
+  },
+)
