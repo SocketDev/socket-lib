@@ -131,6 +131,15 @@ test('rejects malformed, duplicate, and unsorted planned references', () => {
   }
 })
 
+test('accepts producer locale ordering across identifier case', () => {
+  expect(() =>
+    validatePlannedApiReferences([
+      { api: 'findApi', targetVersion: '7.0.2' },
+      { api: 'MIN', targetVersion: '7.0.2' },
+    ]),
+  ).not.toThrow()
+})
+
 test('planned moved leaves retain their source dependencies in the stub gate', () => {
   const { root, verified } = fixture()
   writeFileSync(

@@ -47,7 +47,7 @@ export function validatePlannedApiReferences(
   for (const item of value) {
     const reference = validatePlannedReference(item)
     const key = `${reference['api']}\0${reference['targetVersion']}\0${reference['pathHint'] ?? ''}`
-    if (previous !== undefined && key <= previous) {
+    if (previous !== undefined && key.localeCompare(previous) <= 0) {
       invalidPlannedReference('unsorted or duplicate references')
     }
     previous = key

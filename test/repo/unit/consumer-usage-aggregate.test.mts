@@ -102,6 +102,19 @@ test('accepts complete evidence for a non-default roster owner', () => {
   )
 })
 
+test('ignores historical stable leaves outside the current export map', () => {
+  const root = fixtureRoot()
+  const aggregate = aggregateFor(root)
+  aggregate.usedLeafSpecifiers = [
+    '@socketsecurity/lib-stable/entry',
+    '@socketsecurity/lib-stable/package.json',
+  ]
+  aggregate.contentDigest = consumerAggregateContentDigest(aggregate)
+  expect(validateConsumerUsageAggregate(root, aggregate, CONTEXT)).toEqual(
+    aggregate,
+  )
+})
+
 test.each([
   { complete: false },
   { schemaVersion: 1 },

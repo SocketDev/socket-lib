@@ -12,9 +12,9 @@ import type { ConsumerUsageAggregate } from '../consumer-usage-aggregate.mts'
 export const USAGE_REGISTRY = 'ghcr.io'
 export const USAGE_REPOSITORY = 'socketdev/socket-wheelhouse/fleet-pack'
 export const USAGE_GREEN_TAG = 'lib-usage-green'
-export const USAGE_ARTIFACT_TYPE = 'application/vnd.socket.fleet-lib-usage.v1'
+export const USAGE_ARTIFACT_TYPE = 'application/vnd.socket.fleet-lib-usage.v2'
 export const USAGE_LAYER_TYPE =
-  'application/vnd.socket.fleet-lib-usage.aggregate.v1+json'
+  'application/vnd.socket.fleet-lib-usage.aggregate.v2+json'
 
 export interface ConsumerUsageReceipt {
   schemaVersion: 1

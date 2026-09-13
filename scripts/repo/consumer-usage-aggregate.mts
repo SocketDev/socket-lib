@@ -184,13 +184,16 @@ export function consumerAggregateUsedLeaves(
     ) {
       invalidAggregate('unsorted, duplicate, or non-string specifiers')
     }
-    // Match either public Lib package alias and capture its complete subpath.
-    const match = /^@socketsecurity\/(?:lib|lib-stable)\/(.+)$/.exec(specifier)
-    const leaf = match?.[1]
-    if (!leaf || !publicLeaves.has(leaf)) {
+    // Capture the Lib package alias and its complete export subpath.
+    const match = /^@socketsecurity\/(lib|lib-stable)\/(.+)$/.exec(specifier)
+    const packageName = match?.[1]
+    const leaf = match?.[2]
+    if (!leaf || (packageName === 'lib' && !publicLeaves.has(leaf))) {
       invalidAggregate('a non-public leaf specifier')
     }
-    used.add(leaf)
+    if (publicLeaves.has(leaf)) {
+      used.add(leaf)
+    }
     previous = specifier
   }
   return [...used].toSorted()
