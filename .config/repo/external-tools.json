@@ -166,36 +166,37 @@
     "uv": {
       "notes": [
         "uv (Astral) — the fleet's Python project tool. Installed in the bootstrap (release-asset, SRI-verified per platform, like janus/codedb) so a hash-locked uv install is available BEFORE the security-tools step that needs it (SkillSpector installs via a uv project + uv.lock, no pipx — the fleet 'uv for projects' rule). external-tools/update.mts re-hashes the GitHub release assets on a bump.",
-        "0.11.21 published 2026-06-11; the GitHub release is a known-publisher binary distribution (the soak targets npm freshpub typosquats), past its 7-day window now — no soakBypass needed. Pinned bare; the installer prepends no v (uv tags have no v prefix)."
+        "0.12.10 published 2026-09-04; the GitHub release is a known-publisher binary distribution and has passed the 7-day soak. Pinned bare; the installer prepends no v (uv tags have no v prefix)."
       ],
       "description": "uv — Astral Python package/project manager (pinned, SRI-verified)",
       "repository": "github:astral-sh/uv",
-      "version": "0.12.9",
+      "version": "0.12.10",
+      "versionDate": "2026-09-04",
       "binaryName": "uv",
       "platforms": {
         "darwin-arm64": {
           "asset": "uv-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-tl/z5hF4bIO9hR3b5NrEgjoOsdDTKYiCIdLpfAj1KvvSid7psCVvH64zingxdtFiGSmD9wHWjWyTtMp79HocnA=="
+          "integrity": "sha512-D732rzfulmMjKcIs8qbNbNM2BVwMf0GV1BfDHyRkyO/FwqaeOs1I60sxChQDM/P5tWKEEt6X+YoLo6HB1fJeAQ=="
         },
         "darwin-x64": {
           "asset": "uv-x86_64-apple-darwin.tar.gz",
-          "integrity": "sha512-BWKy9k2jR3EQcPBRbTY/0ZB4C3HUlmgr5fL4OBNl6CnjKLz2RdskHT01I19hdi5qGh4HC6IpIDsdCIBADKfymw=="
+          "integrity": "sha512-i03vLkcc1+ST5L3fX+ZocURVSGTu+yRSAz/e4OLKy263dwfVfFqjzy0Y9d5syMEOdiLtWELhD6DmbfkKxqecJw=="
         },
         "linux-arm64": {
           "asset": "uv-aarch64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-BrrJYbNu+N1cAmRFzXPAFjHhyOx/4poEtgEueN6mcQZHZFC4VUZzmJGxdiEVSLXRa0qYEEzTos5smUA0htmvzA=="
+          "integrity": "sha512-w4i6bv5pd5ZZBAjmgSdMKvQMS6rsR+GEWTOmqYxVRjLnGkN5joRQnJjNmpUaP8r6cAwf1iihNQs34yTnTCJf1Q=="
         },
         "linux-x64": {
           "asset": "uv-x86_64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-gf6Ot90syNl1Mvvu48hS3DDdhSwCEOq6x9xLf08Ojxs1tWWQ8PBr4oDBaY1cTP4lxZX2nxD6fKsuii1p1gS6WA=="
+          "integrity": "sha512-7xnBaVDcjPGTpLMRQG9Cd/KlkgaxP7zPJaIBkkM5rzy1ExbY4v9yGkS9/v0tRgwbbyx0229BGcBfN5bBV8kAXw=="
         },
         "win32-arm64": {
           "asset": "uv-aarch64-pc-windows-msvc.zip",
-          "integrity": "sha512-53kiRH2Ngxdr1v6C6ougI+9ep+qFlSEE/C94Do5BCkVONqFcpry1XlHVGNWWEPRWNaM7wyzGFyrdLyXkRUCKVw=="
+          "integrity": "sha512-kwGYPWISuLPykgsBl15tEVM2SLgv4Tk0P8HXIEfEQ8W9nYAuRhMkmNFT9B55DC3qbkYP1fB0w6986eLbmu35uw=="
         },
         "win32-x64": {
           "asset": "uv-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-ncP08GYr0ka7l0ehQB7LeN/Pg0TbM7JS+FwqSLUyVtlnwvf/rq1zbKzO24dJwrCaOXBxMQvAcY+Tt1dXDtUcSw=="
+          "integrity": "sha512-u6MzyPBMboyP9l0K1paX1d7piiP/4NOEaLr1tO7hnDCHvDW7HAy62vbEpFERMJ+GJLDXlPRDLnXQ18tDkJDrCQ=="
         }
       },
       "origin": "gh-asset"
