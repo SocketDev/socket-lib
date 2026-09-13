@@ -32,7 +32,7 @@ function transportFixture(change?: 'immutable' | 'blob' | 'header') {
         body: change === 'blob' ? Buffer.from('tampered') : verified.bytes,
       }
     let body = verified.manifestBytes
-    if (change === 'immutable' && !url.endsWith('/green'))
+    if (change === 'immutable' && !url.endsWith('/lib-usage-green'))
       body = Buffer.from(`${body.toString()}\n`)
     return {
       status: 200,
@@ -58,7 +58,10 @@ test('downloads anonymously and verifies the content-bound immutable artifact', 
   expect(result).toEqual(verified)
   expect(httpFn.mock.calls[0]?.[1]).toBeUndefined()
   expect(httpFn.mock.calls.map(call => call[0])).toContain(
-    `https://ghcr.io/v2/socketdev/socket-wheelhouse-lib-usage/manifests/lib-usage-${verified.aggregate.producerRevision}-${verified.aggregate.contentDigest.slice(7)}`,
+    'https://ghcr.io/v2/socketdev/socket-wheelhouse/fleet-pack/manifests/lib-usage-green',
+  )
+  expect(httpFn.mock.calls.map(call => call[0])).toContain(
+    `https://ghcr.io/v2/socketdev/socket-wheelhouse/fleet-pack/manifests/lib-usage-${verified.aggregate.producerRevision}-${verified.aggregate.contentDigest.slice(7)}`,
   )
   expect(JSON.stringify(httpFn.mock.calls)).not.toContain('YOUR_GITHUB_TOKEN')
 })

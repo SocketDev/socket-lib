@@ -10,7 +10,8 @@ import { validateConsumerUsageAggregate } from '../consumer-usage-aggregate.mts'
 import type { ConsumerUsageAggregate } from '../consumer-usage-aggregate.mts'
 
 export const USAGE_REGISTRY = 'ghcr.io'
-export const USAGE_REPOSITORY = 'socketdev/socket-wheelhouse-lib-usage'
+export const USAGE_REPOSITORY = 'socketdev/socket-wheelhouse/fleet-pack'
+export const USAGE_GREEN_TAG = 'lib-usage-green'
 export const USAGE_ARTIFACT_TYPE = 'application/vnd.socket.fleet-lib-usage.v1'
 export const USAGE_LAYER_TYPE =
   'application/vnd.socket.fleet-lib-usage.aggregate.v1+json'
@@ -170,7 +171,7 @@ export async function fetchConsumerUsageAggregate(
   const token = await anonymousUsageToken(httpFn)
   const green = await fetchOciManifestEnvelope(
     USAGE_REPOSITORY,
-    'green',
+    USAGE_GREEN_TAG,
     token,
     USAGE_REGISTRY,
     { httpFn },
