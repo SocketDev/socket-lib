@@ -169,7 +169,7 @@ export function main(): void {
           `${coverage.stale.length ? `, records departed member(s) ${coverage.stale.join(', ')}` : ''};` +
           ' wanted the recorded roster to match the current one.\n' +
           '  Why: a leaf only an unjudged member imports reads as fleet-unused, gets compiled out, and throws for that member at runtime.\n' +
-          '  Fix: run `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`, commit the regenerated list, and rebuild.',
+          '  Fix: run `pnpm run audit:consumer-usage --write-stub-list`, commit the regenerated list, and rebuild.',
       )
       failed = true
     }
@@ -188,7 +188,7 @@ export function main(): void {
         `${CHECK} the committed stub list is stale against the roster.\n` +
           '  Where: .config/repo/socket-wheelhouse.json\n' +
           `  Saw: ${stale.length} listed leaf/leaves the fleet now reaches; wanted every listed leaf fleet-unused.\n` +
-          '  Fix: run `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`, commit the regenerated list, and rebuild.',
+          '  Fix: run `pnpm run audit:consumer-usage --write-stub-list`, commit the regenerated list, and rebuild.',
       )
       failed = true
     }
@@ -253,7 +253,7 @@ function reportDistStubs(quiet: boolean): boolean {
         `${CHECK} the built dist ships throwing stubs outside the allowlist.\n` +
           '  Where: dist/ vs .config/repo/socket-wheelhouse.json\n' +
           `  Saw: ${unlisted.length} banner-marked dist module(s) not in the committed stub list; wanted every stub allowlisted.\n` +
-          '  Fix: rebuild from a clean dist, or regenerate the list with `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`.',
+          '  Fix: rebuild from a clean dist, or regenerate the list with `pnpm run audit:consumer-usage --write-stub-list`.',
       )
       failed = true
     }

@@ -179,7 +179,7 @@ function main(): void {
   )
   // Record the exposure durably. The stub list is regenerated from fleet
   // consumers, so a leaf only dropped from it comes back on the next
-  // --write-stub-list and ships throwing again.
+  // `pnpm run audit:consumer-usage --write-stub-list` and ships throwing again.
   addKeptLeaves(
     REPO_ROOT,
     plan.exposed.map(leaf => ({

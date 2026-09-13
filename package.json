@@ -4049,6 +4049,7 @@
     "setup:ci:remote": "node scripts/fleet/ci/remote/setup.mts",
     "audit:consumer-source": "node scripts/fleet/audit/consumer-source.mts",
     "audit:consumer-usage": "node scripts/repo/consumer-usage/sync.mts",
+    "expose:leaf": "node scripts/repo/expose-leaf.mts",
     "ai:odai:diagnose": "node scripts/fleet/ai/odai/run.mts diagnose",
     "update:chrome": "node scripts/fleet/update/chrome.mts",
     "mcp:schemas:check": "node scripts/fleet/mcp/schemas.mts check",

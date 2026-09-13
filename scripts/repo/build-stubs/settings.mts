@@ -87,8 +87,8 @@ export function keptLeafEntries(repoRoot: string): KeptLeaf[] {
  * Add kept-leaf entries, leaving every other key untouched.
  *
  * Exposure survives only when recorded HERE. Dropping a leaf from
- * `unexposed.leaves` alone lasts until the next `--write-stub-list`, which
- * recomputes that list from fleet consumers and re-adds anything no repo
+ * `unexposed.leaves` alone lasts until the next consumer usage stub-list write,
+ * which recomputes that list from fleet consumers and re-adds anything no repo
  * imports by specifier. Existing entries win, so a hand-written reason is never
  * replaced by a generated one.
  */
