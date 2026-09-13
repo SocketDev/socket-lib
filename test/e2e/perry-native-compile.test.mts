@@ -1,5 +1,6 @@
 /**
  * @file E2E: compile a socket-lib surface to a native binary with Perry, then
+ *   runner-collection: opt-in lane
  *   run it. Guards the lib's ahead-of-time-compile support — the `node:smol-*`
  *   deferral and the `require` binding in `node/module.ts` — against
  *   regressions (both "compiles" and "runs"). Skipped when the pinned

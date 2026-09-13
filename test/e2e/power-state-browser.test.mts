@@ -1,3 +1,4 @@
+// runner-collection: opt-in lane
 import path from 'node:path'
 import vm from 'node:vm'
 

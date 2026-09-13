@@ -1,5 +1,6 @@
 /**
  * @file E2E: bundle a socket-lib surface for the BROWSER with webpack AND with
+ *   runner-collection: opt-in lane
  *   esbuild and assert it bundles clean. Guards that node/module.ts's bare
  *   `module` import stays browser-safe: the lib's package.json `browser` field
  *   maps every node builtin (incl. `module`) to `false`, so a browser bundler
