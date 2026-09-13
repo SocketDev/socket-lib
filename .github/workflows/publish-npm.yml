@@ -111,7 +111,7 @@ jobs:
           git remote add origin "${SERVER_URL}/${REPOSITORY}"
           # Backfill's content ref wins; otherwise the dispatched ref.
           FETCH_REF="${CHECKOUT_REF:-${TRIGGER_REF}}"
-          FETCH_ARGS=(--prune --depth 1 origin "${FETCH_REF}")
+          FETCH_ARGS=(--prune origin "${FETCH_REF}")
           # --tags stays on the fetch line itself so the
           # version-derivation-jobs-have-tags gate can see it.
           if [ -n "${GITHUB_TOKEN}" ]; then

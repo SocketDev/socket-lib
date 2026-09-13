@@ -134,6 +134,9 @@ export declare function ghcrBasicAuthHeader(env: Record<string, string | undefin
  * token can be obtained.
  */
 export declare function getGhcrToken(repo: string, registry: string, httpFn?: GhcrHttpGetFn): Promise<string>;
+export declare function getAnonymousGhcrToken(repo: string, registry: string, options?: {
+  readonly httpFn?: GhcrHttpGetFn | undefined;
+} | undefined): Promise<string | undefined>;
 /**
  * GET one manifest by tag or digest. Resolves a multi-arch index to its first
  * sub-manifest so a concrete image manifest that carries the artifact layer is

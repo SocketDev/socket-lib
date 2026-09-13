@@ -3325,13 +3325,7 @@ function ghcrBasicAuthHeader(env) {
  * token can be obtained.
  */
 async function getGhcrToken(repo, registry, httpFn = httpGet) {
-  const primary = await httpFn(ghcrTokenUrl(repo, registry), {
-    headers: { accept: 'application/json' },
-  })
-  const primaryToken =
-    primary.status >= 200 && primary.status < 300
-      ? tokenFromBody(primary.body)
-      : void 0
+  const primaryToken = await getAnonymousGhcrToken(repo, registry, { httpFn })
   if (primaryToken) return primaryToken
   const header = firstHeader(
     (await httpFn(`https://${registry}/v2/`)).headers['www-authenticate'],
@@ -3366,6 +3360,15 @@ async function getGhcrToken(repo, registry, httpFn = httpGet) {
     throw new Error(`Cannot obtain a GHCR pull token.
   Where: ${challenge.realm} for repo ${repo}\n  Saw:   HTTP ${res.status} with no token in the body, anonymously or with the workflow token\n  Fix:   make the package public, or give the job a token with read:packages on it.`)
   return token
+}
+async function getAnonymousGhcrToken(repo, registry, options) {
+  const response = await (options?.httpFn ?? httpGet)(
+    ghcrTokenUrl(repo, registry),
+    { headers: { accept: 'application/json' } },
+  )
+  return response.status >= 200 && response.status < 300
+    ? tokenFromBody(response.body)
+    : void 0
 }
 /**
  * GET one manifest by tag or digest. Resolves a multi-arch index to its first
@@ -4259,6 +4262,7 @@ export {
   firstHeader,
   fleetPackOwnedPaths,
   fleetTrackedAllowlist,
+  getAnonymousGhcrToken,
   getGhcrToken,
   ghcrBasicAuthHeader,
   ghcrBundleRepo,
