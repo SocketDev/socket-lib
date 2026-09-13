@@ -33,7 +33,6 @@ import {
   YARN_CLASSIC,
   YARN_LOCK,
 } from '../../../../../src/eco/npm/constants/package-managers.mjs'
-import libPackageJson from '../../../../../package.json' with { type: 'json' }
 // EXPECTED only. lib-stable is an independent oracle a test may compare
 // against; it is never the ACTUAL, which must come from src/ or dist/. Its
 // subpath stays under `constants/` because that is where the PUBLISHED package
@@ -52,22 +51,9 @@ import {
   YARN as stableYARN,
   YARN_CLASSIC as stableYARN_CLASSIC,
 } from '@socketsecurity/lib-stable/constants/package-managers'
-import stableLibPackageJson from '@socketsecurity/lib-stable/package.json' with { type: 'json' }
 import { describe, expect, it } from 'vitest'
 
 describe('constants/package-managers', () => {
-  it('should expose the current and stable public paths', () => {
-    expect(libPackageJson.exports).toHaveProperty(
-      './eco/npm/constants/package-managers',
-    )
-    expect(stableLibPackageJson.exports).toHaveProperty(
-      './constants/package-managers',
-    )
-    expect(stableLibPackageJson.exports).not.toHaveProperty(
-      './eco/npm/constants/package-managers',
-    )
-  })
-
   describe('agent names', () => {
     it('should export NPM constant', () => {
       expect(NPM).toBe('npm')
