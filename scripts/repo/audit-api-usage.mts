@@ -24,7 +24,7 @@
  *     <dir,…>]
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -37,14 +37,13 @@ import {
 import type { AcornNode } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 
 import {
-  consumerEvidencePath,
   readConsumerEvidence,
+  readExternalConsumerNames,
 } from './consumer-evidence.mts'
 
 import { renderReport } from './audit-api-usage/render.mts'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { runMain } from '../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
@@ -58,19 +57,6 @@ const PKG_STABLE = '@socketsecurity/lib-stable'
 
 // Consumer evidence covers every declared consumer and the wheelhouse.
 const LIB_ROOT = path.resolve(import.meta.dirname, '../..')
-const DEFAULT_CONSUMERS = [
-  'socket-addon',
-  'socket-bin',
-  'socket-btm',
-  'socket-cli',
-  'socket-mcp',
-  'socket-packageurl-js',
-  'socket-registry',
-  'socket-sdk-js',
-  'socket-vscode',
-  'socket-webext',
-  'socket-wheelhouse',
-]
 
 const SOURCE_EXTS = new Set([
   '.cjs',
@@ -279,7 +265,7 @@ function main(): number {
   const consumers =
     argv.includes('--consumers') && consumersArg
       ? consumersArg.split(',')
-      : DEFAULT_CONSUMERS
+      : readExternalConsumerNames(LIB_ROOT)
 
   const libRoot = path.resolve(import.meta.dirname, '../..')
   const subpaths = exportSubpaths(path.join(libRoot, 'package.json'))
@@ -420,7 +406,10 @@ if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
 }
 
-function collectConsumerReferences(consumers: readonly string[]): UsageRef[] {
+export function collectConsumerReferences(
+  consumers: readonly string[],
+  repoRoot: string = LIB_ROOT,
+): UsageRef[] {
   // Walk every consumer, collecting refs, skipping socket-lib's own tree.
   const allRefs: UsageRef[] = []
   for (
@@ -429,11 +418,7 @@ function collectConsumerReferences(consumers: readonly string[]): UsageRef[] {
     i += 1
   ) {
     const repo = consumers[i]!
-    if (!existsSync(consumerEvidencePath(LIB_ROOT, repo))) {
-      getScriptLogger().warn(`skip (absent): ${repo}`)
-      continue
-    }
-    const evidence = readConsumerEvidence(LIB_ROOT, repo)
+    const evidence = readConsumerEvidence(repoRoot, repo)
     for (const entry of evidence.files) {
       const file = `./${entry.path}`
       const source = entry.text

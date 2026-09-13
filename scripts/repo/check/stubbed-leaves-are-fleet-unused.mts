@@ -128,7 +128,7 @@ export function inspectFleetUsageValidation(
   const stale =
     missingEvidence.length === 0 ? findFleetUsedStubLeaves(repoRoot) : []
   return {
-    failed: stale.length > 0,
+    failed: missingEvidence.length > 0 || stale.length > 0,
     missingEvidence,
     stale,
   }
@@ -185,11 +185,12 @@ export function main(): void {
       )
       failed = true
     }
-  } else if (!quiet) {
-    logger.warn(
-      `${CHECK} fleet-usage revalidation skipped — ${validation.missingEvidence.length} consumer evidence report(s) are unavailable. The committed roster coverage and built-dist checks remain enforced.`,
+  } else {
+    logger.error(
+      `${CHECK} consumer usage is unknown. Where: .cache/consumer-evidence. Saw ${validation.missingEvidence.length} missing report(s) (${validation.missingEvidence.join(', ')}); wanted complete revision-bearing evidence for every consumer. Fix: run pnpm run audit:consumer-source in each consumer, then import through Wheelhouse pnpm run cascade:consumer-evidence --target <consumer> --consumer-evidence-to <socket-lib>.`,
     )
   }
+  failed ||= validation.failed
 
   if (failed) {
     process.exitCode = 1

@@ -6,6 +6,7 @@ import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import {
   consumerEvidencePath,
   readConsumerEvidence,
+  readExternalConsumerNames,
 } from '../../../scripts/repo/consumer-evidence.mts'
 
 const fixtures: string[] = []
@@ -55,6 +56,26 @@ test('accepts complete revision-bearing evidence', () => {
     'a'.repeat(40),
   )
 })
+test('uses current roster consumers and excludes the audited library', () => {
+  const root = fixtureRoot()
+  writeFileSync(
+    path.join(
+      root,
+      '.claude/skills/fleet/cascading-commits/lib/fleet-repos.json',
+    ),
+    JSON.stringify({
+      repos: [
+        { name: 'example-consumer', owner: 'example-owner' },
+        { name: 'socket-lib', owner: 'example-owner' },
+        { name: 'example-new-consumer', owner: 'example-owner' },
+      ],
+    }),
+  )
+  expect(readExternalConsumerNames(root)).toEqual([
+    'example-consumer',
+    'example-new-consumer',
+  ])
+})
 test.each([
   { revision: 'branch' },
   { complete: false },
@@ -78,5 +99,17 @@ test('rejects a symlink to external evidence', () => {
   const file = consumerEvidencePath(root, 'example-consumer')
   mkdirSync(path.dirname(file), { recursive: true })
   symlinkSync(external, file)
+  expect(() => readConsumerEvidence(root, 'example-consumer')).toThrow()
+})
+test('rejects complete evidence for a consumer absent from the roster', () => {
+  const root = fixtureRoot()
+  writeEvidence(root)
+  writeFileSync(
+    path.join(
+      root,
+      '.claude/skills/fleet/cascading-commits/lib/fleet-repos.json',
+    ),
+    JSON.stringify({ repos: [] }),
+  )
   expect(() => readConsumerEvidence(root, 'example-consumer')).toThrow()
 })

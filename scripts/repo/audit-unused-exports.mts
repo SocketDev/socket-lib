@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-import { readConsumerEvidence } from './consumer-evidence.mts'
+import {
+  readConsumerEvidence,
+  readExternalConsumerNames,
+} from './consumer-evidence.mts'
 /**
  * @file Audit which individual `src/` exports — functions, classes, consts —
  *   have zero references anywhere: same-file use, other socket-lib source, or
@@ -28,25 +31,6 @@ import { runMain } from '../fleet/process/run-main.mts'
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
-
-// Consumer evidence covers every fleet repo that
-// consumes the lib, plus the wheelhouse (its template/ ships fleet-wide).
-export const CONSUMER_REPOS = [
-  'sdxgen',
-  'socket-addon',
-  'socket-bin',
-  'socket-btm',
-  'socket-cli',
-  'socket-mcp',
-  'socket-packageurl-js',
-  'socket-registry',
-  'socket-sdk-js',
-  'socket-vscode',
-  'socket-webext',
-  'socket-wheelhouse',
-  'stuie',
-  'ultrathink',
-]
 
 const IDENTIFIER_RE = /[$A-Za-z_][\w$]*/g
 const REEXPORT_LINE_RE = /^\s*export\s+(?:\*|\{|type\s+\{)[^;]*?\sfrom\s/
@@ -258,8 +242,9 @@ function main(): number {
       zone: 'test',
     })
   }
-  for (let i = 0, { length } = CONSUMER_REPOS; i < length; i += 1) {
-    const repo = CONSUMER_REPOS[i]!
+  const consumers = readExternalConsumerNames(libRoot)
+  for (let i = 0, { length } = consumers; i < length; i += 1) {
+    const repo = consumers[i]!
     const evidence = readConsumerEvidence(libRoot, repo)
     for (const entry of evidence.files) {
       const file = entry.path
