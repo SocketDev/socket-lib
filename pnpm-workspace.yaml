@@ -537,46 +537,46 @@ patchedDependencies:
   # Indirects the `node-gyp/bin/node-gyp.js` require.resolve so the rolldown
   # bundle doesn't statically inline node-gyp; consumer: pacote → run-script
   # in the bundled dist tree.
-  '@npmcli/run-script@10.0.4': patches/@npmcli__run-script@10.0.4.patch
+  '@npmcli/run-script@10.0.4': patches/repo/@npmcli__run-script@10.0.4.patch
   # Replaces the node:http2 constants import with inline lowercase header
   # literals so the browser bundle (which stubs http2 to false) can load the
   # sigstore signer; consumer: packages/provenance via the browser field.
-  '@sigstore/sign@4.1.1': patches/@sigstore__sign@4.1.1.patch
+  '@sigstore/sign@4.1.1': patches/repo/@sigstore__sign@4.1.1.patch
   # Telemetry lockdown: removes TelemetryManager's Datadog ingest endpoint so
   # the dev-only @yarnpkg/core (reached via @yarnpkg/extensions, the
   # packageExtensions data pkg-ext/data.ts bundles) can never upload metrics;
   # the telemetry-deps-are-reviewed payload scan gates the shape.
   # On a bump, regenerate via `pnpm patch @yarnpkg/core` + `pnpm patch-commit`.
-  '@yarnpkg/core@4.9.1': patches/@yarnpkg__core@4.9.1.patch
+  '@yarnpkg/core@4.9.1': patches/repo/@yarnpkg__core@4.9.1.patch
   # Dedup compat: adds a `require` export condition + source/index.cjs so the
   # ESM-only chalk@5 stays require()-able by chalk@4's CJS consumers (@yarnpkg,
   # type-coverage) after the chalk 4/5 collapse.
-  chalk@5.6.2: patches/chalk@5.6.2.patch
+  chalk@5.6.2: patches/repo/chalk@5.6.2.patch
   # Dedup compat: serves js-tokens@4's regex + matchToToken on the `require`
   # condition (for @babel/code-frame) while keeping js-tokens@10's generator on
   # `import`, after the js-tokens 4/10 collapse.
-  js-tokens@10.0.0: patches/js-tokens@10.0.0.patch
+  js-tokens@10.0.0: patches/repo/js-tokens@10.0.0.patch
   # minipass 7 ships a named export ({ Minipass }) where 3.x was a default;
   # these three re-pin the import shape + peer range so the deduped minipass 7
   # tree works; consumer: cacache/make-fetch-happen in src/external.
-  minipass-flush@1.0.7: patches/minipass-flush@1.0.7.patch
+  minipass-flush@1.0.7: patches/repo/minipass-flush@1.0.7.patch
   # Same minipass 7 named-export fix, plus buffer.length → bufferLength for
   # minipass 7's accessor rename; consumer: make-fetch-happen pipelines.
-  minipass-pipeline@1.2.4: patches/minipass-pipeline@1.2.4.patch
+  minipass-pipeline@1.2.4: patches/repo/minipass-pipeline@1.2.4.patch
   # Same minipass 7 named-export + peer-range fix; consumer: cacache writes.
-  minipass-sized@1.0.3: patches/minipass-sized@1.0.3.patch
+  minipass-sized@1.0.3: patches/repo/minipass-sized@1.0.3.patch
   # Drops the unused Find-VisualStudio.cs C# helper so the packed tree carries
   # no compiled-language source a scanner would flag; consumer: optional gyp
   # builds under allowBuilds.
-  node-gyp@12.4.0: patches/node-gyp@12.4.0.patch
+  node-gyp@12.4.0: patches/repo/node-gyp@12.4.0.patch
   # Swaps `instanceof Error` for the cross-realm Error.isError (with shim) so
   # cause chains survive vm/worker realms; consumer: errors/predicates parity
   # with src's own isError semantics.
-  pony-cause@2.1.11: patches/pony-cause@2.1.11.patch
+  pony-cause@2.1.11: patches/repo/pony-cause@2.1.11.patch
   # Dedup compat: restores content-type@1's req/res-object input to parse()
   # that body-parser@2.2.2 still relies on, after the content-type 1/2
   # collapse. Carried up from the 2.0.0 entry this replaced.
-  content-type@2.1.0: patches/content-type@2.1.0.patch
+  content-type@2.1.0: patches/repo/content-type@2.1.0.patch
 
 # pnpm 11's packageManager-version-check failure policy. `warn` lets the
 # install proceed with a mismatched pnpm (emitting a warning) rather than
