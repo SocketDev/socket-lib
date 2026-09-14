@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
 import { isKnownShimExtension } from '../../../../src/exe/path/bin-kinds.mjs'
-import { windowsShimRelPath } from '../../../../src/exe/path/resolve-shims.mjs'
+import {
+  posixShimRelPath,
+  windowsShimRelPath,
+} from '../../../../src/exe/path/resolve-shims.mjs'
 
 describe('Windows shim target parsing on every platform', () => {
   it.each([
@@ -144,6 +147,26 @@ describe('Windows shim target parsing on every platform', () => {
       }
     },
   )
+
+  it('rejects oversized Windows wrappers', () => {
+    expect(
+      windowsShimRelPath({
+        basename: 'yarn',
+        extLowered: '.cmd',
+        source: `${' '.repeat(64 * 1024)}"%~dp0\\node.exe" "%~dp0\\example\\bin.js" %*`,
+      }),
+    ).toBe('')
+  })
+
+  it('rejects oversized installer shell wrappers', () => {
+    expect(
+      posixShimRelPath({
+        basename: 'pnpm',
+        extLowered: '',
+        source: `${' '.repeat(64 * 1024)}exec node "$basedir/example/bin.js" "$@"`,
+      }),
+    ).toBe('')
+  })
 
   it.each(['', '.cmd', '.exe', '.ps1'])(
     'recognizes supported extension %s',

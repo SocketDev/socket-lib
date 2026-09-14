@@ -14,8 +14,15 @@
  *   the I/O.
  */
 
-import { StringPrototypeStartsWith } from '../../primordials/string.mjs'
+import { KB } from '../../constants/units.mjs'
+import {
+  StringPrototypeIndexOf,
+  StringPrototypeSlice,
+  StringPrototypeStartsWith,
+} from '../../primordials/string.mjs'
 import { BIN_SHIM_FORMAT, binShimFormat } from './bin-kinds.mjs'
+
+export const SHIM_SOURCE_MAX_LENGTH = 64 * KB
 
 /**
  * One shim to parse: its basename, its lowered extension, and its source text.
@@ -30,23 +37,60 @@ export type ShimSource = {
  * The generic `cmd-shim` formats, used for every package binary that does not
  * ship a bespoke wrapper.
  *
- * Verbatim shim bodies: docs/references/repo/cmd-shim-formats.md. The regexes
+ * Verbatim shim bodies: docs/references/repo/cmd-shim-formats.md. The parsers
  * match that exact generated text, so an upstream wording change yields an
  * empty path rather than a loud failure.
  */
 export function cmdShimRelPath(config: ShimSource): string {
   const { extLowered, source } = config
   if (extLowered === '.cmd') {
-    // require-regex-comment: captures the script path from the cmd-shim `"%dp0%\<path>" %*` tail.
-    return /(?<="%dp0%\\)[^"\r\n]+(?=" %\*\r?\n)/.exec(source)?.[0] || ''
+    return extractShimLinePath(source, '"%dp0%\\', '"', '" %*')
   }
   if (extLowered === '') {
-    // require-regex-comment: captures the script path from the cmd-shim `"$basedir/<path>" "$@"` tail.
-    return /(?<="\$basedir\/)[^"\r\n]+(?=" "\$@"\r?\n)/.exec(source)?.[0] || ''
+    return extractShimLinePath(source, '"$basedir/', '"', '" "$@"')
   }
   if (extLowered === '.ps1') {
-    // require-regex-comment: captures the script path from the cmd-shim `"$basedir/<path>" $args` tail.
-    return /(?<="\$basedir\/)[^"\r\n]+(?=" \$args\r?\n)/.exec(source)?.[0] || ''
+    return extractShimLinePath(source, '"$basedir/', '"', '" $args')
+  }
+  return ''
+}
+
+export function extractShimLinePath(
+  source: string,
+  prefix: string,
+  pathTerminator: string,
+  tail: string,
+): string {
+  if (source.length > SHIM_SOURCE_MAX_LENGTH) {
+    return ''
+  }
+  let lineStart = 0
+  while (lineStart < source.length) {
+    const newlineIndex = StringPrototypeIndexOf(source, '\n', lineStart)
+    const lineEnd = newlineIndex === -1 ? source.length : newlineIndex
+    let cursor = lineStart
+    while (cursor < lineEnd) {
+      const prefixIndex = StringPrototypeIndexOf(source, prefix, cursor)
+      if (prefixIndex === -1 || prefixIndex >= lineEnd) {
+        break
+      }
+      const pathStart = prefixIndex + prefix.length
+      const pathEnd = StringPrototypeIndexOf(source, pathTerminator, pathStart)
+      if (pathEnd === -1 || pathEnd >= lineEnd) {
+        break
+      }
+      if (
+        pathEnd > pathStart &&
+        StringPrototypeStartsWith(source, tail, pathEnd)
+      ) {
+        return StringPrototypeSlice(source, pathStart, pathEnd)
+      }
+      cursor = pathEnd + pathTerminator.length
+    }
+    if (newlineIndex === -1) {
+      break
+    }
+    lineStart = newlineIndex + 1
   }
   return ''
 }
@@ -62,13 +106,8 @@ export function cmdShimRelPath(config: ShimSource): string {
 export function installerPosixShimRelPath(config: ShimSource): string {
   const { basename, source } = config
   const relPath =
-    // require-regex-comment: captures a `.tools/...` path from `"$basedir/<path>" "$@"`.
-    /(?<="\$basedir\/)\.tools\/[^"]+(?="\s+"\$@")/.exec(source)?.[0] ||
-    // require-regex-comment: captures any script path from `"$basedir/<path>" "$@"`.
-    /(?<="\$basedir\/)[^"]+(?="\s+"\$@")/.exec(source)?.[0] ||
-    // require-regex-comment: captures the script path from `exec node "$basedir/<path>" "$@"`.
-    /exec\s+node\s+"?\$basedir\/(?<relPath>[^"]+)"?\s+"\$@"/.exec(source)
-      ?.groups?.['relPath'] ||
+    extractShimLinePath(source, '"$basedir/', '"', '" "$@"') ||
+    extractShimLinePath(source, 'exec node $basedir/', ' ', ' "$@"') ||
     ''
   if (
     relPath &&
@@ -87,16 +126,9 @@ export function installerPosixShimRelPath(config: ShimSource): string {
  */
 export function installerWindowsCmdRelPath(source: string): string {
   return (
-    // require-regex-comment: captures the script path from `node "%~dp0\<path>" %*`.
-    /(?<=node\s+")%~dp0\\(?<relPath>[^"]+)(?="\s+%\*)/.exec(source)?.groups?.[
-      'relPath'
-    ] ||
-    // require-regex-comment: captures the script path from `"%~dp0\node.exe" "%~dp0\<path>" %*`.
-    /(?<="%~dp0\\[^"]*node[^"]*"\s+")%~dp0\\(?<relPath>[^"]+)(?="\s+%\*)/.exec(
-      source,
-    )?.groups?.['relPath'] ||
-    // require-regex-comment: captures the script path from the cmd-shim `"%dp0%\<path>" %*` tail.
-    /(?<="%dp0%\\)[^"\r\n]+(?=" %\*\r?\n)/.exec(source)?.[0] ||
+    extractShimLinePath(source, 'node "%~dp0\\', '"', '" %*') ||
+    extractShimLinePath(source, 'node.exe" "%~dp0\\', '"', '" %*') ||
+    extractShimLinePath(source, '"%dp0%\\', '"', '" %*') ||
     ''
   )
 }
@@ -107,17 +139,7 @@ export function installerWindowsCmdRelPath(source: string): string {
  * `"$basedir/node"` or a bare `exec node`, then the generic cmd-shim body.
  */
 export function installerWindowsShellRelPath(source: string): string {
-  return (
-    // require-regex-comment: captures a `.tools/pnpm/<version>/...` path from `"$basedir/<path>" "$@"`.
-    /(?<="\$basedir\/)\.tools\/pnpm\/[^"]+(?="\s+"\$@")/.exec(source)?.[0] ||
-    // require-regex-comment: captures a `.tools/pnpm/<version>/...` path from `exec node "$basedir/<path>" "$@"`.
-    /(?<=exec\s+node\s+"\$basedir\/)\.tools\/pnpm\/[^"]+(?="\s+"\$@")/.exec(
-      source,
-    )?.[0] ||
-    // require-regex-comment: captures the script path from the cmd-shim `"$basedir/<path>" "$@"` tail.
-    /(?<="\$basedir\/)[^"\r\n]+(?=" "\$@"\r?\n)/.exec(source)?.[0] ||
-    ''
-  )
+  return extractShimLinePath(source, '"$basedir/', '"', '" "$@"')
 }
 
 /**
@@ -134,8 +156,7 @@ export function installerWindowsShimRelPath(config: ShimSource): string {
     return installerWindowsShellRelPath(source)
   }
   if (extLowered === '.ps1') {
-    // require-regex-comment: captures the script path from the PowerShell `"$basedir/<path>" $args` tail.
-    return /(?<="\$basedir\/)[^"\r\n]+(?=" \$args\r?\n)/.exec(source)?.[0] || ''
+    return extractShimLinePath(source, '"$basedir/', '"', '" $args')
   }
   return ''
 }
@@ -145,43 +166,27 @@ export function installerWindowsShimRelPath(config: ShimSource): string {
  */
 export function npmPosixShimRelPath(config: ShimSource): string {
   const { basename, source } = config
-  // require-regex-comment: captures the CLI path from `NPM_CLI_JS="$CLI_BASEDIR/<path>"`.
-  const re =
-    basename === 'npm'
-      ? /(?<=NPM_CLI_JS="\$CLI_BASEDIR\/).*(?=")/
-      : /(?<=NPX_CLI_JS="\$CLI_BASEDIR\/).*(?=")/
-  return re.exec(source)?.[0] || ''
+  const variable = basename === 'npm' ? 'NPM_CLI_JS' : 'NPX_CLI_JS'
+  return extractShimLinePath(source, `${variable}="$CLI_BASEDIR/`, '"', '"')
 }
 
 /**
  * The npm CLI's wrapper formats. Each variant assigns the target to a shell
- * variable, so the parse is a lookbehind on that assignment.
+ * variable, so the parser reads the path from that assignment.
  *
  * Sources: npm/cli v11.4.2 `bin/npm{,.cmd,.ps1}` and `bin/npx{,.cmd,.ps1}`.
  */
 export function npmWindowsShimRelPath(config: ShimSource): string {
   const { basename, extLowered, source } = config
-  const isNpm = basename === 'npm'
+  const variable = basename === 'npm' ? 'NPM_CLI_JS' : 'NPX_CLI_JS'
   if (extLowered === '.cmd') {
-    // require-regex-comment: captures the CLI path from `"NPM_CLI_JS=%~dp0\<path>"`.
-    const re = isNpm
-      ? /(?<="NPM_CLI_JS=%~dp0\\).*(?=")/
-      : /(?<="NPX_CLI_JS=%~dp0\\).*(?=")/
-    return re.exec(source)?.[0] || ''
+    return extractShimLinePath(source, `"${variable}=%~dp0\\`, '"', '"')
   }
   if (extLowered === '') {
-    // require-regex-comment: captures the CLI path from `NPM_CLI_JS="$CLI_BASEDIR/<path>"`.
-    const re = isNpm
-      ? /(?<=NPM_CLI_JS="\$CLI_BASEDIR\/).*(?=")/
-      : /(?<=NPX_CLI_JS="\$CLI_BASEDIR\/).*(?=")/
-    return re.exec(source)?.[0] || ''
+    return extractShimLinePath(source, `${variable}="$CLI_BASEDIR/`, '"', '"')
   }
   if (extLowered === '.ps1') {
-    // require-regex-comment: captures the CLI path from `$NPM_CLI_JS="$PSScriptRoot/<path>"`.
-    const re = isNpm
-      ? /(?<=\$NPM_CLI_JS="\$PSScriptRoot\/).*(?=")/
-      : /(?<=\$NPX_CLI_JS="\$PSScriptRoot\/).*(?=")/
-    return re.exec(source)?.[0] || ''
+    return extractShimLinePath(source, `$${variable}="$PSScriptRoot/`, '"', '"')
   }
   return ''
 }
