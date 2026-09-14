@@ -422,6 +422,9 @@ export async function httpRequest(
       return response
     } catch (err) {
       lastError = err
+      if (opts.signal?.aborted) {
+        throw err
+      }
       // Network errors are eligible for retry; HttpResponseError thrown
       // by throwOnError is not, because it is an explicit failure signal.
       if (err instanceof HttpResponseError) {

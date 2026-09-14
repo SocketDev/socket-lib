@@ -84,4 +84,21 @@ describe('http-request/browser retry', { concurrent: false }, () => {
       setTimeoutSpy.mockRestore()
     }
   })
+
+  it('does not retry after caller cancellation', async () => {
+    const controller = new AbortController()
+    fetchSpy.mockImplementationOnce(async () => {
+      controller.abort()
+      throw new Error('aborted')
+    })
+
+    await expect(
+      httpRequest('https://api.example.com/x', {
+        retries: 3,
+        retryDelay: 0,
+        signal: controller.signal,
+      }),
+    ).rejects.toThrow('aborted')
+    expect(fetchSpy).toHaveBeenCalledTimes(1)
+  })
 })
