@@ -261,7 +261,7 @@ describe('getPowerSnapshot', () => {
     })
   })
 
-  test.each(['-1%', '101%', '4.5%', 'unknown%', '4%; 5%'])(
+  test.each(['-1%', '101%', '4.5%', '5.%', '1.2.3%', 'unknown%', '4%; 5%'])(
     'does not guess malformed or multiple charges %s',
     async charges => {
       state.stdout = `Now drawing from 'AC Power'\n${charges}`
@@ -271,6 +271,14 @@ describe('getPowerSnapshot', () => {
       })
     },
   )
+
+  test('does not scan oversized macOS power output', async () => {
+    state.stdout = `Now drawing from 'Battery Power'\n${'0'.repeat(64 * 1024)} 4%`
+    expect(await getPowerSnapshot()).toEqual({
+      state: 'battery',
+      batteryPercent: undefined,
+    })
+  })
 
   test('observes unplugging and crossing the low-charge boundary without caching', async () => {
     state.stdout = "Now drawing from 'AC Power'\n5%"

@@ -14,6 +14,7 @@ import { getNodeProcess } from '../node/process.mjs'
 
 export const POWER_SUPPLY_DIRECTORY = '/sys/class/power_supply'
 export const POWER_SUPPLY_LIMIT = 64
+export const POWER_SNAPSHOT_OUTPUT_MAX_LENGTH = 64 * KB
 
 export async function getLinuxPowerSnapshot(
   signal: AbortSignal,
@@ -234,6 +235,47 @@ export function parseLinuxPowerState(contents: string): PowerState {
   return 'unknown'
 }
 
+export function parseMacPowerPercentage(output: string): number | undefined {
+  if (output.length > POWER_SNAPSHOT_OUTPUT_MAX_LENGTH) {
+    return undefined
+  }
+  let found = false
+  let percentage: number | undefined
+  let candidateStart = -1
+  let candidateValid = false
+  for (let index = 0; index < output.length; index += 1) {
+    const code = output.charCodeAt(index)
+    const isDigit = code >= 48 && code <= 57
+    if (candidateStart === -1) {
+      if (code === 45 || isDigit) {
+        candidateStart = index
+        candidateValid = isDigit
+      }
+      continue
+    }
+    if (isDigit) {
+      continue
+    }
+    if (code === 45 || code === 46) {
+      candidateValid = false
+      continue
+    }
+    if (code !== 37) {
+      candidateStart = -1
+      continue
+    }
+    if (found) {
+      return undefined
+    }
+    found = true
+    percentage = candidateValid
+      ? parsePowerPercentage(output.slice(candidateStart, index))
+      : undefined
+    candidateStart = -1
+  }
+  return percentage
+}
+
 export function parseMacPowerSnapshot(output: string): PowerSnapshot {
   const firstLine = output.split(/\r?\n/, 1)[0]
   const state =
@@ -242,14 +284,9 @@ export function parseMacPowerSnapshot(output: string): PowerSnapshot {
       : firstLine === "Now drawing from 'Battery Power'"
         ? 'battery'
         : 'unknown'
-  // Capture the complete signed percentage so invalid ranges or fractions cannot become valid suffixes.
-  const percentages = output.match(/-?\d+(?:\.\d+)?%/g) ?? []
   return {
     state,
-    batteryPercent:
-      percentages.length === 1
-        ? parsePowerPercentage(percentages[0]?.slice(0, -1))
-        : undefined,
+    batteryPercent: parseMacPowerPercentage(output),
   }
 }
 
