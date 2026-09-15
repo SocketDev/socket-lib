@@ -135,8 +135,8 @@ function namedExportIssue(
   }
   if (
     keys.length === 0 &&
-    !normalizedPath.endsWith('/types.js') &&
-    !normalizedPath.endsWith('-types.js')
+    !normalizePath(normalizedPath).endsWith('/types.js') &&
+    !normalizePath(normalizedPath).endsWith('-types.js')
   ) {
     return 'Module exports an empty object with no named exports'
   }

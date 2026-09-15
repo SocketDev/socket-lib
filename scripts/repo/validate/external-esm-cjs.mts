@@ -328,8 +328,9 @@ export function inquirerExportIssues(
   const cjsType = typeof cjsModule
   const esmDefault = esmModule['default']
   // Test 4: Specific checks for @inquirer modules
-  if (normalizedPath.startsWith('@inquirer/')) {
-    const moduleName = normalizedPath.split('/')[1]?.replace(/\.js$/, '') ?? ''
+  if (normalizePath(normalizedPath).startsWith('@inquirer/')) {
+    const moduleName =
+      normalizePath(normalizedPath).split('/')[1]?.replace(/\.js$/, '') ?? ''
 
     // confirm, input, password should export functions directly
     if (['confirm', 'input', 'password'].includes(moduleName)) {

@@ -16,6 +16,7 @@ import {
   findRealYarn,
 } from '../../../../src/exe/path/find.mjs'
 import { isShadowBinPath } from '../../../../src/exe/shadow/detect.mjs'
+import { normalizePath } from '../../../../src/paths/normalize.mjs'
 import { runWithTempDir } from '../../util/temp-files.mjs'
 
 describe('findRealBin', () => {
@@ -84,9 +85,10 @@ describe('findRealNpm', () => {
 
   it('should not return a shadow bin path when possible', () => {
     const result = findRealNpm()
+    const normalizedResult = normalizePath(result)
     // If we found a real path (not just "npm"), it shouldn't be a shadow bin
-    if (result !== 'npm' && result.includes('/')) {
-      const dir = path.dirname(result)
+    if (normalizedResult !== 'npm' && normalizedResult.includes('/')) {
+      const dir = path.dirname(normalizedResult)
       // We prefer non-shadow paths, but don't strictly require it
       // since the system might only have shadow bins available
       expect(typeof isShadowBinPath(dir)).toBe('boolean')
