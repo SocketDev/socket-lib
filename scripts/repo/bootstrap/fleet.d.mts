@@ -171,8 +171,21 @@ export declare function sha256Hex(buf: Buffer): string;
  */
 export declare function pullFleetBundleTarball(config: PullBundleConfig): Promise<string>;
 //#endregion
+//#region scripts/repo/gen/bootstrap/src/workflow-jobs.d.mts
+interface WorkflowJobMigration {
+  id: string;
+  sha256: string;
+  replacementId: string;
+  replacement?: string | undefined;
+}
+interface WorkflowFileMove {
+  from: string;
+  to: string;
+  workflowJob?: WorkflowJobMigration | undefined;
+}
+//#endregion
 //#region template/base/universal/scripts/fleet/lib/conditional-config.d.mts
-type ConfigFlag = 'bundlesVendoredDeps' | 'hasCodeql' | 'hasCratesRegistry' | 'hasGhcr' | 'hasGithubRelease' | 'hasNapi' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
+type ConfigFlag = 'bundlesVendoredDeps' | 'hasCodeql' | 'hasCratesRegistry' | 'hasGhcr' | 'hasGithubRelease' | 'hasNapi' | 'hasNpmRegistry' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/conditional-files.d.mts
 interface ConditionalManifestGroup {
@@ -201,10 +214,7 @@ export interface FleetFileManifest {
     files: readonly string[];
   }> | undefined;
   files: Record<string, string>;
-  movedPaths?: ReadonlyArray<{
-    from: string;
-    to: string;
-  }> | undefined;
+  movedPaths?: ReadonlyArray<WorkflowFileMove> | undefined;
   removedPaths?: readonly string[] | undefined;
   segments?: ReadonlyArray<{
     path: string;
@@ -342,10 +352,7 @@ export declare const HYBRID_BUNDLE_PATHS: ReadonlySet<string>;
 export interface BundleManifest extends Pick<FleetFileManifest, 'capabilityScopedFiles' | 'conditionalScopedFiles' | 'shapeScopedFiles'> {
   readonly files: Record<string, string>;
   readonly generatedPaths?: readonly string[] | undefined;
-  readonly movedPaths?: ReadonlyArray<{
-    from: string;
-    to: string;
-  }> | undefined;
+  readonly movedPaths?: ReadonlyArray<WorkflowFileMove> | undefined;
   readonly removedPaths?: readonly string[] | undefined;
   readonly segments?: readonly SegmentEntry[] | undefined;
   readonly settingsSegment?: SettingsSegmentEntry | undefined;
@@ -616,8 +623,8 @@ export declare function fetchBundleSource(config: {
  * half of relocating a file the fleet does NOT byte-mirror. A plain tombstone
  * would delete the member's only copy with nothing in the bundle to re-create
  * it (the file is repo-owned; the bundle never ships it), so the move renames
- * `from` → `to` when `to` is absent — repo-owned content survives
- * byte-for-byte — and deletes a stale `from` leftover once `to` exists. Runs
+ * `from` → `to` when `to` is absent and removes identical duplicates. Workflow
+ * metadata follows the destination name; job bodies remain repo-owned. Runs
  * BEFORE removeTombstonedPaths. Idempotent: a missing `from` is a no-op.
  * Belt: a move whose `from` the current manifest ships a file at/under is
  * skipped, so a bad producer entry can never displace freshly placed payload.

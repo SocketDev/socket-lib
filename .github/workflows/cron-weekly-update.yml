@@ -1,5 +1,5 @@
-name: 🔁 Weekly update
-run-name: Weekly update
+name: 'cron: weekly update'
+run-name: 'cron: weekly update'
 
 # The runner applies dependency updates, installs, and fixes before PR creation.
 # The PR App push starts downstream CI, which runs the required tests.
