@@ -12,6 +12,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
@@ -138,8 +139,9 @@ export function groupRows(rows: Row[]): Map<string, Row[]> {
   const groups = new Map<string, Row[]>()
   for (let i = 0, { length } = rows; i < length; i += 1) {
     const row = rows[i]!
-    const key = row.subpath.includes('/')
-      ? `${row.subpath.split('/')[0]}/`
+    const subpath = normalizePath(row.subpath)
+    const key = subpath.includes('/')
+      ? `${subpath.split('/')[0]}/`
       : 'Top-level'
     const bucket = groups.get(key) ?? []
     bucket.push(row)
@@ -160,7 +162,7 @@ export function renderGroupSummary(key: string, rows: Row[]): string {
   const nested = new Set<string>()
   const leaves: string[] = []
   for (let i = 0, { length } = rows; i < length; i += 1) {
-    const parts = rows[i]!.subpath.split('/')
+    const parts = normalizePath(rows[i]!.subpath).split('/')
     if (parts.length > 2) {
       nested.add(parts[1]!)
     } else if (parts.length === 2) {
