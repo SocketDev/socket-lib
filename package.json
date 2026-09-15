@@ -3999,7 +3999,7 @@
     "npm:trust": "node scripts/fleet/registry-infra/npm/settings/trust.mts",
     "offload:model": "node scripts/fleet/offload-model.mts",
     "preflight": "node scripts/repo/bootstrap/fleet.mjs --quiet && node scripts/fleet/preflight.mts",
-    "prepare": "node scripts/repo/bootstrap/prepare.mts && node scripts/fleet/install-git-hooks.mts && node scripts/fleet/prepare.mts && pnpm run gen:command-groups",
+    "prepare": "node scripts/repo/bootstrap/prepare.mts && node scripts/fleet/install-git-hooks.mts && node scripts/fleet/prepare.mts",
     "prepublishOnly": "echo 'ERROR: Use GitHub Actions workflow for publishing' && exit 1",
     "prim": "node tools/prim/bin/prim.mts",
     "prune:backups": "node scripts/fleet/backup-branches.mts prune",
