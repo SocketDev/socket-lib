@@ -3978,7 +3978,6 @@
     "format:check": "node scripts/fleet/format.mts --check",
     "gen:glyph": "node scripts/fleet/gen/glyph.mts",
     "gen:llms-txt": "node scripts/fleet/gen/llms-txt.mts",
-    "get-green": "node scripts/fleet/get-green.mts",
     "gh:auth": "node scripts/fleet/gh-auth.mts",
     "hide-comments": "node scripts/fleet/hide-comments.mts",
     "integrity-refresh": "node scripts/fleet/external-tools/refresh.mts",
