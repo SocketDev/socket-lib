@@ -303,7 +303,7 @@ describe('runCoverageDiagnostics', () => {
 test('collects coverage in four shards before aggregation', () => {
   const document = parseDocument(
     readFileSync(
-      new URL('../../.github/workflows/ci.yml', import.meta.url),
+      new URL('../../.github/workflows/ci-gates.yml', import.meta.url),
       'utf8',
     ),
   )
