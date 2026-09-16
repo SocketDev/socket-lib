@@ -5,10 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [7.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.2) - 2026-08-31
+## [7.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.2) - 2026-09-16
 
 ### Added
 
+- **`audits`** — resolve planned consumer apis by public name
+- **`audits`** — verify public consumer usage aggregates
+- **`secrets`** — authorize onepassword terminal integration
+- **`power`** — expose node and browser power detection
+- **`env`** — detect power source and battery charge
+- **`fs`** — add a guarded scratch-directory fixture
+- **`objects`** — add the NullProto type helper
+- **`ai`** — _move the simulator install target into the options bag_
+- **`stdio`** — _move createFooter message into the options bag_
+- **`json`** — _move parseJsonStrict schema into the options bag_
+- **`eco`** — parse bun and vlt lockfiles, and git deps universally
+- **`constants`** — add self-describing duration and byte-size units
+- **`fs`** — split the delete API into safe, strict, and force subpaths
+- **`git`** — place scratch worktrees in the OS temp dir
+- **`git`** — add worktree enumeration over git's own porcelain
 - **`sorts`** — add compareStrLengthDesc for longest-first token order
 - **`fs`** — add cloneFile and cloneDir for copy-on-write tree copies
 - **`fs`** — add writeFileAtomicSync and a getNode-accessor lint rule
@@ -16,17 +31,164 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`spawn`** — opt-in retry with backoff for spawnSync
 - **`process`** — read the process table and spot a wrapper recursing into itself
 - **`spawn`** — kill descendants on timeout via killTreeOnTimeout
+- **`fs`** — let a caller name extra allowed roots for safeDelete
+- **`colors`** — add stream-keyed color capability detection
+- **`memo`** — add memoizeWeakAsync for object-keyed async work
+- **`yaml`** — add EditableYaml, a surface-preserving YAML editor
+- **`fs`** — give safeDelete a cwd so callers relocate the guard, not lift it
+
+### Changed
+
+- **`prim`** — omit dependency jsdoc from the cli bundle
 
 ### Fixed
 
+- **`paths`** — normalize validation paths
+- **`paths`** — normalize api subpaths
+- **`security`** — scan power percentages linearly
+- **`security`** — bound shim parsing
+- **`http`** — stop browser retries after cancellation
+- **`build-stubs`** — preserve reviewed candidates
+- **`build-stubs`** — sync verified fleet usage
+- **`audits`** — validate current consumer evidence
+- **`audits`** — read the published consumer evidence tag
+- **`prim`** — use the script entry contract
+- **`audits`** — use options objects for consumer evidence
+- **`prim`** — keep the bundled runner self-contained
+- **`release`** — integrate verified consumer evidence work
+- **`publish`** — lock hydrated fleet hook importers
+- **`audits`** — bind usage tags to aggregate content
+- **`audits`** — require complete consumer evidence
+- **`hydration`** — preserve tracked fleet surfaces
+- **`archives`** — prevent zip symlink overwrite
+- **`prim`** — validate commands before loading surfaces
+- **`boundaries`** — read the renamed cascade roster
+- **`hydration`** — align fleet pack untrack set
+- **`test`** — satisfy browser fixture lint
+- **`test`** — relocate repository git fixture
+- **`boundaries`** — contain source audits and build fixtures
+- **`test`** — finish fixture path migration
+- **`coverage`** — align aggregate build inputs
+- **`coverage`** — build package exports before sharding
+- **`coverage`** — split collection across four shards
+- **`coverage`** — expose shard commands
+- **`build`** — align generated node engine floor
+- **`cli`** — enforce structured output contracts
+- **`packages`** — load npm utilities on demand
+- **`debug`** — preserve runtime namespace configuration
+- **`iterator`** — preserve pending errors during quiet close
+- **`release`** — declare npm-only publication
+- **`build`** — use the installed typescript 7 compiler for declarations
+- **`types`** — retain upstream package url declarations
+- **`tooling`** — align typescript native api compiler
+- **`exe`** — parse quoted windows shim targets across line endings
+- **`release`** — dispatch this package through the fleet publisher
+- **`tests`** — use archive instance type for size fixtures
+- **`logger`** — preserve lazy singleton resolution at library callsites
+- **`logger`** — bind lazy module loggers without eager initialization
+- **`git`** — resolve relative status paths against supplied cwd
+- **`test`** — classify measured process and filesystem suites
+- **`test`** — classify mocked and environment suites as mid lane
+- **`test`** — route coverage suites through measured speed lanes
+- **`tooling`** — reconcile runtime pins and remove dead scripts
+- **`build`** — ship temporal modules required by fleet consumers
+- **`logger`** — use circled information symbol
+- **`logger`** — use circled information symbol
+- **`build`** — include stderr required by spinner output
+- match Socket coverage badge styling
+- **`security`** — reject inherited http fixture handlers
+- **`exports`** — regenerate the export map for the split bin resolvers
+- **`scripts`** — make the cjs export rewriter self-describing
+- **`audit`** — resolve fleet siblings from the primary checkout
+- **`http`** — preserve cancellation across redirects
+- **`build`** — normalize bundled sdk documentation examples
+- **`validation`** — build before checks and simplify test routing
+- **`test`** — collect isolated coverage in the fleet report directory
+- **`validation`** — normalize paths and align runtime fixtures
+- **`validation`** — preserve purl types and locate registry helpers
+- **`validation`** — share windows paths and retire duplicate test setup
+- **`external`** — expose inquirer separator to native esm
+- **`ai`** — isolate backend routing scratch records
+- **`build`** — isolate primordial transform result records
+- **`iterator`** — declare record next result contract
+- **`iterator`** — declare lazy step result contracts
+- **`validation`** — enforce external module interop contracts
+- **`build`** — isolate resolver plugin records
+- **`releases`** — isolate graphql release row records
+- **`validation`** — preserve inferred export option types
+- **`schema`** — isolate normalized validation issues
+- **`validation`** — isolate esm export analysis results
+- **`memo`** — isolate collection cache key records
+- **`build`** — isolate printable tree summaries
+- **`validation`** — isolate export result record prototypes
+- **`exe`** — match a cased windows node spelling in volta shim avoidance
+- **`exe`** — stop the execBin tests depending on an ambient node on PATH
+- **`prim`** — rewrite a no-argument prototype call instead of dropping it
+- **`packages`** — make package extensions match again
+- **`build`** — expose the git/exec leaf reached by git/remote
+- **`test`** — type the disambiguate cache entry and drop the unused import
+- **`build-stubs`** — expose strings/lines for fleet consumers
+- **`build-stubs`** — expose ai/agent/context, ai/agent/detect, ai/agent/paths for fleet consumers
+- **`build-stubs`** — expose ai/agent-context for fleet consumers
+- **`security`** — close the three code-scanning alerts left open
+- **`security`** — close the last five code-scanning alerts
+- **`security`** — bound the quantifiers that sit before a literal
+- **`security`** — replace two polynomial-backtracking trims
+- **`build-stubs`** — expose the accessor leaves the burn-down made reachable
+- **`test`** — track the tar-pack test helper
+- **`exports`** — restore the npm twin entries the eco/ move dropped
+- **`build-stubs`** — make leaf exposure survive list regeneration
+- **`build-stubs`** — expose http-request/fetch/browser, primordials/headers for fleet consumers
+- **`build-stubs`** — expose git/exec for fleet consumers
+- **`git`** — follow git's -z porcelain recommendation for worktree list
+- **`build-stubs`** — wire unexposedLeavesPath into the stub-list writer
+- **`scripts`** — point repo scripts at the moved fleet subject dirs
+- **`eco`** — repoint the moved npm imports one level deeper
 - **`build-stubs`** — update the settings section in place, never the whole file
 - **`build-stubs`** — expose process/spawn/kill-tree for fleet consumers
 - **`spawn`** — split the retry sleep per platform and stop it throwing in a browser
 - **`external-tools`** — consolidate the pnpm pin into the fleet registry
+- **`logger`** — withhold color escapes from a stream that accepts none
+- **`colors`** — type the detector off its module namespace
+- **`build-stubs`** — see fleet-payload consumers when auditing leaf usage
+- **`build-stubs`** — expose npm/registry/auth for fleet consumers
+- **`assets`** — track the fleet brand assets the README references
+- **`fs`** — allow a temp path in its real form, not just its resolved form
+- **`build`** — move the bootstrap predicates to scripts/repo/flags/predicates
+- **`build`** — stop the build scripts depending on the previous release
+- **`fuzz`** — match .mts targets and stay quiet on an empty run
+- **`build-stubs`** — expose npm/registry/auth for fleet consumers
+- **`build-stubs`** — expose exe/argv/flag-predicates, ai/agent-context for fleet consumers
+- **`build-stubs`** — expose exe/argv/parse, exe/argv/parse-args-string, term/colors/palette/socket for fleet consumers
+- **`reconcile`** — stop the content-commit install failing on payload drift
 
 ### Internal
 
+- **`deps`** — declare repository patch ownership
+- **`check`** — tolerate unavailable consumer evidence
+- **`ci`** — align fleet validation contracts
+- **`ci`** — align checks with fleet policy
+- **`fleet`** — align thin ignore block with pinned pack
+- **`ci`** — align published fleet tooling and checkout refs
+- **`ci`** — use PR app for diagnostic source reads
+- **`hooks`** — preserve immutable canonical source proofs
+- **`ci`** — reuse PR app credentials for payload reads
+- **`check`** — import json formatter outside documentation
+- **`lint`** — remove cleaned spinner from builtin baseline
+- **`check`** — clean containment probes within their parent directory
+- **`check`** — scope deletion probe cleanup explicitly
+- **`fleet`** — adopt context budgets and bounded repository tooling
+- **`ci`** — build modules before runtime checks
+- **`check`** — name and place the probe module by its role
+- **`check`** — batch the undefined-bindings probe per worker
+- **`gitignore`** — re-include docs/repo/agents.md after the fleet-pack block
+- **`lint`** — clear the five errors the loadable config exposed
+- **`config`** — untrack the pack-owned fleet config
+- **`hooks`** — untrack the codex-session-budget-guard payload
 - **`deps`** — pin @hono/node-server past GHSA-frvp-7c67-39w9
+- **`check`** — install the packed tarball the way pnpm 12 accepts
+- **`check`** — install the packed tarball as a file: dependency
+- **`check`** — keep isJson on the published predicate module
 
 ## [7.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.1) - 2026-08-27
 
