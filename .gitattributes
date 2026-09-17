@@ -64,6 +64,9 @@
 .github/actions/fleet/debug linguist-generated=true
 .github/actions/fleet/download-artifact linguist-generated=true
 .github/actions/fleet/expose-actions-runtime linguist-generated=true
+.github/actions/fleet/github-ci-fix-app-token linguist-generated=true
+.github/actions/fleet/github-issue-app-token linguist-generated=true
+.github/actions/fleet/github-maintenance-app-token linguist-generated=true
 .github/actions/fleet/github-payload-app-token linguist-generated=true
 .github/actions/fleet/github-pr-app-token linguist-generated=true
 .github/actions/fleet/github-release linguist-generated=true
@@ -87,7 +90,6 @@
 .github/workflows/cron-weekly-fuzz.yml linguist-generated=true
 .github/workflows/cron-weekly-odai-cache.yml linguist-generated=true
 .github/workflows/cron-weekly-update.yml linguist-generated=true
-.github/workflows/publish-npm.yml linguist-generated=true
 .github/workflows/sweep-jobs.yml linguist-generated=true
 .github/zizmor.yml linguist-generated=true
 .mcp.json linguist-generated=true
@@ -102,6 +104,7 @@ docs/design/fleet/README.md linguist-generated=true
 docs/design/fleet/components.css linguist-generated=true
 docs/design/fleet/tokens.css linguist-generated=true
 docs/fleet/agents.md linguist-generated=true
+docs/fleet/ai-balancer linguist-generated=true
 docs/fleet/ai-balancer.md linguist-generated=true
 docs/fleet/development linguist-generated=true
 docs/fleet/fuzzing linguist-generated=true
