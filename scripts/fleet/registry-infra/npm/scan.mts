@@ -32,7 +32,6 @@ import type { ThreatManifest } from './threat-scan.mts'
 import { getSocketApiToken } from '@socketsecurity/lib-stable/env/socket'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-import { withBrowserAuthNavigation } from '../../browser/auth-navigation.mts'
 import { password } from '@socketsecurity/lib-stable/stdio/prompts'
 
 export const SOCKET_TOKEN_ENV_VAR = 'SOCKET_API_TOKEN'
@@ -40,6 +39,14 @@ export const SOCKET_TOKEN_ENV_VAR = 'SOCKET_API_TOKEN'
 // Where a human mints a token when none is in the environment: dashboard →
 // org settings → API tokens. The gate needs `full-scans` + `report` scopes.
 export const SOCKET_TOKEN_MINT_URL = 'https://socket.dev/dashboard'
+
+async function openSocketScanTokenPage<T>(
+  task: (open: (url: string) => Promise<void>) => Promise<T>,
+): Promise<T> {
+  const { withBrowserAuthNavigation } =
+    await import('../../browser/auth-navigation.mts')
+  return await withBrowserAuthNavigation('socket-scan', task)
+}
 
 /**
  * Everything a gate run needs: an authenticated SDK bound to one org.
@@ -111,7 +118,7 @@ async function acquireSocketScanToken(config: {
             await openUrl(SOCKET_TOKEN_MINT_URL)
             return await prompt()
           })()
-        : withBrowserAuthNavigation('socket-scan', async open => {
+        : openSocketScanTokenPage(async open => {
             await open(SOCKET_TOKEN_MINT_URL)
             return await prompt()
           }))
