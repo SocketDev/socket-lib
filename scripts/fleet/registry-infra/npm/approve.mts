@@ -2,10 +2,9 @@
  * @file `--approve` mode: list the user's staged packages, run the pre-approve
  *   integrity gate over every eligible entry FIRST (staging is one-shot per
  *   version, so verification must complete successfully before the human
- *   approve step is even offered), then multi-select over the verified entries,
- *   then batch-approve through pnpm's browser 2FA. `--yes` replaces the
- *   interactive selection for agent/scripted runs. The registry challenge
- *   opens npmjs.com in the existing browser session for attended approval.
+ *   approve step is even offered), then select the verified repo-local entries
+ *   and batch-approve through pnpm's browser 2FA. The registry challenge opens
+ *   npmjs.com in the existing browser session for attended approval.
  */
 
 import process from 'node:process'
@@ -312,7 +311,7 @@ async function selectApproveTargets(config: {
     })) as string[] | undefined
     return picked ?? []
   }
-  logger.log('--yes: approving all staged packages:')
+  logger.log('Approving all eligible repo-local staged packages:')
   for (let i = 0, { length } = choices; i < length; i += 1) {
     logger.log(`  ${choices[i]!.name}`)
   }
