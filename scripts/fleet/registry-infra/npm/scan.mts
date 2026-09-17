@@ -585,15 +585,18 @@ async function readFullScanEvidence(config: {
     const scan = await sdk.getFullScan(orgSlug, scanId)
     if (!scan.success) {
       const status = (scan as { status?: unknown | undefined }).status
+      const scopeHint =
+        status === 403 ? '; required scope: full-scans:list' : ''
       logger.fail(
         `Scan gate: full-scan read failed for ${entryLabel}` +
           (typeof status === 'number' ? ` (status ${status})` : '') +
-          '; not approving.',
+          `${scopeHint}; not approving.`,
       )
       return {
         refusal: scanRefused(
           `could not read full scan ${scanId} for ${entryLabel}` +
-            (typeof status === 'number' ? ` (status ${status})` : ''),
+            (typeof status === 'number' ? ` (status ${status})` : '') +
+            scopeHint,
         ),
       }
     }
