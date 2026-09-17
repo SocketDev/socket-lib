@@ -4140,6 +4140,7 @@
     "@vitiate/core": "catalog:",
     "@yarnpkg/extensions": "catalog:",
     "ast-v8-to-istanbul": "catalog:",
+    "ata-validator": "catalog:",
     "c8": "catalog:",
     "cacache": "catalog:",
     "chrome-devtools-mcp": "catalog:",
