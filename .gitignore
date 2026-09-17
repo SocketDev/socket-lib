@@ -2934,6 +2934,7 @@ scripts/fleet/browser/bridge/extension/github.mts
 scripts/fleet/browser/bridge/extension/manifest.json
 scripts/fleet/browser/bridge/extension/state.mts
 scripts/fleet/browser/bridge/extension/types.mts
+scripts/fleet/browser/bridge/help-window.mts
 scripts/fleet/browser/bridge/human-help.mts
 scripts/fleet/browser/bridge/managed-policy.mts
 scripts/fleet/browser/bridge/native-helper/authorization-policy.cc
@@ -3814,6 +3815,7 @@ scripts/fleet/patches/ownership.mts
 scripts/fleet/patching-findings/cli.mts
 scripts/fleet/patching-findings/lib/patch-parse.mts
 scripts/fleet/paths.mts
+scripts/fleet/paths/browser.mts
 scripts/fleet/paths/runtime.mts
 scripts/fleet/paths/util.mts
 scripts/fleet/pnpm/ecosystems.mts
@@ -3945,6 +3947,7 @@ scripts/fleet/registry-infra/npm/bump.mts
 scripts/fleet/registry-infra/npm/challenge-gate.mts
 scripts/fleet/registry-infra/npm/lifecycle-scripts.mts
 scripts/fleet/registry-infra/npm/login.mts
+scripts/fleet/registry-infra/npm/native-login.mts
 scripts/fleet/registry-infra/npm/otp-runner.mts
 scripts/fleet/registry-infra/npm/pack-manifest-lock.mts
 scripts/fleet/registry-infra/npm/pack-manifest.mts
@@ -3957,6 +3960,7 @@ scripts/fleet/registry-infra/npm/publish-command.mts
 scripts/fleet/registry-infra/npm/publish-failure.mts
 scripts/fleet/registry-infra/npm/registry.mts
 scripts/fleet/registry-infra/npm/release-assets.mts
+scripts/fleet/registry-infra/npm/remote-scan-receipt.mts
 scripts/fleet/registry-infra/npm/reserve-release.mts
 scripts/fleet/registry-infra/npm/settings/migrations.mts
 scripts/fleet/registry-infra/npm/settings/org-sweep.mts
@@ -3970,8 +3974,15 @@ scripts/fleet/registry-infra/npm/settings/trusted-publisher-browser.mts
 scripts/fleet/registry-infra/npm/settings/trusted-publisher-page.mts
 scripts/fleet/registry-infra/npm/settings/trusted-publisher-parse.mts
 scripts/fleet/registry-infra/npm/settings/trusted-publisher-plan.mts
+scripts/fleet/registry-infra/npm/settings/trusted-publisher/arguments.mts
+scripts/fleet/registry-infra/npm/settings/trusted-publisher/browser.mts
+scripts/fleet/registry-infra/npm/settings/trusted-publisher/collection.mts
+scripts/fleet/registry-infra/npm/settings/trusted-publisher/parse.mts
+scripts/fleet/registry-infra/npm/settings/trusted-publisher/plan.mts
+scripts/fleet/registry-infra/npm/settings/trusted-publisher/worklist.mts
 scripts/fleet/registry-infra/npm/shared.mts
 scripts/fleet/registry-infra/npm/stage-cli.mts
+scripts/fleet/registry-infra/npm/stage-command.mts
 scripts/fleet/registry-infra/npm/staged-browser-parse.mts
 scripts/fleet/registry-infra/npm/staged-browser-read.mts
 scripts/fleet/registry-infra/npm/staged-cross-check.mts
