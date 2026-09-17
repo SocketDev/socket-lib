@@ -3793,6 +3793,7 @@ scripts/fleet/npm-auth.mts
 scripts/fleet/npm-publish.mts
 scripts/fleet/npm/approve.mts
 scripts/fleet/npm/publish-npm.mts
+scripts/fleet/npm/scan.mts
 scripts/fleet/npm/staged.mts
 scripts/fleet/npm/trusted-publisher/migrate.mts
 scripts/fleet/npm/trusted-publisher/run.mts
@@ -3957,7 +3958,6 @@ scripts/fleet/registry-infra/npm/publish-failure.mts
 scripts/fleet/registry-infra/npm/registry.mts
 scripts/fleet/registry-infra/npm/release-assets.mts
 scripts/fleet/registry-infra/npm/reserve-release.mts
-scripts/fleet/registry-infra/npm/scan.mts
 scripts/fleet/registry-infra/npm/settings/migrations.mts
 scripts/fleet/registry-infra/npm/settings/org-sweep.mts
 scripts/fleet/registry-infra/npm/settings/org-web.mts

@@ -1309,6 +1309,7 @@ const ALWAYS_TRACKED_GITHUB_PREFIXES = [
   '.github/actions/fleet/expose-actions-runtime/',
   '.github/actions/fleet/github-ci-fix-app-token/',
   '.github/actions/fleet/github-payload-app-token/',
+  '.github/actions/fleet/github-pr-branch-app-token/',
   '.github/actions/fleet/github-status-check/',
   '.github/actions/fleet/install/',
   '.github/actions/fleet/setup-and-install/',
@@ -1353,7 +1354,8 @@ const ALWAYS_TRACKED_PREFIXES = [
   'patches/fleet/vitest@5.0.0.patch',
   'scripts/fleet/npm/scan-ci.mts',
   'scripts/fleet/npm/scan-receipt.mts',
-  'scripts/fleet/npm/scan.mts',
+  'scripts/fleet/registry-infra/npm/scan-ndjson.mts',
+  'scripts/fleet/registry-infra/npm/scan.mts',
   'scripts/repo/bootstrap/',
 ]
 /**

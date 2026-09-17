@@ -65,6 +65,7 @@ jobs:
           payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
 
       - name: Mint release token
+        if: ${{ inputs.branch == '' || inputs.branch == github.event.repository.default_branch }}
         id: release-app
         uses: ./.github/actions/fleet/github-ci-fix-app-token
         with:
@@ -72,6 +73,14 @@ jobs:
           private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
           repositories: ${{ github.event.repository.name }}
 
+      - name: Mint PR branch token
+        if: ${{ inputs.branch != '' && inputs.branch != github.event.repository.default_branch }}
+        id: pr-branch-app
+        uses: ./.github/actions/fleet/github-pr-branch-app-token
+        with:
+          client-id: ${{ secrets.SOCKET_PR_CLIENT_ID || vars.SOCKET_PR_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
       - name: Mint PR token
         if: ${{ inputs.branch != '' && inputs.branch != github.event.repository.default_branch }}
         id: pr-app
@@ -87,7 +96,8 @@ jobs:
         env:
           SOURCE_BRANCH: ${{ inputs.branch || github.event.repository.default_branch }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-          CI_FIX_WRITE_TOKEN: ${{ steps.release-app.outputs.token }}
+          CI_FIX_RELEASE_TOKEN: ${{ steps.release-app.outputs.token }}
+          CI_FIX_PR_BRANCH_TOKEN: ${{ steps.pr-branch-app.outputs.token }}
           CI_FIX_PR_TOKEN: ${{ steps.pr-app.outputs.token }}
           CI_FIX_MONITOR_TOKEN: ${{ github.token }}
         run: pnpm run ci:fix --branch "$SOURCE_BRANCH" --deliver --json

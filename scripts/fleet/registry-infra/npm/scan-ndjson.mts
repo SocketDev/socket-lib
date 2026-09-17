@@ -137,7 +137,5 @@ export async function readFullScanNdjson(
   if (processing) {
     return { processing: true }
   }
-  return sawScores
-    ? { artifacts }
-    : { reason: 'full scan ended before the final scores record' }
+  return { artifacts }
 }
