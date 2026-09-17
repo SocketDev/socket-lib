@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`paths`** — scope repository cache entries
+- **`npm`** — ship staged scan controllers
 - **`paths`** — normalize validation paths
 - **`paths`** — normalize api subpaths
 - **`security`** — scan power percentages linearly
