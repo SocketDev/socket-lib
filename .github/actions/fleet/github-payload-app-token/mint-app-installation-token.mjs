@@ -21,7 +21,7 @@
  *   OWNER           (required) org/owner to mint the installation token for
  *   PERMISSIONS     (optional) JSON object, e.g. {"contents":"write"}; an empty
  *                              object is rejected, would mint blanket perms
- *   REPOSITORIES    (optional) newline/comma repo NAMES to scope the token to
+ *   REPOSITORIES    (required) newline/comma repo NAMES to scope the token to
  *   GITHUB_OUTPUT   (required) set by the runner; token is written here.
  */
 
@@ -223,18 +223,25 @@ export function formatAppTokenMintFailure(config) {
 }
 
 // Split a REPOSITORIES string (newline/comma repo NAMES) into the access-token
-// request's `repositories` array, or undefined when blank. Pure (the raw string
-// is the argument) + exported so it is unit-testable.
+// request's `repositories` array. The raw string is the argument. Exported for
+// unit tests.
 export function parseRepositories(rawInput) {
   const raw = rawInput?.trim()
   if (!raw) {
-    return undefined
+    throw new Error(
+      'REPOSITORIES is required. Where: App token repository scope. Saw: a blank value; wanted one or more repository names. Fix: pass the repositories action input.',
+    )
   }
   const names = raw
     .split(/[\n,]/)
     .map(s => s.trim())
     .filter(Boolean)
-  return names.length ? names : undefined
+  if (!names.length) {
+    throw new Error(
+      'REPOSITORIES is required. Where: App token repository scope. Saw: no repository names; wanted one or more names. Fix: pass comma-separated repository names.',
+    )
+  }
+  return names
 }
 
 async function main() {
@@ -299,9 +306,7 @@ async function main() {
   if (permissions !== undefined) {
     tokenBody.permissions = permissions
   }
-  if (repositories !== undefined) {
-    tokenBody.repositories = repositories
-  }
+  tokenBody.repositories = repositories
   const minted = await gh(
     'POST',
     `/app/installations/${installationId}/access_tokens`,

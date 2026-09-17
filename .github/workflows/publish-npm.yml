@@ -190,6 +190,8 @@ jobs:
           payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
           checkout-ref: ${{ inputs.checkout-ref || github.sha }}
+      - name: Build
+        run: pnpm run build
       - name: 'Download coverage artifacts'
         uses: ./.github/actions/fleet/download-artifact
         with:
@@ -223,7 +225,7 @@ jobs:
     if: ${{ always() && (inputs.backfill-version != '' || needs.coverage.result == 'success') }}
     cache-mode: read
     name: Publish npm
-    runs-on: ${{ vars.BROWSER_BRIDGE_RELEASE_ENABLED == 'true' && (vars.NPM_PUBLISH_RUNNER || 'macos-14') || vars.ODAI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ${{ vars.NPM_PUBLISH_RUNNER || vars.ODAI_RUNNER || 'ubuntu-latest' }}
     # npm's trusted-publisher config pins this GitHub environment name; the
     # OIDC token exchange 404s if the job runs outside it.
     environment: publish-npm
@@ -398,32 +400,12 @@ jobs:
           client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
           repositories: ${{ github.event.repository.name }}
-      - name: Verify browser bridge signing runner
-        if: ${{ vars.BROWSER_BRIDGE_RELEASE_ENABLED == 'true' && inputs.publish == true && inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' }}
-        shell: bash
-        run: |
-          if [ "$RUNNER_OS" != 'macOS' ]; then
-            echo '::error::Browser bridge signing requires a macOS NPM_PUBLISH_RUNNER.' >&2
-            exit 1
-          fi
-      - name: Prepare browser bridge signing
-        if: ${{ vars.BROWSER_BRIDGE_RELEASE_ENABLED == 'true' && inputs.publish == true && inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' }}
-        env:
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_DEVELOPER_ID_APPLICATION_CERTS_P12: ${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTS_P12 }}
-          APPLE_DEVELOPER_ID_APPLICATION_CERTS_P12_PASS: ${{ secrets.APPLE_DEVELOPER_ID_APPLICATION_CERTS_P12_PASS }}
-          APPLE_ID: ${{ secrets.APPLE_ID || vars.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || vars.APPLE_TEAM_ID }}
-        run: pnpm run browser-bridge:signing-setup
       # The version resolver consumes a prerelease hint, uses configured odai
       # for patch/minor, or defaults to minor. Backfills keep their version.
       - name: Publish
         env:
-          APPLE_TEAM_ID: ${{ vars.BROWSER_BRIDGE_RELEASE_ENABLED == 'true' && inputs.publish == true && inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' && (secrets.APPLE_TEAM_ID || vars.APPLE_TEAM_ID) || '' }}
           BACKFILL_VERSION: ${{ inputs.backfill-version }}
-          BROWSER_BRIDGE_RELEASE_ENABLED: ${{ vars.BROWSER_BRIDGE_RELEASE_ENABLED == 'true' && inputs.publish == true && inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' && 'true' || 'false' }}
           CHECKOUT_REF: ${{ inputs.resume-reserved != true && inputs.checkout-ref || '' }}
-          CHROME_EXTENSION_CRX_PRIVATE_KEY_PEM: ${{ vars.BROWSER_BRIDGE_RELEASE_ENABLED == 'true' && inputs.publish == true && inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' && secrets.CHROME_EXTENSION_CRX_PRIVATE_KEY_PEM || '' }}
           DIST_TAG: ${{ inputs.dist-tag }}
           RELEASE_APP_TOKEN: ${{ steps.release-app.outputs.token }}
           GH_TOKEN: ${{ steps.release-app.outputs.token }}
@@ -431,6 +413,3 @@ jobs:
         # backfill-version is refused by the script instead of silently
         # bump-publishing historical content.
         run: node scripts/fleet/npm-publish.mts --tag "$DIST_TAG" ${BACKFILL_VERSION:+--backfill "$BACKFILL_VERSION"} ${CHECKOUT_REF:+--checkout-ref "$CHECKOUT_REF"} ${{ inputs.resume-reserved == true && '--resume-reserved' || '' }} ${{ inputs.publish != true && '--dry-run' || '' }}
-      - name: Remove browser bridge signing keychain
-        if: ${{ always() && vars.BROWSER_BRIDGE_RELEASE_ENABLED == 'true' && inputs.publish == true && inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' }}
-        run: pnpm run browser-bridge:signing-cleanup

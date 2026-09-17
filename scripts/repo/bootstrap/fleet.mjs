@@ -989,6 +989,11 @@ function publishesCrates(raw) {
   return publishesRegistry(raw, 'crates-registry')
 }
 function publishesNpm(raw) {
+  const release = raw['release']
+  if (isPlainObject(release)) {
+    const packages = release['publishedPackages']
+    if (Array.isArray(packages) && packages.length === 0) return false
+  }
   return publishesRegistry(raw, 'npm-registry')
 }
 function publishesRegistry(raw, registry) {
@@ -1302,6 +1307,7 @@ const ALWAYS_TRACKED_GITHUB_PREFIXES = [
   '.github/actions/fleet/checkout/',
   '.github/actions/fleet/debug/',
   '.github/actions/fleet/expose-actions-runtime/',
+  '.github/actions/fleet/github-ci-fix-app-token/',
   '.github/actions/fleet/github-payload-app-token/',
   '.github/actions/fleet/github-status-check/',
   '.github/actions/fleet/install/',
@@ -2913,6 +2919,15 @@ function applyMovedPaths(dest, manifest, options) {
   const movedWorkflowDestinations = new Set(
     plans.filter(plan => plan.workflow).map(plan => plan.to),
   )
+  const plannedChangedPaths = /* @__PURE__ */ new Set()
+  for (const plan of plans) {
+    plannedChangedPaths.add(normalizeBundlePath(path.relative(dest, plan.from)))
+    if (!plan.exists)
+      plannedChangedPaths.add(normalizeBundlePath(path.relative(dest, plan.to)))
+  }
+  for (const filename of updates.keys())
+    plannedChangedPaths.add(normalizeBundlePath(path.relative(dest, filename)))
+  if (options?.allowChangedPaths?.([...plannedChangedPaths]) === false) return 0
   for (const plan of plans)
     if (existsSync(plan.to)) rm(plan.from, dest)
     else {
@@ -2930,6 +2945,8 @@ function applyMovedPaths(dest, manifest, options) {
         chmodSync(filename, mode)
     }
   }
+  for (const changedPath of plannedChangedPaths)
+    options?.changedPaths?.add(changedPath)
   return plans.length
 }
 /**
