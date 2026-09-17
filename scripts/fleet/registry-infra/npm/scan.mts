@@ -210,7 +210,8 @@ export async function preflightSocketScanAuth(
     interactive = Boolean(process.stdout.isTTY),
     openUrl,
     promptForToken,
-    sdkFactory = token => new SocketSdk(token),
+    sdkFactory = token =>
+      new SocketSdk(token, { timeout: FULL_SCAN_READ_TIMEOUT_MS }),
   } = opts
 
   const token = await acquireSocketScanToken({
