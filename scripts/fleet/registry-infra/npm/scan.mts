@@ -26,12 +26,16 @@ import {
   acquireSocketTokenViaOAuth,
   socketOAuthConfigured,
 } from '../socket-oauth.mts'
+import { readFullScanNdjson } from './scan-ndjson.mts'
+import type { FullScanArtifact, FullScanStreamResult } from './scan-ndjson.mts'
+export type { FullScanArtifact } from './scan-ndjson.mts'
 import { defaultPackTarball } from './staged.mts'
 import { collectThreatFailures, runLocalThreatScan } from './threat-scan.mts'
 import type { ThreatManifest } from './threat-scan.mts'
 import { getSocketApiToken } from '@socketsecurity/lib-stable/env/socket'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { sleep } from '@socketsecurity/lib-stable/promises/timers'
 import { password } from '@socketsecurity/lib-stable/stdio/prompts'
 
 export const SOCKET_TOKEN_ENV_VAR = 'SOCKET_API_TOKEN'
@@ -340,40 +344,8 @@ export function summarizeResolvedPolicyAlerts(
 // Full-scan payload shapes vary by endpoint version (a bare artifact array vs
 // an `{ artifacts: [...] }` wrapper); normalize to the artifact array the
 // policy evaluation consumes.
-export interface FullScanArtifact {
-  alerts?:
-    | Array<{
-        action?: string | undefined
-        severity?: string | undefined
-        type?: string | undefined
-      }>
-    | undefined
-  name?: string | undefined
-  version?: string | undefined
-}
-
-// Return the artifact list for a RECOGNIZED full-scan response shape (a bare
-// array or `{ artifacts: [...] }`), or undefined when the shape is
-// unrecognized. The gate fails closed on undefined rather than conflating
-// "unknown response shape" with "clean" — the SDK maps an empty HTTP body to
-// `{}`, and a future enveloped/paginated shape would otherwise silently pass.
-// A recognized-but-empty `[]` is also a fail-closed signal at the call site: a
-// real full scan of a package always yields at least the package's own
-// artifact, so zero artifacts means nothing was evaluated.
-export function normalizeFullScanArtifacts(
-  data: unknown,
-): FullScanArtifact[] | undefined {
-  if (Array.isArray(data)) {
-    return data as FullScanArtifact[]
-  }
-  if (data !== null && typeof data === 'object') {
-    const maybe = (data as { artifacts?: unknown | undefined }).artifacts
-    if (Array.isArray(maybe)) {
-      return maybe as FullScanArtifact[]
-    }
-  }
-  return undefined
-}
+const FULL_SCAN_POLL_INTERVAL_MS = 1000
+const FULL_SCAN_READ_TIMEOUT_MS = 2 * 60 * 1000
 
 /**
  * Scan one staged entry's artifact through the Socket API. Resolves the
@@ -560,6 +532,37 @@ async function createStagedArchiveScan(config: {
   return { scanId }
 }
 
+type FullScanAttempt =
+  | FullScanStreamResult
+  | { missingStream: true }
+  | { readStatus: number | undefined }
+
+async function streamFullScanAttempt(
+  sdk: SocketSdk,
+  orgSlug: string,
+  scanId: string,
+): Promise<FullScanAttempt> {
+  const scan = await sdk.streamFullScan(orgSlug, scanId)
+  if (!scan.success) {
+    const status = (scan as { status?: unknown | undefined }).status
+    return { readStatus: typeof status === 'number' ? status : undefined }
+  }
+  const response = scan.data as {
+    rawResponse?:
+      | (AsyncIterable<unknown> & { destroy?: (() => void) | undefined })
+      | undefined
+  }
+  const rawResponse = response?.rawResponse
+  if (!rawResponse || typeof rawResponse[Symbol.asyncIterator] !== 'function') {
+    return { missingStream: true }
+  }
+  try {
+    return await readFullScanNdjson(rawResponse, scanId)
+  } finally {
+    rawResponse.destroy?.()
+  }
+}
+
 /**
  * Read the finished scan with the server-resolved policy action on every
  * alert. FAILS CLOSED on an unrecognized or empty scan, or any alert without a
@@ -581,49 +584,77 @@ async function readFullScanEvidence(config: {
   const cfg = { __proto__: null, ...config } as typeof config
   const { entryLabel, scanId } = cfg
   const { orgSlug, sdk } = cfg.context
+  const deadline = Date.now() + FULL_SCAN_READ_TIMEOUT_MS
   try {
-    const scan = await sdk.getFullScan(orgSlug, scanId)
-    if (!scan.success) {
-      const status = (scan as { status?: unknown | undefined }).status
-      const scopeHint =
-        status === 403 ? '; required scope: full-scans:list' : ''
-      logger.fail(
-        `Scan gate: full-scan read failed for ${entryLabel}` +
-          (typeof status === 'number' ? ` (status ${status})` : '') +
-          `${scopeHint}; not approving.`,
-      )
-      return {
-        refusal: scanRefused(
-          `could not read full scan ${scanId} for ${entryLabel}` +
+    for (;;) {
+      const streamed = await streamFullScanAttempt(sdk, orgSlug, scanId)
+      if ('readStatus' in streamed) {
+        const { readStatus: status } = streamed
+        const scopeHint =
+          status === 403 ? '; required scope: full-scans:list' : ''
+        logger.fail(
+          `Scan gate: full-scan read failed for ${entryLabel}` +
             (typeof status === 'number' ? ` (status ${status})` : '') +
-            scopeHint,
-        ),
+            `${scopeHint}; not approving.`,
+        )
+        return {
+          refusal: scanRefused(
+            `could not read full scan ${scanId} for ${entryLabel}` +
+              (typeof status === 'number' ? ` (status ${status})` : '') +
+              scopeHint,
+          ),
+        }
       }
-    }
-    const rawArtifacts = normalizeFullScanArtifacts(scan.data)
-    if (!rawArtifacts || rawArtifacts.length === 0) {
-      logger.fail(
-        `Scan gate: full scan for ${entryLabel} returned no recognizable ` +
-          'artifacts; refusing to approve bytes the scan did not evaluate.',
-      )
-      return {
-        refusal: scanRefused(
-          `full scan ${scanId} returned no recognizable artifacts for ${entryLabel} — nothing was evaluated`,
-        ),
+      if ('missingStream' in streamed) {
+        return {
+          refusal: scanRefused(
+            `full scan ${scanId} returned no readable response stream for ${entryLabel}`,
+          ),
+        }
       }
-    }
-    const summary = summarizeResolvedPolicyAlerts(rawArtifacts)
-    if (!summary) {
-      logger.fail(
-        `Scan gate: full scan for ${entryLabel} returned malformed or unresolved policy evidence; refusing to approve.`,
-      )
-      return {
-        refusal: scanRefused(
-          `full scan ${scanId} returned malformed or unresolved policy evidence for ${entryLabel}`,
-        ),
+      if (streamed.processing) {
+        if (Date.now() + FULL_SCAN_POLL_INTERVAL_MS > deadline) {
+          return {
+            refusal: scanRefused(
+              `full scan ${scanId} remained processing for ${entryLabel}`,
+            ),
+          }
+        }
+        await sleep(FULL_SCAN_POLL_INTERVAL_MS)
+        continue
       }
+      if (streamed.reason) {
+        return {
+          refusal: scanRefused(
+            `${streamed.reason} for ${entryLabel} (${scanId})`,
+          ),
+        }
+      }
+      const rawArtifacts = streamed.artifacts
+      if (!rawArtifacts || rawArtifacts.length === 0) {
+        logger.fail(
+          `Scan gate: full scan for ${entryLabel} returned no recognizable ` +
+            'artifacts; refusing to approve bytes the scan did not evaluate.',
+        )
+        return {
+          refusal: scanRefused(
+            `full scan ${scanId} returned no recognizable artifacts for ${entryLabel} — nothing was evaluated`,
+          ),
+        }
+      }
+      const summary = summarizeResolvedPolicyAlerts(rawArtifacts)
+      if (!summary) {
+        logger.fail(
+          `Scan gate: full scan for ${entryLabel} returned malformed or unresolved policy evidence; refusing to approve.`,
+        )
+        return {
+          refusal: scanRefused(
+            `full scan ${scanId} returned malformed or unresolved policy evidence for ${entryLabel}`,
+          ),
+        }
+      }
+      return { artifacts: rawArtifacts, summary }
     }
-    return { artifacts: rawArtifacts, summary }
   } catch (e) {
     logger.fail(
       `Scan gate: reading scan results threw for ${entryLabel} (${errorMessage(e)}).`,
