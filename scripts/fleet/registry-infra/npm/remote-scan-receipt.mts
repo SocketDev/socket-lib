@@ -30,8 +30,71 @@ function recordOf(value: unknown): Record<string, unknown> {
 
 function receiptError(saw: string): never {
   throw new Error(
-    `Remote npm scan receipt is invalid. Where: ${NPM_SCAN_RECEIPT_FILE}. Saw ${saw}; wanted one successful trusted publish-npm scan bound to the current staged bytes. Fix: dispatch the scan workflow again and pass its run ID to npm:approve.`,
+    `Remote npm scan receipt is invalid. Where: ${NPM_SCAN_RECEIPT_FILE}. Saw ${saw}; wanted one successful trusted publish-npm scan bound to the current staged bytes. Fix: run npm:scan for the current stage, then run npm:approve again.`,
   )
+}
+
+export async function discoverNpmRemoteScanRun(
+  selected: readonly string[],
+  entries: readonly StageListEntry[],
+  options?:
+    | {
+        candidateRunIds?: (() => Promise<readonly number[]>) | undefined
+        verifyRun?: typeof verifyNpmRemoteScanRun | undefined
+      }
+    | undefined,
+): Promise<string[]> {
+  const opts = { __proto__: null, ...options } as NonNullable<typeof options>
+  const candidateRunIds = opts.candidateRunIds ?? successfulPublishScanRunIds
+  const verifyRun = opts.verifyRun ?? verifyNpmRemoteScanRun
+  const candidates = [...new Set(await candidateRunIds())].toSorted(
+    (left, right) => right - left,
+  )
+  for (let index = 0, { length } = candidates; index < length; index += 1) {
+    const runId = candidates[index]!
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      const match = await verifyRun(runId, selected, entries)
+      if (
+        match &&
+        match.length === selected.length &&
+        match.every(
+          (stageId, selectedIndex) => stageId === selected[selectedIndex],
+        )
+      ) {
+        return match
+      }
+    } catch {
+      // Every candidate still passes the complete authenticated verifier. A
+      // successful workflow with unrelated or malformed evidence is not a
+      // match for this live stage.
+    }
+  }
+  receiptError('no matching successful scan run')
+}
+
+async function successfulPublishScanRunIds(): Promise<number[]> {
+  const repository = await currentRepository()
+  const metadata = recordOf(await githubJson(`repos/${repository}`))
+  const defaultBranch = metadata['default_branch']
+  if (typeof defaultBranch !== 'string' || defaultBranch === '') {
+    receiptError('repository metadata without a default branch')
+  }
+  const listing = recordOf(
+    await githubJson(
+      `repos/${repository}/actions/workflows/publish-npm.yml/runs?branch=${encodeURIComponent(defaultBranch)}&event=workflow_dispatch&status=success&per_page=100`,
+    ),
+  )
+  const runs = listing['workflow_runs']
+  if (!Array.isArray(runs)) {
+    receiptError('a malformed successful workflow run listing')
+  }
+  return runs.flatMap(value => {
+    const id = recordOf(value)['id']
+    return typeof id === 'number' && Number.isSafeInteger(id) && id > 0
+      ? [id]
+      : []
+  })
 }
 
 export function verifyNpmRemoteScanBinding(

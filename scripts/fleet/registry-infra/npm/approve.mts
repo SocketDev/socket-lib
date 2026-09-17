@@ -14,7 +14,7 @@ import { checkbox } from '@socketsecurity/lib-stable/stdio/prompts'
 
 import { logger, rootPath } from '../shared.mts'
 import type { runInheritTty } from '../shared.mts'
-import { isAlreadyPublished } from './registry.mts'
+import { fetchVersionTrustInfo, isAlreadyPublished } from './registry.mts'
 import type { StageListEntry } from './shared.mts'
 import {
   fetchPriorProvenanceMap,
@@ -24,20 +24,8 @@ import {
 } from './shared.mts'
 import { ensureNpmIdentity } from './auth-identity.mts'
 import { runNativeNpmOperation } from './settings/trust.mts'
-import { preflightSocketScanAuth, scanStagedEntry } from './scan.mts'
-import { verifyNpmRemoteScanRun } from './remote-scan-receipt.mts'
-import {
-  browserStagedRequested,
-  openStagedBrowserSession,
-} from './staged-browser-read.mts'
-import { threatScanRequested } from './threat-scan.mts'
-import type { StagedBrowserSession } from './staged-browser-read.mts'
-import {
-  composeTarballProviders,
-  defaultDownloadStagedTarball,
-  verifyStagedEntry,
-} from './staged.mts'
-import type { TarballProvider } from './staged.mts'
+import { discoverNpmRemoteScanRun } from './remote-scan-receipt.mts'
+import { defaultDownloadStagedTarball, verifyStagedEntry } from './staged.mts'
 import { verifyStagedPlatformEntry } from './staged-workspace.mts'
 import { hasMachineBuiltPayload } from './workspace-plan.mts'
 import {
@@ -77,7 +65,6 @@ export function buildApproveChoices(
  */
 export interface ApproveConfig {
   dryRun: boolean
-  scanRunId?: number | undefined
   yes: boolean
   // ── Injected collaborators, dependency injection. Every field
   // defaults to the real import below, so omitting them leaves prod behavior
@@ -85,20 +72,16 @@ export interface ApproveConfig {
   // npm/pnpm/git/gh, prompting a TTY, or touching the registry. Typed as
   // `typeof <realFn>` so a signature drift on the collaborator is a compile
   // error here. ──
-  browserRequested?: typeof browserStagedRequested | undefined
   checkbox?: typeof checkbox | undefined
+  discoverRemoteScan?: typeof discoverNpmRemoteScanRun | undefined
   ensureIdentity?: typeof ensureNpmIdentity | undefined
   fetchPriorProvenance?: typeof fetchPriorProvenanceMap | undefined
+  fetchVersionTrust?: typeof fetchVersionTrustInfo | undefined
   isPublished?: typeof isAlreadyPublished | undefined
   listStaged?: typeof listStagedPackages | undefined
-  openStagedSession?: typeof openStagedBrowserSession | undefined
   readPkg?: typeof readPackageJson | undefined
   resolveLayout?: typeof resolveNpmWorkspaceLayout | undefined
   runInheritTty?: typeof runInheritTty | undefined
-  scanAuth?: typeof preflightSocketScanAuth | undefined
-  scanEntry?: typeof scanStagedEntry | undefined
-  verifyRemoteScan?: typeof verifyNpmRemoteScanRun | undefined
-  threatRequested?: typeof threatScanRequested | undefined
   verifyEntry?: typeof verifyStagedEntry | undefined
 }
 
@@ -110,6 +93,7 @@ export interface ApproveConfig {
 interface ApproveStageCollaborators {
   ensureIdentity: typeof ensureNpmIdentity
   fetchPriorProvenance: typeof fetchPriorProvenanceMap
+  fetchVersionTrust: typeof fetchVersionTrustInfo
   isPublished: typeof isAlreadyPublished
   listStaged: typeof listStagedPackages
   promptCheckbox: typeof checkbox
@@ -123,13 +107,8 @@ interface ApproveStageCollaborators {
  * passback, the approve spawn.
  */
 interface ApproveGateCollaborators {
-  browserRequested: typeof browserStagedRequested
-  openStagedSession: typeof openStagedBrowserSession
+  discoverRemoteScan: typeof discoverNpmRemoteScanRun
   runTty: typeof runInheritTty
-  scanAuth: typeof preflightSocketScanAuth
-  scanEntry: typeof scanStagedEntry
-  verifyRemoteScan: typeof verifyNpmRemoteScanRun
-  threatRequested: typeof threatScanRequested
 }
 
 async function runNativeStageApproval(
@@ -147,6 +126,7 @@ function resolveApproveStageCollaborators(
     ensureIdentity: config.ensureIdentity ?? ensureNpmIdentity,
     fetchPriorProvenance:
       config.fetchPriorProvenance ?? fetchPriorProvenanceMap,
+    fetchVersionTrust: config.fetchVersionTrust ?? fetchVersionTrustInfo,
     isPublished: config.isPublished ?? isAlreadyPublished,
     listStaged: config.listStaged ?? listStagedPackages,
     promptCheckbox: config.checkbox ?? checkbox,
@@ -160,13 +140,8 @@ function resolveApproveGateCollaborators(
   config: ApproveConfig,
 ): ApproveGateCollaborators {
   return {
-    browserRequested: config.browserRequested ?? browserStagedRequested,
-    openStagedSession: config.openStagedSession ?? openStagedBrowserSession,
+    discoverRemoteScan: config.discoverRemoteScan ?? discoverNpmRemoteScanRun,
     runTty: config.runInheritTty ?? runNativeStageApproval,
-    scanAuth: config.scanAuth ?? preflightSocketScanAuth,
-    scanEntry: config.scanEntry ?? scanStagedEntry,
-    verifyRemoteScan: config.verifyRemoteScan ?? verifyNpmRemoteScanRun,
-    threatRequested: config.threatRequested ?? threatScanRequested,
   }
 }
 
@@ -275,17 +250,9 @@ async function verifyStagedEntriesForApprove(
  * prompt, or `pnpm stage approve`.
  */
 async function collectVerifiedApproveEntries(config: {
-  scanRunId?: number | undefined
   layout: NpmWorkspaceLayout
   stage: ApproveStageCollaborators
-  verifyRemoteScan: typeof verifyNpmRemoteScanRun
-}): Promise<
-  | {
-      entries: StageListEntry[]
-      remoteScanned: string[] | undefined
-    }
-  | undefined
-> {
+}): Promise<StageListEntry[] | undefined> {
   const { layout, stage } = config
   const staged = await stage.listStaged()
   if (staged.length === 0) {
@@ -304,31 +271,6 @@ async function collectVerifiedApproveEntries(config: {
   if (eligible.length === 0) {
     logger.log('All staged entries are already published; nothing to approve.')
     return undefined
-  }
-  if (config.scanRunId !== undefined) {
-    const stageIds = eligible.flatMap(entry =>
-      entry.stageId ? [entry.stageId] : [],
-    )
-    try {
-      const remoteScanned = await config.verifyRemoteScan(
-        config.scanRunId,
-        stageIds,
-        eligible,
-      )
-      if (
-        stageIds.length !== eligible.length ||
-        !remoteScanned ||
-        remoteScanned.length !== stageIds.length ||
-        stageIds.some(stageId => !remoteScanned.includes(stageId))
-      ) {
-        throw new Error('Remote npm scan receipt did not verify every stage.')
-      }
-      return { entries: eligible, remoteScanned }
-    } catch (error) {
-      logger.fail(String(error))
-      process.exitCode = 1
-      return undefined
-    }
   }
   const verifiedEntries = await verifyStagedEntriesForApprove(eligible, {
     layout,
@@ -349,7 +291,7 @@ async function collectVerifiedApproveEntries(config: {
     process.exitCode = 1
     return undefined
   }
-  return { entries: verifiedEntries, remoteScanned: undefined }
+  return verifiedEntries
 }
 
 /**
@@ -396,83 +338,6 @@ function logPlannedApprovals(
 }
 
 /**
- * The artifact-source FALLBACK CHAIN for one staged entry, in precedence order
- * rather than a single pick: a browser-read session (its bytes are npm's actual
- * staged upload) → the registry-API staged download. A source that yields no
- * bytes falls through to the next. A local re-pack is not eligible because it
- * can change after verification and is not the artifact npm will promote.
- */
-function resolveStagedTarballSources(config: {
-  browserSession: StagedBrowserSession | undefined
-  entry: StageListEntry
-  stageId: string
-}): TarballProvider[] {
-  const { browserSession, entry, stageId } = config
-  const sources: TarballProvider[] = []
-  if (browserSession) {
-    const stagedTar = browserSession.tarballs.find(
-      t => t.packageName === entry.name && t.version === entry.version,
-    )
-    if (stagedTar) {
-      sources.push(() => browserSession.download(stagedTar))
-    }
-  }
-  sources.push(() => defaultDownloadStagedTarball(stageId))
-  return sources
-}
-
-/**
- * Scan every selected entry and return the stage ids that came back clean.
- */
-async function scanSelectedStagedEntries(
-  selected: readonly string[],
-  config: {
-    browserSession: StagedBrowserSession | undefined
-    scanContext: Awaited<ReturnType<typeof preflightSocketScanAuth>>
-    scanEntry: typeof scanStagedEntry
-    threatScan: boolean
-    verifiedEntries: readonly StageListEntry[]
-  },
-): Promise<string[]> {
-  const {
-    browserSession,
-    scanContext,
-    scanEntry,
-    threatScan,
-    verifiedEntries,
-  } = config
-  const scanned: string[] = []
-  for (let i = 0, { length } = selected; i < length; i += 1) {
-    const stageId = selected[i]!
-    const entry = verifiedEntries.find(e => e.stageId === stageId)
-    if (!entry?.name || !entry.version || !entry.shasum) {
-      continue
-    }
-    const packTarball = composeTarballProviders(
-      resolveStagedTarballSources({
-        browserSession,
-        entry,
-        stageId,
-      }),
-    )
-    // eslint-disable-next-line no-await-in-loop
-    const scanOk = await scanEntry(
-      { name: entry.name, version: entry.version },
-      {
-        context: scanContext,
-        expectedShasum: entry.shasum,
-        packTarball,
-        threatScan,
-      },
-    )
-    if (scanOk) {
-      scanned.push(stageId)
-    }
-  }
-  return scanned
-}
-
-/**
  * The Socket full-scan gate over the selection. It downloads each staged
  * artifact, checks its registry-recorded shasum, and sends those exact bytes to
  * Socket. Returns the stage ids that scanned clean, or
@@ -485,72 +350,29 @@ async function runApproveScanGate(
   selected: readonly string[],
   config: {
     gates: ApproveGateCollaborators
-    remoteScanned?: readonly string[] | undefined
     verifiedEntries: readonly StageListEntry[]
   },
 ): Promise<string[] | undefined> {
   const { gates, verifiedEntries } = config
-  const { remoteScanned } = config
-  if (remoteScanned !== undefined) {
-    return selected.every(stageId => remoteScanned.includes(stageId))
-      ? [...selected]
-      : undefined
-  }
-  // One auth preflight for the whole batch: token resolution (with the
-  // browser-assisted mint on an interactive run), a cheap quota verify, and the
-  // org slug — so a missing/expired token surfaces here, not per-entry mid-gate.
-  const scanContext = await gates.scanAuth()
-  if (!scanContext) {
-    logger.fail('Socket scan gate unavailable; nothing approved.')
+  const missingDigest = selected.find(stageId => {
+    const entry = verifiedEntries.find(
+      candidate => candidate.stageId === stageId,
+    )
+    return !entry?.shasum
+  })
+  if (missingDigest) {
+    logger.fail(
+      `Cannot bind the staged bytes. Where: npm stage ${missingDigest}. Saw no registry shasum; wanted the staged SHA-1. Fix: inspect the live stage and retry npm:approve.`,
+    )
     process.exitCode = 1
     return undefined
   }
-  // Optional browser-read passback: with --staged-browser (or
-  // SOCKET_STAGED_BROWSER=1) open one signed-in npm session and pull each
-  // staged tarball's bytes THROUGH it — the staged view + tarball are
-  // session-only, invisible to the registry API. Opened once for the whole
-  // batch; closed in finally. Opt-in local code-threat scan: with
-  // --threat-scan (or SOCKET_THREAT_SCAN=1) each entry additionally runs the
-  // keyless on-device triage over its extracted source. Resolved once.
-  const threatScan = gates.threatRequested()
-  let browserSession: StagedBrowserSession | undefined
-  if (gates.browserRequested()) {
-    try {
-      browserSession = await gates.openStagedSession()
-    } catch (e) {
-      logger.fail(
-        `Browser-read staged passback failed to open; nothing approved. ${String(e)}`,
-      )
-      process.exitCode = 1
-      return undefined
-    }
-  }
   try {
-    const scanned = await scanSelectedStagedEntries(selected, {
-      browserSession,
-      scanContext,
-      scanEntry: gates.scanEntry,
-      threatScan,
-      verifiedEntries,
-    })
-    if (scanned.length === 0) {
-      logger.fail(
-        'No selected package passed the Socket scan gate; nothing approved.',
-      )
-      process.exitCode = 1
-      return undefined
-    }
-    if (scanned.length < selected.length) {
-      logger.fail(
-        `${selected.length - scanned.length}/${selected.length} failed the scan gate; ` +
-          'refusing the whole batch.',
-      )
-      process.exitCode = 1
-      return undefined
-    }
-    return scanned
-  } finally {
-    await browserSession?.close()
+    return await gates.discoverRemoteScan(selected, verifiedEntries)
+  } catch (error) {
+    logger.fail(String(error))
+    process.exitCode = 1
+    return undefined
   }
 }
 
@@ -562,6 +384,8 @@ async function runApproveScanGate(
 async function approveGatedSelection(
   gated: readonly string[],
   config: {
+    entries: readonly StageListEntry[]
+    fetchVersionTrust: typeof fetchVersionTrustInfo
     listStaged: typeof listStagedPackages
     runTty: typeof runInheritTty
   },
@@ -569,39 +393,60 @@ async function approveGatedSelection(
   approved: number
   failed: number
 }> {
-  const { listStaged, runTty } = config
+  const { entries, fetchVersionTrust, listStaged, runTty } = config
   let approved = 0
   let failed = 0
-  const reportedApproved: string[] = []
+  const results = new Map<string, number>()
   for (let i = 0, { length } = gated; i < length; i += 1) {
     const stageId = gated[i]!
     const args = ['stage', 'approve', stageId]
     // eslint-disable-next-line no-await-in-loop
     const code = await runTty('pnpm', args, rootPath)
+    results.set(stageId, code)
+  }
+  const remaining = new Set(
+    (await listStaged()).flatMap(entry =>
+      entry.stageId ? [entry.stageId] : [],
+    ),
+  )
+  const unverifiedSuccess = [...results].flatMap(([stageId, code]) =>
+    code === 0 && remaining.has(stageId) ? [stageId] : [],
+  )
+  if (unverifiedSuccess.length) {
+    logger.fail(
+      `Approval reported success but ${unverifiedSuccess.length} stage(s) remain pending: ${unverifiedSuccess.join(', ')}`,
+    )
+  }
+  for (const [stageId, code] of results) {
+    if (remaining.has(stageId)) {
+      failed += 1
+      if (code !== 0) {
+        logger.fail(`Approve ${stageId} exited ${code}`)
+      }
+      continue
+    }
     if (code === 0) {
       approved += 1
-      reportedApproved.push(stageId)
-    } else {
-      failed += 1
-      logger.fail(`Approve ${stageId} exited ${code}`)
+      continue
     }
-  }
-  if (reportedApproved.length) {
-    const remaining = new Set(
-      (await listStaged()).flatMap(entry =>
-        entry.stageId ? [entry.stageId] : [],
-      ),
-    )
-    const unverified = reportedApproved.filter(stageId =>
-      remaining.has(stageId),
-    )
-    if (unverified.length) {
-      approved -= unverified.length
-      failed += unverified.length
-      logger.fail(
-        `Approval reported success but ${unverified.length} stage(s) remain pending: ${unverified.join(', ')}`,
-      )
+    const entry = entries.find(candidate => candidate.stageId === stageId)
+    if (entry?.name && entry.version && entry.shasum) {
+      // eslint-disable-next-line no-await-in-loop
+      const published = (await fetchVersionTrust(entry.name))[entry.version]
+      if (
+        published?.shasum === entry.shasum &&
+        typeof published.integrity === 'string' &&
+        published.integrity.length > 0
+      ) {
+        approved += 1
+        logger.success(
+          `Approve ${stageId} completed in the browser; verified ${entry.name}@${entry.version} on the registry.`,
+        )
+        continue
+      }
     }
+    failed += 1
+    logger.fail(`Approve ${stageId} exited ${code}`)
   }
   return { approved, failed }
 }
@@ -623,16 +468,10 @@ export async function runApprove(config: ApproveConfig): Promise<void> {
     process.exitCode = 1
     return
   }
-  const collected = await collectVerifiedApproveEntries({
-    layout,
-    scanRunId: config.scanRunId,
-    stage,
-    verifyRemoteScan: gates.verifyRemoteScan,
-  })
-  if (!collected) {
+  const verifiedEntries = await collectVerifiedApproveEntries({ layout, stage })
+  if (!verifiedEntries) {
     return
   }
-  const { entries: verifiedEntries, remoteScanned } = collected
 
   // Fetch prior-version provenance for each unique package name so the
   // approver can spot regressions (last public version had provenance
@@ -641,6 +480,14 @@ export async function runApprove(config: ApproveConfig): Promise<void> {
   // name, abbreviated packument (no _npmUser needed; we only check
   // attestations presence as a proxy for "this name is OIDC-published").
   const priorProvenance = await stage.fetchPriorProvenance(verifiedEntries)
+
+  if (layout.kind === 'single' && verifiedEntries.length !== 1) {
+    logger.fail(
+      `Cannot select one approval. Where: ${layout.versionSource.name}. Saw ${verifiedEntries.length} eligible local stages; wanted exactly one. Fix: reject stale local stages, then retry npm:approve.`,
+    )
+    process.exitCode = 1
+    return
+  }
 
   const selected = await selectApproveTargets({
     choices: buildApproveChoices(verifiedEntries, priorProvenance),
@@ -660,7 +507,6 @@ export async function runApprove(config: ApproveConfig): Promise<void> {
   // Full-scan gate: entries that fail drop out, mirroring the verify gate.
   const gated = await runApproveScanGate(selected, {
     gates,
-    remoteScanned,
     verifiedEntries,
   })
   if (!gated) {
@@ -668,6 +514,8 @@ export async function runApprove(config: ApproveConfig): Promise<void> {
   }
 
   const { approved, failed } = await approveGatedSelection(gated, {
+    entries: verifiedEntries,
+    fetchVersionTrust: stage.fetchVersionTrust,
     listStaged: stage.listStaged,
     runTty: gates.runTty,
   })
