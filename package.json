@@ -4111,7 +4111,8 @@
     "browser:doctor": "node scripts/fleet/browser/bridge/doctor.mts",
     "browser:setup": "node scripts/fleet/setup/browser/bridge.mts",
     "browser:verify-installed": "node scripts/fleet/browser/bridge/verify-installed.mts",
-    "npm:trust:browser": "node scripts/fleet/registry-infra/npm/settings/trusted-publisher/browser.mts"
+    "npm:trust:browser": "node scripts/fleet/registry-infra/npm/settings/trusted-publisher/browser.mts",
+    "npm:scan": "node scripts/fleet/npm/scan.mts"
   },
   "devDependencies": {
     "@babel/core": "catalog:",

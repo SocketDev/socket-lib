@@ -1351,6 +1351,9 @@ const ALWAYS_TRACKED_PREFIXES = [
   'patches/fleet/minimatch@10.2.6.patch',
   'patches/fleet/run-local-ci@0.18.1.patch',
   'patches/fleet/vitest@5.0.0.patch',
+  'scripts/fleet/npm/scan-ci.mts',
+  'scripts/fleet/npm/scan-receipt.mts',
+  'scripts/fleet/npm/scan.mts',
   'scripts/repo/bootstrap/',
 ]
 /**
