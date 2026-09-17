@@ -211,6 +211,7 @@ jobs:
             cp -R "$source/." "$target/"
           done
       - name: Install cargo-llvm-cov
+        if: ${{ hashFiles('**/Cargo.toml') != '' }}
         run: pnpm run setup:rust-coverage
       - name: Aggregate coverage
         env:
