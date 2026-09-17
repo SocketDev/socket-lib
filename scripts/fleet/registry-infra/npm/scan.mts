@@ -29,13 +29,12 @@ import {
 import { defaultPackTarball } from './staged.mts'
 import { collectThreatFailures, runLocalThreatScan } from './threat-scan.mts'
 import type { ThreatManifest } from './threat-scan.mts'
+import { getSocketApiToken } from '@socketsecurity/lib-stable/env/socket'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-import { openUrlInNewWindow } from '../../browser/open-url.mts'
+import { withBrowserAuthNavigation } from '../../browser/auth-navigation.mts'
 import { password } from '@socketsecurity/lib-stable/stdio/prompts'
 
-// The canonical fleet env name for the Socket API token — bootstrap hooks
-// normalize the legacy aliases into it, so only this one is read.
 export const SOCKET_TOKEN_ENV_VAR = 'SOCKET_API_TOKEN'
 
 // Where a human mints a token when none is in the environment: dashboard →
@@ -54,18 +53,20 @@ export interface SocketScanContext {
  * Read the Socket API token from the environment.
  */
 export function resolveSocketApiToken(
-  env: NodeJS.ProcessEnv = process.env,
+  options?:
+    | {
+        env?: NodeJS.ProcessEnv | undefined
+        resolveDefault?: (() => string | undefined) | undefined
+      }
+    | undefined,
 ): string | undefined {
+  const opts = { __proto__: null, ...options }
+  const env = opts.env ?? process.env
+  if (env === process.env) {
+    return (opts.resolveDefault ?? getSocketApiToken)()
+  }
   const value = env[SOCKET_TOKEN_ENV_VAR]
   return typeof value === 'string' && value !== '' ? value : undefined
-}
-
-// Best-effort browser opener, fire-and-forget so the gate never waits on the
-// browser process. A failure to open is non-fatal: the URL is printed and the
-// human opens it by hand. New window rather than a tab, which is what
-// _shared/open-url.mts owns for every fleet script.
-function openInBrowser(url: string): void {
-  openUrlInNewWindow(url)
 }
 
 /**
@@ -77,12 +78,12 @@ function openInBrowser(url: string): void {
 async function acquireSocketScanToken(config: {
   env: NodeJS.ProcessEnv
   interactive: boolean
-  openUrl: (url: string) => void
+  openUrl?: ((url: string) => void | Promise<void>) | undefined
   promptForToken?: (() => Promise<string>) | undefined
 }): Promise<string | undefined> {
   const cfg = { __proto__: null, ...config } as typeof config
   const { env, openUrl } = cfg
-  let token = resolveSocketApiToken(env)
+  let token = resolveSocketApiToken({ env })
   if (!token && socketOAuthConfigured(env)) {
     // Browser OAuth (authorization-code + PKCE + loopback) — no key to copy.
     // The browser opens on the operator's screen, so this path does not need
@@ -98,14 +99,23 @@ async function acquireSocketScanToken(config: {
       `Scan gate: no Socket API token in the environment — opening ${SOCKET_TOKEN_MINT_URL} ` +
         '(org settings → API tokens; the gate needs full-scans + report scopes).',
     )
-    openUrl(SOCKET_TOKEN_MINT_URL)
     const prompt =
       cfg.promptForToken ??
       (async () =>
         String(
           (await password({ message: 'Paste the Socket API token:' })) ?? '',
         ))
-    const pasted = (await prompt()).trim()
+    const pasted = (
+      await (openUrl
+        ? (async () => {
+            await openUrl(SOCKET_TOKEN_MINT_URL)
+            return await prompt()
+          })()
+        : withBrowserAuthNavigation('socket-scan', async open => {
+            await open(SOCKET_TOKEN_MINT_URL)
+            return await prompt()
+          }))
+    ).trim()
     if (pasted) {
       token = pasted
     }
@@ -177,19 +187,20 @@ export async function preflightSocketScanAuth(
     | {
         env?: NodeJS.ProcessEnv | undefined
         interactive?: boolean | undefined
-        openUrl?: ((url: string) => void) | undefined
+        openUrl?: ((url: string) => void | Promise<void>) | undefined
         promptForToken?: (() => Promise<string>) | undefined
         sdkFactory?: ((token: string) => SocketSdk) | undefined
       }
     | undefined,
 ): Promise<SocketScanContext | undefined> {
+  const opts = { __proto__: null, ...options } as NonNullable<typeof options>
   const {
     env = process.env,
     interactive = Boolean(process.stdout.isTTY),
-    openUrl = openInBrowser,
+    openUrl,
     promptForToken,
     sdkFactory = token => new SocketSdk(token),
-  } = { __proto__: null, ...options } as NonNullable<typeof options>
+  } = opts
 
   const token = await acquireSocketScanToken({
     env,
@@ -259,28 +270,53 @@ export interface PolicyAlertSummary {
   warn: PolicyFailingAlert[]
 }
 
+const RESOLVED_ALERT_ACTIONS = new Set(['error', 'ignore', 'monitor', 'warn'])
+
+function isResolvedPolicyAlert(alert: unknown): alert is {
+  action: 'error' | 'ignore' | 'monitor' | 'warn'
+  severity?: string | undefined
+  type: string
+} {
+  if (alert === null || typeof alert !== 'object') {
+    return false
+  }
+  const candidate = alert as {
+    action?: unknown | undefined
+    type?: unknown | undefined
+  }
+  return (
+    typeof candidate.type === 'string' &&
+    candidate.type !== '' &&
+    typeof candidate.action === 'string' &&
+    RESOLVED_ALERT_ACTIONS.has(candidate.action)
+  )
+}
+
 /**
  * Pure policy evaluation: bucket every artifact alert by its org
  * security-policy action. This is the report-level gate semantic — the org's
  * own policy decides what blocks, not a hardcoded severity floor.
  */
-export function summarizePolicyAlerts(
-  artifacts: ReadonlyArray<{
-    alerts?:
-      | ReadonlyArray<{ severity?: string | undefined; type: string }>
-      | undefined
-    name?: string | undefined
-    version?: string | undefined
-  }>,
-  policyRules: Readonly<Record<string, { action?: string | undefined }>>,
-): PolicyAlertSummary {
+export function summarizeResolvedPolicyAlerts(
+  artifacts: readonly FullScanArtifact[],
+): PolicyAlertSummary | undefined {
   const summary: PolicyAlertSummary = { error: [], total: 0, warn: [] }
   for (let i = 0, { length } = artifacts; i < length; i += 1) {
     const artifact = artifacts[i]!
-    const alerts = artifact.alerts ?? []
+    if (
+      artifact === null ||
+      typeof artifact !== 'object' ||
+      !Array.isArray(artifact.alerts)
+    ) {
+      return undefined
+    }
+    const alerts = artifact.alerts
     for (const alert of alerts) {
+      if (!isResolvedPolicyAlert(alert)) {
+        return undefined
+      }
       summary.total += 1
-      const action = policyRules[alert.type]?.action
+      const { action } = alert
       if (action !== 'error' && action !== 'warn') {
         continue
       }
@@ -294,37 +330,20 @@ export function summarizePolicyAlerts(
   return summary
 }
 
-/**
- * Pure policy evaluation: collect every alert whose org security-policy
- * action is `error`. This is the report-level:error gate semantic — the org's
- * own policy decides what blocks, not a hardcoded severity floor.
- */
-export function collectPolicyFailingAlerts(
-  artifacts: ReadonlyArray<{
-    alerts?:
-      | ReadonlyArray<{ severity?: string | undefined; type: string }>
-      | undefined
-    name?: string | undefined
-    version?: string | undefined
-  }>,
-  policyRules: Readonly<Record<string, { action?: string | undefined }>>,
-): PolicyFailingAlert[] {
-  return summarizePolicyAlerts(artifacts, policyRules).error
-}
-
 // Full-scan payload shapes vary by endpoint version (a bare artifact array vs
 // an `{ artifacts: [...] }` wrapper); normalize to the artifact array the
 // policy evaluation consumes.
 export interface FullScanArtifact {
-  alerts?: Array<{ severity?: string | undefined; type: string }> | undefined
+  alerts?:
+    | Array<{
+        action?: string | undefined
+        severity?: string | undefined
+        type?: string | undefined
+      }>
+    | undefined
   name?: string | undefined
   version?: string | undefined
 }
-
-export type SecurityPolicyRules = Record<
-  string,
-  { action?: string | undefined }
->
 
 // Return the artifact list for a RECOGNIZED full-scan response shape (a bare
 // array or `{ artifacts: [...] }`), or undefined when the shape is
@@ -344,28 +363,6 @@ export function normalizeFullScanArtifacts(
     const maybe = (data as { artifacts?: unknown | undefined }).artifacts
     if (Array.isArray(maybe)) {
       return maybe as FullScanArtifact[]
-    }
-  }
-  return undefined
-}
-
-// Return the org security-policy rule map for a RECOGNIZED shape, or undefined
-// when `securityPolicyRules` is absent or not an object. The gate fails closed
-// on undefined rather than defaulting to an empty map — an empty map matches
-// no alert, so a missing/renamed policy would silently approve a package that
-// carries genuine error-action alerts.
-export function extractSecurityPolicyRules(
-  data: unknown,
-): SecurityPolicyRules | undefined {
-  if (data !== null && typeof data === 'object') {
-    const rules = (data as { securityPolicyRules?: unknown | undefined })
-      .securityPolicyRules
-    if (
-      rules !== null &&
-      typeof rules === 'object' &&
-      Object.keys(rules).length > 0
-    ) {
-      return rules as SecurityPolicyRules
     }
   }
   return undefined
@@ -557,12 +554,10 @@ async function createStagedArchiveScan(config: {
 }
 
 /**
- * Read the finished scan and the org security policy — the two halves the
- * verdict is computed from. FAILS CLOSED on an unrecognized or empty
- * scan/policy: an unknown response shape (or the SDK's empty-body `{}`) must
- * never read as "clean". A real full scan yields at least the package's own
- * artifact, and a real org carries a policy rule map; the absence of either
- * means nothing was actually evaluated.
+ * Read the finished scan with the server-resolved policy action on every
+ * alert. FAILS CLOSED on an unrecognized or empty scan, or any alert without a
+ * recognized resolved action. The full-scan endpoint applies the org policy;
+ * a separate settings read is not required to evaluate the returned evidence.
  */
 async function readFullScanEvidence(config: {
   context: SocketScanContext
@@ -571,7 +566,7 @@ async function readFullScanEvidence(config: {
 }): Promise<
   | {
       artifacts: FullScanArtifact[]
-      policyRules: SecurityPolicyRules
+      summary: PolicyAlertSummary
       refusal?: undefined
     }
   | { refusal: StagedScanVerdict }
@@ -580,17 +575,18 @@ async function readFullScanEvidence(config: {
   const { entryLabel, scanId } = cfg
   const { orgSlug, sdk } = cfg.context
   try {
-    const { 0: scan, 1: policy } = await Promise.all([
-      sdk.getFullScan(orgSlug, scanId),
-      sdk.getOrgSecurityPolicy(orgSlug),
-    ])
-    if (!scan.success || !policy.success) {
+    const scan = await sdk.getFullScan(orgSlug, scanId)
+    if (!scan.success) {
+      const status = (scan as { status?: unknown | undefined }).status
       logger.fail(
-        `Scan gate: could not read the scan or the org security policy for ${entryLabel}; not approving.`,
+        `Scan gate: full-scan read failed for ${entryLabel}` +
+          (typeof status === 'number' ? ` (status ${status})` : '') +
+          '; not approving.',
       )
       return {
         refusal: scanRefused(
-          `could not read full scan ${scanId} or the org security policy for ${entryLabel}`,
+          `could not read full scan ${scanId} for ${entryLabel}` +
+            (typeof status === 'number' ? ` (status ${status})` : ''),
         ),
       }
     }
@@ -606,19 +602,18 @@ async function readFullScanEvidence(config: {
         ),
       }
     }
-    const rules = extractSecurityPolicyRules(policy.data)
-    if (!rules) {
+    const summary = summarizeResolvedPolicyAlerts(rawArtifacts)
+    if (!summary) {
       logger.fail(
-        `Scan gate: org security policy for ${entryLabel} was empty or ` +
-          'unrecognized; refusing to approve without a policy to evaluate against.',
+        `Scan gate: full scan for ${entryLabel} returned malformed or unresolved policy evidence; refusing to approve.`,
       )
       return {
         refusal: scanRefused(
-          `the ${orgSlug} security policy was empty or unrecognized — no policy to evaluate ${entryLabel} against`,
+          `full scan ${scanId} returned malformed or unresolved policy evidence for ${entryLabel}`,
         ),
       }
     }
-    return { artifacts: rawArtifacts, policyRules: rules }
+    return { artifacts: rawArtifacts, summary }
   } catch (e) {
     logger.fail(
       `Scan gate: reading scan results threw for ${entryLabel} (${errorMessage(e)}).`,
@@ -714,8 +709,7 @@ export async function scanStagedEntryDetailed(
     if (evidence.refusal) {
       return evidence.refusal
     }
-    const { artifacts, policyRules } = evidence
-    const summary = summarizePolicyAlerts(artifacts, policyRules)
+    const { artifacts, summary } = evidence
     const seen =
       `full scan ${scanId} (org ${orgSlug}): ${artifacts.length} artifact(s), ` +
       `${summary.total} alert(s) — ${summary.error.length} error, ${summary.warn.length} warn`

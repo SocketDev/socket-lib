@@ -472,6 +472,7 @@ jobs:
           git checkout -q --detach "refs/remotes/origin/${DEFAULT_BRANCH}"
           install -m 0600 scripts/fleet/npm/scan-ci.mts "$RUNNER_TEMP/npm-scan-ci.mts"
           install -m 0600 scripts/fleet/npm/scan-receipt.mts "$RUNNER_TEMP/npm-scan-receipt.mts"
+          install -m 0600 scripts/fleet/registry-infra/npm/scan.mts "$RUNNER_TEMP/npm-registry-scan.mts"
       - name: Verify release source before setup
         shell: bash
         env:
@@ -527,6 +528,7 @@ jobs:
         run: |
           install -m 0600 "$RUNNER_TEMP/npm-scan-ci.mts" scripts/fleet/npm/scan-ci.mts
           install -m 0600 "$RUNNER_TEMP/npm-scan-receipt.mts" scripts/fleet/npm/scan-receipt.mts
+          install -m 0600 "$RUNNER_TEMP/npm-registry-scan.mts" scripts/fleet/registry-infra/npm/scan.mts
       - name: Build exact release source
         run: pnpm run build
       - name: Scan exact staged bytes
