@@ -119,7 +119,7 @@ describe('fleet usage evidence', () => {
       )
       expect(missingRosterRepos(root)).toEqual(['example-consumer'])
       expect(() => auditFleetLibUsage(root)).toThrow()
-      const evidenceDir = path.join(root, '.cache/consumer-evidence')
+      const evidenceDir = path.join(root, '.cache/repo/consumer-evidence')
       mkdirSync(evidenceDir, { recursive: true })
       writeFileSync(
         path.join(evidenceDir, 'example-consumer.json'),

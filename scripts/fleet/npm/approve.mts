@@ -5,9 +5,10 @@ import type { ScriptMeta } from '../process/run-main.mts'
 
 const SCRIPT_META: ScriptMeta = {
   describe: 'approves verified and scanned npm staging',
-  help: `Usage: pnpm run npm:approve
+  help: `Usage: pnpm run npm:approve [options]
 
-  --dry-run preview approval without mutations`,
+  --dry-run preview approval without mutations
+  --yes     select every eligible staged package`,
   json: 'result',
 }
 

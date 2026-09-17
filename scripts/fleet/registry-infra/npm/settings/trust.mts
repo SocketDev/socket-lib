@@ -25,7 +25,7 @@ import {
  *      non-TTY session. npm then grants a ~5-minute skip-2FA window, so
  *      packages are written SEQUENTIALLY with a short sleep — npm's own
  *      rate-limit guidance. The desired shape per package comes from
- *      trusted-publisher/plan.mts, so the two-workflow rule holds here exactly
+ *      trusted-publisher-plan.mts, so the two-workflow rule holds here exactly
  *      as it does in the browser driver: a plain package publishes from
  *      `publish-npm.yml`, a napi `<base>-<platform>` package from
  *      `publish-npm-addons.yml`. Dry-run is the default: it prints the plan and
@@ -42,33 +42,19 @@ import process from 'node:process'
 
 import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { sleep } from '@socketsecurity/lib-stable/promises/timers'
+import { httpRequest } from '@socketsecurity/lib-stable/http-request'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
-import { stripAnsi } from '@socketsecurity/lib-stable/term/ansi/strip'
 import { getScriptLogger } from '../../../process/script-output.mts'
 
 import { isMainModule } from '../../../process/is-main-module.mts'
 import { runMain } from '../../../process/run-main.mts'
+import { startBrowserTask } from '../../../browser/bridge.mts'
+import type { BrowserTask } from '../../../browser/bridge.mts'
 import { REPO_ROOT } from '../../../paths.mts'
-import {
-  buildPtyInvocation,
-  NON_INTERACTIVE_RENDER_ENV,
-  runCapture,
-} from '../../shared.mts'
-import {
-  openNativeNpmGrantUrl,
-  redactNativeNpmGrantOutput,
-} from '../native-login.mts'
+import { buildPtyInvocation, runCapture } from '../../shared.mts'
 import { resolvePinnedNpm } from '../pinned-npm.mts'
-import {
-  parseTrustedPublisherBindings,
-  supersededTrustedPublisherBindings,
-  trustedPublisherBindingMatches,
-} from './trusted-publisher/collection.mts'
-import {
-  desiredTrustedPublisher,
-  LEGACY_WORKFLOW_FILENAMES,
-} from './trusted-publisher/plan.mts'
-import type { TrustedPublisherDesired } from './trusted-publisher/plan.mts'
+import { desiredTrustedPublisher } from './trusted-publisher-plan.mts'
+import type { TrustedPublisherDesired } from './trusted-publisher-plan.mts'
 import { resolveNpmWorkspaceLayout } from '../workspace.mts'
 import {
   currentPublisherRepository,
@@ -97,16 +83,17 @@ export const WRITE_SPACING_MS = 2000
  * already-correct row is a skip, not a rewrite.
  */
 export interface TrustPlan {
-  readonly canonicalPresent: boolean
   readonly desired: TrustedPublisherDesired
   readonly matches: boolean
   readonly pkg: string
   // Whether the `npm trust list` read ANSWERED. A refused or rate-limited
   // read says nothing about the row, so an unreadable package is neither
-  // conforming nor pending. Counting it "to configure" is the 2026-08-06
-  // miscount, and writing it blind could target an unknown binding.
+  // conforming nor pending — writing it blind would 409 on an existing
+  // connection, and counting it "to configure" is the 2026-08-06 miscount.
   readonly readable: boolean
-  readonly staleIds: readonly string[]
+  // The connection already on the package, when it has one. Present means the
+  // write is a REBIND and has to revoke before it creates.
+  readonly trustId?: string | undefined
 }
 
 export interface TrustFlags {
@@ -244,14 +231,22 @@ export function enumerateRepoPackages(repoRoot: string): string[] {
  * devEngines names pnpm.
  */
 /**
- * The only `--id` in `npm trust list` output. Multiple IDs return undefined,
- * because selecting the first binding could revoke an unrelated publisher.
+ * The `--id` of the trust connection currently on a package, read out of
+ * `npm trust list` output, or undefined when the package carries none.
+ *
+ * `npm trust` has `github` (create) and `revoke`, and no update. Creating over
+ * an existing connection answers 409 Conflict, so REBINDING a package that is
+ * already trusted means revoking the old connection first, and revoking needs
+ * this id. Pure — exported for tests.
  */
 export function trustConnectionId(listOutput: string): string | undefined {
-  const ids = [...listOutput.matchAll(/^\s*id:\s*(\S+)\s*$/gm)].map(
-    match => match[1]!,
-  )
-  return ids.length === 1 ? ids[0] : undefined
+  // A v4 uuid on an `id` line, which is how `npm trust list` prints the
+  // connection's identifier.
+  const match =
+    /\bid[:=\s]+([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\b/i.exec(
+      listOutput,
+    )
+  return match?.[1]
 }
 
 /**
@@ -275,10 +270,10 @@ export function buildTrustWriteArgs(
     `${desired.repositoryOwner}/${desired.repositoryName}`,
     '--environment',
     desired.environmentName,
-    '--allow-stage-publish',
-    // Direct publishing remains opt-in. npm 12 requires at least one grant
-    // flag, so the canonical stage grant is always explicit.
+    // Each grant flag rides only when the law wants that action — the write
+    // is a full upsert of the row, so an omitted flag CLEARS the grant.
     ...(desired.allowNpmPublish ? ['--allow-publish'] : []),
+    ...(desired.allowNpmStagePublish ? ['--allow-stage-publish'] : []),
     '--yes',
   ]
 }
@@ -289,27 +284,36 @@ export function buildTrustWriteArgs(
  * value rather than parsing a shape npm may restyle. The grants must match
  * too: the write is a full upsert where an omitted flag CLEARS a grant, so a
  * row still carrying direct publish is NOT the stage-only row we would write
- * and skipping it would leave the wide grant in place.
- * Exactly one matching binding proves the intended configuration.
+ * and skipping it would leave the wide grant in place. npm prints the grants
+ * on a `permissions:` line — `stage publish` for the staged grant, a bare
+ * `publish` for direct publish — and a restyled or absent line reads as a
+ * mismatch, which converges by rewriting rather than skipping.
  */
 export function listOutputMatches(
   listOutput: string,
   desired: TrustedPublisherDesired,
 ): boolean {
-  return (
-    parseTrustedPublisherBindings(listOutput).filter(binding =>
-      trustedPublisherBindingMatches(binding, desired),
-    ).length === 1
+  const haystack = listOutput.toLowerCase()
+  const slug =
+    `${desired.repositoryOwner}/${desired.repositoryName}`.toLowerCase()
+  if (
+    !haystack.includes(slug) ||
+    !haystack.includes(desired.workflowFilename.toLowerCase()) ||
+    !haystack.includes(desired.environmentName.toLowerCase())
+  ) {
+    return false
+  }
+  const permissionsLine =
+    /^\s*permissions\s*:(.*)$/im.exec(listOutput)?.[1]?.toLowerCase() ?? ''
+  const hasStagePublish = permissionsLine.includes('stage publish')
+  // `publish` is a substring of `stage publish`, so the direct grant is only
+  // what remains once every staged token is removed.
+  const hasDirectPublish = /\bpublish\b/.test(
+    permissionsLine.replaceAll('stage publish', ''),
   )
-}
-
-function trustReadMatches(config: {
-  desired: TrustedPublisherDesired
-  result: { code: number; output: string }
-}): boolean {
   return (
-    config.result.code === 0 &&
-    listOutputMatches(config.result.output, config.desired)
+    hasStagePublish === desired.allowNpmStagePublish &&
+    hasDirectPublish === desired.allowNpmPublish
   )
 }
 
@@ -418,7 +422,13 @@ export async function runCaptureBoth(
 }
 
 /**
- * Run an npm trust command through a PTY and answer its browser prompt.
+ * Npm's browser-approval URL and the endpoint that reports the approval, as
+ * printed in an EOTP refusal. `npm trust` does NOT poll for the approval the
+ * way `npm login` does — it refuses, names both URLs, and expects the next
+ * call to find an elevated session. This flow closes that loop itself.
+ */
+/**
+ * Run a `npm trust` write through a PTY and answer its prompts.
  *
  * With a TTY npm takes its INTERACTIVE OTP path instead of refusing: it prints
  * an approval URL, waits at `Press ENTER to open in the browser...`, then polls
@@ -427,155 +437,55 @@ export async function runCaptureBoth(
  * prompt and opens the URL directly — the difference between a hang and a
  * completed write.
  */
-export interface TrustCommandResult {
-  readonly code: number
-  readonly output: string
-}
-
-const TRUST_OUTPUT_LIMIT = 1024 * 1024
-
-export async function runNativeNpmOperation(
-  commandPath: string,
+export async function runTrustWriteInteractive(
+  npmPath: string,
   args: readonly string[],
   neutralCwd: string,
-): Promise<TrustCommandResult> {
+): Promise<number> {
   const runOnce = async (
     command: string,
     commandArgs: string[],
   ): Promise<{ code: number; seen: string }> => {
     const child = spawn(command, commandArgs, {
       cwd: neutralCwd,
-      env: {
-        ...process.env,
-        ...NON_INTERACTIVE_RENDER_ENV,
-        npm_config_browser: 'false',
-      },
       shell: isWin32(),
       stdio: scriptStdio(['pipe', 'pipe', 'pipe']),
     })
-    void child.catch(() => undefined)
     let seen = ''
     let answered = false
     let opened = false
-    let approvalFailed = false
-    let approvalFailure: unknown
-    let approvalStart: Promise<void> | undefined
-    let openTimer: ReturnType<typeof setTimeout> | undefined
-    let pendingStderr = ''
-    let pendingStdout = ''
-    const writeSafe = (
-      chunk: Buffer,
-      destination: 'stderr' | 'stdout',
-    ): void => {
-      const current = destination === 'stderr' ? pendingStderr : pendingStdout
-      const pending = `${current}${chunk.toString('utf8')}`
-      const boundary = Math.max(
-        pending.lastIndexOf('\n'),
-        pending.lastIndexOf('\r'),
-      )
-      if (boundary === -1) {
-        if (destination === 'stderr') {
-          pendingStderr = pending
-        } else {
-          pendingStdout = pending
-        }
-        return
-      }
-      writeScriptStdout(
-        Buffer.from(redactNativeNpmGrantOutput(pending.slice(0, boundary + 1))),
-      )
-      if (destination === 'stderr') {
-        pendingStderr = pending.slice(boundary + 1)
-      } else {
-        pendingStdout = pending.slice(boundary + 1)
-      }
-    }
-    const flushSafe = (): void => {
-      for (const pending of [pendingStdout, pendingStderr]) {
-        if (pending) {
-          writeScriptStdout(Buffer.from(redactNativeNpmGrantOutput(pending)))
-        }
-      }
-      pendingStdout = ''
-      pendingStderr = ''
-    }
-    const tryOpen = (output: string): void => {
-      if (opened) {
-        return
-      }
-      const url = urlAfterMarker(output, 'auth/cli/')
-      if (url) {
-        opened = true
-        approvalStart = openApprovalUrl(url).catch(error => {
-          approvalFailed = true
-          approvalFailure = error
-          try {
-            child.process.kill()
-          } catch {}
-        })
-      }
-    }
-    const scheduleTrailingOpen = (): void => {
-      if (openTimer) {
-        clearTimeout(openTimer)
-      }
-      openTimer = setTimeout(() => {
-        openTimer = undefined
-        tryOpen(seen)
-      }, 250)
-    }
-    const onChunk = (chunk: Buffer, destination: 'stderr' | 'stdout'): void => {
-      seen = `${seen}${chunk.toString('utf8')}`.slice(-TRUST_OUTPUT_LIMIT)
-      writeSafe(chunk, destination)
+    const onChunk = (chunk: Buffer): void => {
+      seen += chunk.toString('utf8')
+      writeScriptStdout(chunk)
       if (!answered && /press enter/i.test(seen)) {
         answered = true
         child.process.stdin?.write('\n')
       }
       if (!opened) {
-        const boundary = Math.max(
-          seen.lastIndexOf('\n'),
-          seen.lastIndexOf('\r'),
-        )
-        if (boundary >= 0) {
-          tryOpen(seen.slice(0, boundary + 1))
+        const url = urlAfterMarker(seen, 'auth/cli/')
+        if (url) {
+          opened = true
+          void openApprovalUrl(url).catch(() => undefined)
         }
-        scheduleTrailingOpen()
       }
     }
-    child.process.stdout?.on('data', (chunk: Buffer) =>
-      onChunk(chunk, 'stdout'),
-    )
-    child.process.stderr?.on('data', (chunk: Buffer) =>
-      onChunk(chunk, 'stderr'),
-    )
+    child.process.stdout?.on('data', onChunk)
+    child.process.stderr?.on('data', onChunk)
     const code = await new Promise<number>(resolve => {
       child.process.on('close', (exitCode: number | null) => {
-        if (openTimer) {
-          clearTimeout(openTimer)
-          openTimer = undefined
-        }
-        tryOpen(seen)
-        flushSafe()
         resolve(exitCode ?? 1)
       })
     })
-    await approvalStart
-    if (approvalFailed) {
-      throw approvalFailure
-    }
+    void child.catch(() => undefined)
     return { code, seen }
   }
-  const pty = buildPtyInvocation(process.platform, commandPath, [...args])
+  const pty = buildPtyInvocation(process.platform, npmPath, [...args])
   const attempt = await runOnce(
-    pty?.command ?? commandPath,
+    pty?.command ?? npmPath,
     pty ? [...pty.args] : [...args],
   )
-  const wrappedBin = commandPath.split(/[\\/]/).at(-1) ?? commandPath
-  if (!pty || !isPtyAllocationFailure(attempt.seen, attempt.code, wrappedBin)) {
-    return {
-      code: attempt.code,
-      output: redactNativeNpmGrantOutput(attempt.seen),
-    }
+  if (!pty || !isPtyAllocationFailure(attempt.seen, attempt.code)) {
+    return attempt.code
   }
   // script(1) refused the pseudo-terminal (socket/pipe stdio — an agent
   // session or a captured run) and npm never executed. expect(1) allocates
@@ -590,41 +500,62 @@ export async function runNativeNpmOperation(
     )
     const viaExpect = await runOnce(EXPECT_PATH, [
       '-c',
-      buildExpectPtyScript(commandPath, [...args]),
+      buildExpectPtyScript(npmPath, [...args]),
     ])
-    if (!isPtyAllocationFailure(viaExpect.seen, viaExpect.code, wrappedBin)) {
-      return {
-        code: viaExpect.code,
-        output: redactNativeNpmGrantOutput(viaExpect.seen),
-      }
+    if (!isPtyAllocationFailure(viaExpect.seen, viaExpect.code)) {
+      return viaExpect.code
     }
   }
-  // Last resort: return npm's own refusal from a plain spawn. Only npm may
-  // exchange the short-lived browser result for an OTP and retry the request.
+  // Last resort — a plain spawn. npm may refuse a non-interactive WRITE with
+  // EOTP even inside a primed session, so an EOTP refusal here drives the
+  // same browser-approval loop the priming step uses — open the approval URL,
+  // poll npm's done endpoint, then run the write once more against the
+  // elevated session.
   logger.info(
     'PTY allocation failed here (no TTY); retrying the write with a plain spawn.',
   )
-  const plain = await runOnce(commandPath, [...args])
-  return {
-    code: plain.code,
-    output: redactNativeNpmGrantOutput(plain.seen),
+  const plain = await runOnce(npmPath, [...args])
+  if (plain.code === 0 || !isOtpRequired(plain.seen)) {
+    return plain.code
   }
-}
-
-export async function runTrustCommandInteractive(
-  npmPath: string,
-  args: readonly string[],
-  neutralCwd: string,
-): Promise<TrustCommandResult> {
-  return await runNativeNpmOperation(npmPath, args, neutralCwd)
-}
-
-export async function runTrustWriteInteractive(
-  npmPath: string,
-  args: readonly string[],
-  neutralCwd: string,
-): Promise<number> {
-  return (await runTrustCommandInteractive(npmPath, args, neutralCwd)).code
+  const challenge = parseOtpChallenge(plain.seen)
+  if (!challenge) {
+    return plain.code
+  }
+  logger.info(
+    'npm wants a fresh browser approval for this write — opening the ' +
+      'approval page and waiting.',
+  )
+  await openApprovalUrl(challenge.authUrl)
+  const deadline = Date.now() + OTP_APPROVAL_BUDGET_MS
+  let approved = false
+  while (Date.now() < deadline) {
+    // One operator, one approval.
+    // eslint-disable-next-line no-await-in-loop -- serial
+    const poll = await pollApproval(challenge.doneUrl, npmPath, neutralCwd)
+    if (poll === 'complete') {
+      approved = true
+      break
+    }
+    if (poll === 'expired') {
+      // npm dropped the approval session. Polling a dead authId for the rest
+      // of the budget is a silent multi-minute hang; say so and stop.
+      logger.warn(
+        'the npm approval session expired before it was approved — re-run ' +
+          'and approve the page as soon as it opens.',
+      )
+      break
+    }
+    // Not a retry ladder.
+    // eslint-disable-next-line no-await-in-loop -- paced poll
+    await sleep(OTP_POLL_MS)
+  }
+  if (!approved) {
+    return plain.code
+  }
+  logger.success('approval received — repeating the write.')
+  const retried = await runOnce(npmPath, [...args])
+  return retried.code
 }
 
 /**
@@ -713,6 +644,11 @@ export function isPtyAllocationFailure(
   return !new RegExp(`\\b${wrappedBin}\\b`, 'i').test(withoutWrapperLines)
 }
 
+export interface OtpChallenge {
+  readonly authUrl: string
+  readonly doneUrl: string
+}
+
 /**
  * The last whitespace-delimited token on the first line containing `marker`.
  * npm prints each URL alone at the end of its line, so the token IS the URL.
@@ -739,11 +675,196 @@ export function urlAfterMarker(
   return undefined
 }
 
-interface NativeApprovalTask {
-  cleanup: () => Promise<void>
+export function parseOtpChallenge(output: string): OtpChallenge | undefined {
+  const authUrl = urlAfterMarker(output, 'auth/cli/')
+  const doneUrl = urlAfterMarker(output, 'v1/done?authId=')
+  return authUrl && doneUrl ? { authUrl, doneUrl } : undefined
 }
 
-let approvalSession: NativeApprovalTask | undefined
+/**
+ * Whether `url` resolves to something a person can approve. npm's CLI has
+ * printed EOTP approval URLs for routes the website no longer serves — both the
+ * `auth/cli` page and its paired done endpoint answered 404 on 2026-08-04 —
+ * and opening a 404 tells the operator nothing. Checking first is what lets
+ * this flow fall through to the login protocol that does work.
+ */
+export async function isUrlReachable(url: string): Promise<boolean> {
+  try {
+    const response = await httpRequest(url)
+    return response.status < 400
+  } catch {
+    return false
+  }
+}
+
+/**
+ * A fresh approval flow from the registry's web-login protocol — the same
+ * `/-/v1/login` call `login.mts` makes, whose URLs the website does serve.
+ * `npm-auth-type: web` is load-bearing: the endpoint 401s a client that does
+ * not declare web auth.
+ */
+export async function createLoginChallenge(): Promise<
+  OtpChallenge | undefined
+> {
+  try {
+    const created = await httpRequest('https://registry.npmjs.org/-/v1/login', {
+      body: '{}',
+      headers: {
+        'content-type': 'application/json',
+        'npm-auth-type': 'web',
+        'npm-command': 'login',
+      },
+      method: 'POST',
+    })
+    if (!created.ok) {
+      return undefined
+    }
+    const session = created.json<{
+      doneUrl?: string | undefined
+      loginUrl?: string | undefined
+    }>()
+    return session.loginUrl && session.doneUrl
+      ? { authUrl: session.loginUrl, doneUrl: session.doneUrl }
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * A challenge whose URLs actually resolve. npm's own EOTP pair is preferred
+ * when it works; when it 404s, the registry's web-login protocol
+ * (`login.mts`, which posts `/-/v1/login` with `npm-auth-type: web`) issues a
+ * session that does — and a completed web login elevates the account for the
+ * same ~5-minute window an OTP would, which is all these writes need.
+ */
+export async function resolveUsableChallenge(
+  probeOutput: string,
+): Promise<OtpChallenge | undefined> {
+  const printed = parseOtpChallenge(probeOutput)
+  if (printed && (await isUrlReachable(printed.authUrl))) {
+    return printed
+  }
+  if (printed) {
+    logger.log(
+      "npm's own approval URL is not reachable, so this run falls back to the " +
+        'registry login protocol.',
+    )
+  }
+  return await createLoginChallenge()
+}
+
+/**
+ * How long to wait for the operator's browser approval, and how often to ask
+ * the done endpoint. A person is opening a page and clicking, so the budget is
+ * generous and the poll is slow.
+ */
+export const OTP_APPROVAL_BUDGET_MS = 5 * 60_000
+export const OTP_POLL_MS = 3000
+
+/**
+ * Whether npm's done endpoint reports the approval as complete. It answers 202
+ * while the operator has not finished and 200 with the token once they have.
+ */
+export type ApprovalPollResult = 'complete' | 'expired' | 'pending'
+
+// The `npm config` key the elevated session token lands under, and the record
+// of what was there before, so the run can put it back. A session token is a
+// credential: leaving it persisted in the operator's `npm config` after the run
+// would outlive the elevation it exists for.
+const AUTH_TOKEN_KEY = '//registry.npmjs.org/:_authToken'
+let persistedToken:
+  | { neutralCwd: string; npmPath: string; prior: string | undefined }
+  | undefined
+
+/**
+ * Restore the operator's `npm config` auth token to its pre-run value — the
+ * prior token when one existed, deletion when the run introduced the key.
+ * Safe to call when nothing was persisted. Runs in main's finally, so an
+ * elevated session token never outlives the run that earned it.
+ */
+export async function restorePersistedAuthToken(): Promise<void> {
+  const record = persistedToken
+  persistedToken = undefined
+  if (!record) {
+    return
+  }
+  const { neutralCwd, npmPath, prior } = record
+  const args = prior
+    ? ['config', 'set', `${AUTH_TOKEN_KEY}=${prior}`]
+    : ['config', 'delete', AUTH_TOKEN_KEY]
+  await runCaptureBoth(npmPath, args, neutralCwd).catch(() => undefined)
+  logger.info('restored the npm config auth token to its pre-run state.')
+}
+
+/**
+ * One poll of the login protocol's done endpoint. `complete` persists the
+ * elevated session token (recording what it replaced, for restore on exit);
+ * `expired` means the approval session itself is GONE — npm expires them in
+ * minutes, and polling a dead authId for the rest of the budget is the
+ * 5-minute silent hang this state exists to kill; anything else is `pending`.
+ */
+export async function pollApproval(
+  doneUrl: string,
+  npmPath?: string | undefined,
+  neutralCwd?: string | undefined,
+): Promise<ApprovalPollResult> {
+  try {
+    const response = await httpRequest(doneUrl, {
+      headers: { 'npm-auth-type': 'web', 'npm-command': 'login' },
+    })
+    if (response.status === 404 || response.status === 410) {
+      return 'expired'
+    }
+    if (response.status !== 200) {
+      return 'pending'
+    }
+    // The login protocol answers 200 with the session's token. Persisting it is
+    // what makes the CLI use the newly elevated session; npm's own EOTP flow
+    // returns no token and needs nothing saved.
+    const { token } = response.json<{ token?: string | undefined }>()
+    if (neutralCwd && npmPath && token) {
+      if (!persistedToken) {
+        const before = await runCaptureBoth(
+          npmPath,
+          ['config', 'get', AUTH_TOKEN_KEY],
+          neutralCwd,
+        ).catch(() => undefined)
+        const prior = before?.output.trim()
+        persistedToken = {
+          neutralCwd,
+          npmPath,
+          prior: prior && prior !== 'undefined' ? prior : undefined,
+        }
+      }
+      await runCaptureBoth(
+        npmPath,
+        ['config', 'set', `${AUTH_TOKEN_KEY}=${token}`],
+        neutralCwd,
+      )
+      logger.info(
+        'persisted the elevated npm session token (restored on exit).',
+      )
+    }
+    return 'complete'
+  } catch {
+    return 'pending'
+  }
+}
+
+export async function isApprovalComplete(
+  doneUrl: string,
+  npmPath?: string | undefined,
+  neutralCwd?: string | undefined,
+): Promise<boolean> {
+  return (await pollApproval(doneUrl, npmPath, neutralCwd)) === 'complete'
+}
+
+let approvalSession: BrowserTask | undefined
+
+// The live cooldown watcher's stop handle, so a relaunch or a close never
+// leaves an orphan pump ticking a dead page.
+let stopCooldownWatch: (() => void) | undefined
 
 /**
  * The injectable dependency for the attended browser task. A unit test swaps
@@ -751,16 +872,8 @@ let approvalSession: NativeApprovalTask | undefined
  * the approval flow is testable without a browser.
  */
 export const approvalDeps: {
-  startTask: (options: {
-    targetUrl: string
-    taskName: string
-  }) => Promise<NativeApprovalTask>
-} = {
-  async startTask(config) {
-    const cfg = { __proto__: null, ...config } as typeof config
-    return await openNativeNpmGrantUrl(cfg.targetUrl)
-  },
-}
+  startTask: typeof startBrowserTask
+} = { startTask: startBrowserTask }
 
 /**
  * Open `url` where the operator can actually approve it. npm approval pages
@@ -772,7 +885,20 @@ export async function openApprovalUrl(url: string): Promise<void> {
     targetUrl: url,
     taskName: 'npm-approval',
   })
-  logger.info('approval page opened in the verified shared browser session.')
+  logger.info('approval page opened in the attended npm task window.')
+  let stopped = false
+  const task = approvalSession
+  const pump = async (): Promise<void> => {
+    const deadline = Date.now() + OTP_APPROVAL_BUDGET_MS
+    while (!stopped && Date.now() < deadline) {
+      await task.action('npm.approval.cooldown').catch(() => undefined)
+      await sleep(1500)
+    }
+  }
+  stopCooldownWatch = () => {
+    stopped = true
+  }
+  void pump().catch(() => undefined)
 }
 
 /**
@@ -780,11 +906,82 @@ export async function openApprovalUrl(url: string): Promise<void> {
  * when none was ever opened.
  */
 export async function closeApprovalSession(): Promise<void> {
+  stopCooldownWatch?.()
+  stopCooldownWatch = undefined
   const session = approvalSession
   approvalSession = undefined
   if (session) {
-    await session.cleanup()
+    await session.cleanup().catch(() => undefined)
   }
+}
+
+/**
+ * Authenticate once before any read or write, so nine account operations cost
+ * one approval — npm elevates the session for about five minutes.
+ *
+ * The probe is a read (`npm trust list`) because a read is idempotent: the
+ * priming step must never be the thing that writes a row. On refusal this
+ * OPENS the approval page in the operator's browser and polls npm's own done
+ * endpoint until it reports success, so the URL never has to be copied out of
+ * a log — which is what makes the flow work from a non-interactive session.
+ */
+export async function setupOtpSession(
+  npmPath: string,
+  probePkg: string,
+  neutralCwd: string,
+): Promise<boolean> {
+  // Both streams: npm puts the refusal AND the approval URLs on stderr.
+  const probe = await runCaptureBoth(
+    npmPath,
+    ['trust', 'list', probePkg],
+    neutralCwd,
+  )
+  if (!isOtpRequired(probe.output)) {
+    return true
+  }
+  const challenge = await resolveUsableChallenge(probe.output)
+  if (!challenge) {
+    logger.fail(
+      'npm would not open an authentication flow this session.\n' +
+        `  Where: ${npmPath} trust list ${probePkg}\n` +
+        `  Saw:   ${probe.output.trim().slice(0, 200) || '(no output)'}\n` +
+        '  Fix:   configure the trusted publishers through the npmjs.com web UI ' +
+        '(scripts/fleet/registry-infra/npm/settings/trusted-publisher-browser.mts).',
+    )
+    return false
+  }
+  logger.log(
+    'npm requires one browser approval before it will change trusted ' +
+      'publishers. Opening the approval page now — approve it and this run ' +
+      'continues on its own.',
+  )
+  // Open the page for the operator rather than printing a URL they would have
+  // to copy: a redirected or piped run makes a printed URL unreachable.
+  await openApprovalUrl(challenge.authUrl)
+  const deadline = Date.now() + OTP_APPROVAL_BUDGET_MS
+  while (Date.now() < deadline) {
+    // One operator, one approval.
+    // eslint-disable-next-line no-await-in-loop -- serial
+    const poll = await pollApproval(challenge.doneUrl, npmPath, neutralCwd)
+    if (poll === 'complete') {
+      logger.success('approval received — continuing.')
+      return true
+    }
+    if (poll === 'expired') {
+      logger.fail(
+        'the npm approval session expired before it was approved.\n' +
+          '  What:  npm expires an approval page within minutes of opening it.\n' +
+          `  Where: ${challenge.authUrl}\n` +
+          '  Saw:   the done endpoint reported the session gone.\n' +
+          '  Fix:   re-run and approve the page as soon as it opens.',
+      )
+      return false
+    }
+    // Not a retry ladder.
+    // eslint-disable-next-line no-await-in-loop -- paced poll
+    await sleep(OTP_POLL_MS)
+  }
+  return false
 }
 
 export async function main(): Promise<void> {
@@ -798,161 +995,6 @@ export async function main(): Promise<void> {
   }
 }
 
-export function classifyTrustReadFailure(result: TrustCommandResult): string {
-  // Capture npm's stable uppercase error code from either CLI prefix shape.
-  const code = /\bnpm (?:error )?code\s+([A-Z0-9_-]+)/i.exec(result.output)?.[1]
-  if (code === 'EUNKNOWNCOMMAND' || code === 'EUSAGE') {
-    return `CLI unsupported (${code})`
-  }
-  if (code === 'E401' || code === 'E403') {
-    return `permission or authentication scope (${code})`
-  }
-  if (code === 'EOTP') {
-    return 'one-time approval incomplete (EOTP)'
-  }
-  // Capture only actionable HTTP statuses near a status label.
-  const status =
-    /\b(?:status|statusCode)\D{0,8}(401|403|404|429|5\d\d)\b/i.exec(
-      result.output,
-    )?.[1]
-  if (status) {
-    return `registry endpoint response (HTTP ${status})`
-  }
-  return result.code === 0
-    ? 'response parse failure'
-    : `command exit ${result.code}`
-}
-
-function isTrustRateLimit(output: string): boolean {
-  // Accept npm's code, HTTP label, or stable rate-limit phrase.
-  return /\bE429\b|\bHTTP\s*429\b|rate limit/i.test(output)
-}
-
-export function parseTrustListJson(
-  output: string,
-): ReturnType<typeof parseTrustedPublisherBindings> {
-  const plain = stripAnsi(output)
-  if (!plain.trim()) {
-    return []
-  }
-  const json = completeTrustJson(plain)
-  if (!json) {
-    const bindings = parseTrustedPublisherBindings(plain)
-    if (bindings.length) {
-      return bindings
-    }
-    throw new Error('missing trusted-publisher data')
-  }
-  JSON.parse(json)
-  return parseTrustedPublisherBindings(json)
-}
-
-function completeTrustJson(output: string): string | undefined {
-  const bindings: unknown[] = []
-  for (let start = 0; start < output.length; start += 1) {
-    // 91 is `[` and 123 is `{`. `start` is an integer loop index.
-    const code = output.charCodeAt(start)
-    if (code !== 91 && code !== 123) {
-      continue
-    }
-    const candidate = balancedJsonAt(output, start)
-    if (!candidate) {
-      continue
-    }
-    const parsed = JSON.parse(candidate) as unknown
-    const values = Array.isArray(parsed) ? parsed : [parsed]
-    for (const value of values) {
-      if (isTrustBindingJson(value)) {
-        bindings.push(value)
-      }
-    }
-    start += candidate.length - 1
-  }
-  return bindings.length ? JSON.stringify(bindings) : undefined
-}
-
-function isTrustBindingJson(value: unknown): boolean {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    return false
-  }
-  const row = value as Record<string, unknown>
-  return typeof row['type'] === 'string' && Array.isArray(row['permissions'])
-}
-
-function balancedJsonAt(output: string, start: number): string | undefined {
-  const stack: string[] = []
-  let escaped = false
-  let quoted = false
-  for (let index = start; index < output.length; index += 1) {
-    const char = output[index]!
-    if (quoted) {
-      if (escaped) {
-        escaped = false
-      } else if (char === '\\') {
-        escaped = true
-      } else if (char === '"') {
-        quoted = false
-      }
-      continue
-    }
-    if (char === '"') {
-      quoted = true
-    } else if (char === '[' || char === '{') {
-      stack.push(char)
-    } else if (char === ']' || char === '}') {
-      const open = stack.pop()
-      if ((open === '[') !== (char === ']')) {
-        return undefined
-      }
-      if (!stack.length) {
-        const candidate = output.slice(start, index + 1)
-        try {
-          JSON.parse(candidate)
-          return candidate
-        } catch {
-          return undefined
-        }
-      }
-    }
-  }
-  return undefined
-}
-
-async function readTrustBindings(config: {
-  apply: boolean
-  args: readonly string[]
-  neutralCwd: string
-  npmPath: string
-}): Promise<{
-  bindings: ReturnType<typeof parseTrustedPublisherBindings>
-  readable: boolean
-}> {
-  const cfg = { __proto__: null, ...config } as typeof config
-  const run = async (): Promise<TrustCommandResult> =>
-    cfg.apply
-      ? await runTrustCommandInteractive(cfg.npmPath, cfg.args, cfg.neutralCwd)
-      : await runCaptureBoth(cfg.npmPath, cfg.args, cfg.neutralCwd)
-  let result = await run()
-  if (result.code !== 0 && isTrustRateLimit(result.output)) {
-    await sleep(WRITE_SPACING_MS)
-    result = await run()
-  }
-  if (result.code !== 0 || isOtpRequired(result.output)) {
-    logger.warn(
-      `${cfg.args[2]}: trust read refused (${classifyTrustReadFailure(result)}).`,
-    )
-    return { bindings: [], readable: false }
-  }
-  try {
-    return { bindings: parseTrustListJson(result.output), readable: true }
-  } catch {
-    logger.warn(
-      `${cfg.args[2]}: trust read refused (${classifyTrustReadFailure(result)}).`,
-    )
-    return { bindings: [], readable: false }
-  }
-}
-
 /**
  * Read each package's CURRENT trusted publisher and pair it with the desired
  * one. A package with no `--repo` and no matching rule is derived from the
@@ -961,7 +1003,6 @@ async function readTrustBindings(config: {
  * written blind.
  */
 async function planTrustedPublishers(config: {
-  apply: boolean
   localPackages: readonly string[]
   localRepository: string | undefined
   neutralCwd: string
@@ -1018,37 +1059,35 @@ async function planTrustedPublishers(config: {
     })!
     // Npm rate-limits account reads.
     // eslint-disable-next-line no-await-in-loop -- sequential by design
-    const listArgs = ['trust', 'list', pkg, ...(cfg.apply ? [] : ['--json'])]
-    // Account reads stay sequential to respect npm rate limits.
-    // eslint-disable-next-line no-await-in-loop -- ordered reads
-    const { bindings, readable } = await readTrustBindings({
-      apply: cfg.apply,
-      args: listArgs,
-      neutralCwd,
+    let listRun = await runCaptureBoth(
       npmPath,
-    })
-    const canonicalBindings = bindings.filter(binding =>
-      trustedPublisherBindingMatches(binding, desired),
+      ['trust', 'list', pkg],
+      neutralCwd,
     )
-    const canonicalPresent = canonicalBindings.length > 0
-    const staleBindings = supersededTrustedPublisherBindings(
-      bindings,
-      desired,
-      LEGACY_WORKFLOW_FILENAMES,
-    )
-    const staleIds = staleBindings
-      .map(binding => binding.id)
-      .filter((id): id is string => id !== undefined)
+    if (listRun.code !== 0 && !isOtpRequired(listRun.output)) {
+      // One breath, one retry: npm's account-read rate limit recovers with a
+      // pause; an OTP refusal does not, so it goes straight to unreadable.
+      // The retry belongs to this package's turn.
+      // eslint-disable-next-line no-await-in-loop -- the retry belongs
+      await sleep(WRITE_SPACING_MS)
+      // The retry belongs to this package's turn.
+      // eslint-disable-next-line no-await-in-loop -- the retry belongs
+      listRun = await runCaptureBoth(
+        npmPath,
+        ['trust', 'list', pkg],
+        neutralCwd,
+      )
+    }
+    const readable = listRun.code === 0 && !isOtpRequired(listRun.output)
     plans.push({
-      canonicalPresent,
       desired,
-      matches:
-        readable &&
-        canonicalBindings.length === 1 &&
-        staleBindings.length === 0,
+      matches: readable && listOutputMatches(listRun.output, desired),
       pkg,
       readable,
-      staleIds,
+      // Held from the read so a rebind can revoke the old connection first:
+      // `npm trust` creates or revokes and never updates, so writing over an
+      // existing connection answers 409 Conflict.
+      trustId: trustConnectionId(listRun.output),
     })
   }
   return plans
@@ -1073,17 +1112,10 @@ function logTrustPlanTable(config: {
   )
   for (let i = 0, { length } = plans; i < length; i += 1) {
     const plan = plans[i]!
-    const changes: string[] = []
-    if (plan.readable && !plan.canonicalPresent) {
-      changes.push('add canonical')
-    }
-    if (plan.readable && plan.staleIds.length) {
-      changes.push(`remove ${plan.staleIds.length} superseded`)
-    }
     const label = plan.readable
       ? plan.matches
         ? 'conforms'
-        : `would ${changes.length ? changes.join(' and ') : 'repair canonical'}`
+        : 'would configure'
       : 'unreadable'
     logger.log(
       `  ${plan.pkg}: ${label} — ${plan.desired.repositoryOwner}/` +
@@ -1094,8 +1126,9 @@ function logTrustPlanTable(config: {
 }
 
 /**
- * Write each missing canonical publisher and verify it. Only then revoke
- * known superseded workflows in the same repository by exact binding ID.
+ * Write each pending trusted publisher and read it back. A package that
+ * already carries a connection loses it first: `npm trust` creates or revokes
+ * and never updates, so a create over an existing trust answers 409 Conflict.
  * A REFUSED verify read is reported as UNVERIFIED, never as a failed write —
  * claiming a write failed when only the read did hides a write that landed.
  */
@@ -1116,89 +1149,43 @@ async function applyTrustedPublisherWrites(config: {
       // eslint-disable-next-line no-await-in-loop -- sequential
       await sleep(WRITE_SPACING_MS)
     }
-    let code = 0
-    if (!plan.canonicalPresent) {
-      // Sequential writes share one approval window.
+    if (plan.trustId) {
+      // Shares the 2FA window with the write that follows.
       // eslint-disable-next-line no-await-in-loop -- sequential
-      code = await runTrustWriteInteractive(
+      await runTrustWriteInteractive(
         npmPath,
-        buildTrustWriteArgs(plan.pkg, plan.desired),
+        buildTrustRevokeArgs(plan.pkg, plan.trustId),
         neutralCwd,
       )
     }
+    // A PTY makes npm take its interactive OTP path, which waits rather than
+    // refusing; this answers that wait and opens the approval page.
+    // Sequential writes share one 2FA window.
+    // eslint-disable-next-line no-await-in-loop -- sequential writes share one
+    const code = await runTrustWriteInteractive(
+      npmPath,
+      buildTrustWriteArgs(plan.pkg, plan.desired),
+      neutralCwd,
+    )
+    // The verify belongs to this package's turn.
     // eslint-disable-next-line no-await-in-loop -- the verify belongs
-    let verify = await runCaptureBoth(
+    const verify = await runCaptureBoth(
       npmPath,
       ['trust', 'list', plan.pkg],
       neutralCwd,
     )
+    if (code === 0 && listOutputMatches(verify.output, plan.desired)) {
+      configured += 1
+      logger.success(`${plan.pkg}: configured and verified.`)
+      continue
+    }
     if (isOtpRequired(verify.output)) {
       unverified.push(plan.pkg)
       logger.warn(formatUnverifiable(plan.pkg, plan.desired, code))
       continue
     }
-    if (
-      code !== 0 ||
-      !trustReadMatches({ desired: plan.desired, result: verify })
-    ) {
-      failures.push(plan.pkg)
-      logger.fail(formatVerifyFailure(plan.pkg, plan.desired, verify.output))
-      continue
-    }
-    const stale = supersededTrustedPublisherBindings(
-      parseTrustedPublisherBindings(verify.output),
-      plan.desired,
-      LEGACY_WORKFLOW_FILENAMES,
-    )
-    let revokeFailed = false
-    for (const binding of stale) {
-      if (!binding.id) {
-        revokeFailed = true
-        break
-      }
-      // eslint-disable-next-line no-await-in-loop -- bounded sequential writes
-      const revokeCode = await runTrustWriteInteractive(
-        npmPath,
-        buildTrustRevokeArgs(plan.pkg, binding.id),
-        neutralCwd,
-      )
-      if (revokeCode !== 0) {
-        revokeFailed = true
-        break
-      }
-    }
-    if (revokeFailed) {
-      failures.push(plan.pkg)
-      logger.fail(`${plan.pkg}: a superseded binding could not be revoked.`)
-      continue
-    }
-    if (stale.length === 0) {
-      configured += 1
-      logger.success(`${plan.pkg}: configured and verified.`)
-      continue
-    }
-    // eslint-disable-next-line no-await-in-loop -- final proof belongs here
-    verify = await runCaptureBoth(
-      npmPath,
-      ['trust', 'list', plan.pkg],
-      neutralCwd,
-    )
-    const finalBindings = parseTrustedPublisherBindings(verify.output)
-    const staleRemain = supersededTrustedPublisherBindings(
-      finalBindings,
-      plan.desired,
-      LEGACY_WORKFLOW_FILENAMES,
-    )
-    if (
-      !trustReadMatches({ desired: plan.desired, result: verify }) ||
-      staleRemain.length > 0
-    ) {
-      failures.push(plan.pkg)
-      logger.fail(formatVerifyFailure(plan.pkg, plan.desired, verify.output))
-      continue
-    }
-    configured += 1
-    logger.success(`${plan.pkg}: configured and verified.`)
+    failures.push(plan.pkg)
+    logger.fail(formatVerifyFailure(plan.pkg, plan.desired, verify.output))
   }
   return { configured, failures, unverified }
 }
@@ -1265,8 +1252,24 @@ async function runTrust(): Promise<void> {
     process.exitCode = 1
     return
   }
+  // Authenticate before the first read. Skipped for a dry run, which only
+  // needs the plan — an unauthenticated dry run prints its packages as
+  // "unreadable" and exits non-zero, never a fabricated "would configure".
+  if (
+    flags.apply &&
+    !(await setupOtpSession(npmPath, packages[0]!, neutralCwd))
+  ) {
+    logger.fail(
+      'npm did not accept a one-time password, so nothing was changed.\n' +
+        `  Where: ${npmPath}\n` +
+        '  Saw:   the authentication prompt did not complete.\n' +
+        '  Fix:   run this command from an attached terminal so the browser ' +
+        'approval can complete.',
+    )
+    process.exitCode = 1
+    return
+  }
   const plans = await planTrustedPublishers({
-    apply: flags.apply,
     localPackages,
     localRepository,
     neutralCwd,
@@ -1286,9 +1289,9 @@ async function runTrust(): Promise<void> {
     logger.fail(
       `${unreadable.length} package(s) could not be read.\n` +
         `  Where: ${unreadable.map(plan => plan.pkg).join(', ')}\n` +
-        '  Saw:   the sanitized refusal category is reported above.\n' +
-        '  Fix:   resolve the reported CLI, permission, endpoint, or response ' +
-        'problem; an unreadable package is never written blind.',
+        '  Saw:   the read exited non-zero or asked for a one-time password.\n' +
+        '  Fix:   authenticate (`pnpm run npm:login`) and re-run; an unreadable ' +
+        'package is never written blind.',
     )
     process.exitCode = 1
   }

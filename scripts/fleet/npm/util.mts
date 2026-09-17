@@ -82,6 +82,7 @@ export async function runNpmApprove(): Promise<void> {
     args: getScriptArgs(),
     options: {
       'dry-run': { default: false, type: 'boolean' },
+      yes: { default: false, type: 'boolean' },
     },
     allowPositionals: false,
     strict: true,
@@ -89,7 +90,7 @@ export async function runNpmApprove(): Promise<void> {
   const outcome = await runApproveStep({
     cwd: REPO_ROOT,
     dryRun: values['dry-run'],
-    yes: true,
+    yes: values.yes,
     verifyLocalVersion: false,
   })
   logger.log(outcome.detail)

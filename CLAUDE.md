@@ -62,9 +62,9 @@
 - Never name leftover work and drop it: fix it, or leave a `Follow-up:` handle. (`.claude/hooks/fleet/deferred-residue-guard/`) [`no-deferred-residue`](docs/fleet/agents.md/no-deferred-residue.md)
 - 🚨 Verified admins push default-branch commits with `--no-verify`, without a bypass phrase. [`push-policy`](docs/fleet/agents.md/push-policy.md)
 - PRs stay small, one logical feature/fix around 200 changed lines. [`commit-cadence-format`](docs/fleet/agents.md/commit-cadence-format.md)
-- Never open a PR from the default branch. [`commit-cadence-format`](docs/fleet/agents.md/commit-cadence-format.md)
+- 🚨 Never create a PR whose source is `main`, `master`, or the repository default branch. (`no-pr-from-default-branch-guard`) [`commit-cadence-format`](docs/fleet/agents.md/commit-cadence-format.md)
 - Never set `"rule-name": "off"`/`"warn"` in an oxlint config; fix the code instead. [`no-disable-lint-rule`](docs/fleet/agents.md/no-disable-lint-rule.md)
-- Fleet hooks bundle into `.claude/hooks/fleet/_dist/fleet-pack.generated.cjs`; rebuild after touching a source. [`hook-bundle`](docs/fleet/agents.md/hook-bundle.md)
+- Rebuild the fleet hook bundle after source changes. [`hook-bundle`](docs/fleet/agents.md/hook-bundle.md)
 - A snapshotted hook NEVER uses dynamic `import()`: use `process.getBuiltinModule('node:x')`, or mark it `@dispatch-snapshot-exclude`. [`hook-bundle`](docs/fleet/agents.md/hook-bundle.md)
 - A vendored/build-copied dir (`upstream/`, `pkg-node/`, `*-bundled`/`*-vendored`) is untracked-by-default. [`untracked-by-default`](docs/fleet/agents.md/untracked-by-default.md)
 - Never write runtime or per-checkout state into the tracked tree. [`runtime-state-and-caches`](docs/fleet/agents.md/runtime-state-and-caches.md) <!-- enforcement: off-machine - needs VFS instrumentation -->

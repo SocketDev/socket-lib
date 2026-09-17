@@ -1347,7 +1347,6 @@ const ALWAYS_TRACKED_PREFIXES = [
   'assets/fleet/socket-combomark-dark.svg',
   'assets/fleet/socket-combomark-light.svg',
   'patches/fleet/@polka__url@1.0.0-next.29.patch',
-  'patches/fleet/@socketsecurity__lib@7.0.1.patch',
   'patches/fleet/brace-expansion@5.0.9.patch',
   'patches/fleet/minimatch@10.2.6.patch',
   'patches/fleet/run-local-ci@0.18.1.patch',
