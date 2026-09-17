@@ -6,9 +6,8 @@ import { describe, expect, it } from 'vitest'
 
 // EXPECTED only. lib-stable is an independent oracle a test may compare
 // against; it is never the ACTUAL, which must come from src/ or dist/. Its
-// subpath stays under `constants/` because that is where the PUBLISHED package
-// exports it — it moves here once this rename ships.
-import { packageDefaultNodeRange as canonicalPackageDefaultNodeRange } from '@socketsecurity/lib-stable/constants/package-default-node-range'
+// subpath matches the PUBLISHED package export.
+import { packageDefaultNodeRange as canonicalPackageDefaultNodeRange } from '@socketsecurity/lib-stable/eco/npm/constants/package-default-node-range'
 
 import { packageDefaultNodeRange } from '../../../../../src/eco/npm/constants/package-default-node-range.mjs'
 

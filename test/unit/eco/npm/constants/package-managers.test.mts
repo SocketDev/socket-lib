@@ -35,8 +35,7 @@ import {
 } from '../../../../../src/eco/npm/constants/package-managers.mjs'
 // EXPECTED only. lib-stable is an independent oracle a test may compare
 // against; it is never the ACTUAL, which must come from src/ or dist/. Its
-// subpath stays under `constants/` because that is where the PUBLISHED package
-// exports it — it moves here once this rename ships.
+// subpath matches the PUBLISHED package export.
 import {
   BUN as stableBUN,
   NPM as stableNPM,
@@ -50,7 +49,7 @@ import {
   VLT as stableVLT,
   YARN as stableYARN,
   YARN_CLASSIC as stableYARN_CLASSIC,
-} from '@socketsecurity/lib-stable/constants/package-managers'
+} from '@socketsecurity/lib-stable/eco/npm/constants/package-managers'
 import { describe, expect, it } from 'vitest'
 
 describe('constants/package-managers', () => {
