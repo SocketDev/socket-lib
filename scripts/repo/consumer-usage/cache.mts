@@ -24,7 +24,7 @@ export function consumerUsageCachePaths(repoRoot: string): {
   receipt: string
   manifest: string
 } {
-  const directory = path.join(repoRoot, '.cache/consumer-evidence')
+  const directory = path.join(repoRoot, '.cache/repo/consumer-evidence')
   const paths = {
     aggregate: path.join(directory, 'fleet-lib-usage.aggregate.json'),
     receipt: path.join(directory, 'fleet-lib-usage.receipt.json'),
@@ -34,7 +34,7 @@ export function consumerUsageCachePaths(repoRoot: string): {
     Object.values(paths).some(file => !repositoryContainsTarget(repoRoot, file))
   ) {
     throw new Error(
-      'Consumer usage cache escapes its repository. Where: .cache/consumer-evidence. Saw an external path; wanted contained runtime files. Fix: remove escaping symlinks and run pnpm run audit:consumer-usage.',
+      'Consumer usage cache escapes its repository. Where: .cache/repo/consumer-evidence. Saw an external path; wanted contained runtime files. Fix: remove escaping symlinks and run pnpm run audit:consumer-usage.',
     )
   }
   return paths

@@ -46,6 +46,7 @@ describe('cachePathFor', { concurrent: false }, () => {
     expect(path.isAbsolute(result)).toBe(true)
     expect(path.relative('/foo', result).split(path.sep)).toEqual([
       '.cache',
+      'repo',
       'agent-discovery.json',
     ])
   })

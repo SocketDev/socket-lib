@@ -133,7 +133,7 @@ describe('which files the walk reads', () => {
     // Vendored code is not the user's to migrate, and node_modules would
     // dominate every audit.
     const findings = await audit({
-      '.cache/cached.mjs': 'Object.keys(o)\n',
+      '.cache/repo/cached.mjs': 'Object.keys(o)\n',
       'external/vendored.mjs': 'Object.keys(o)\n',
       'node_modules/pkg/installed.mjs': 'Object.keys(o)\n',
     })

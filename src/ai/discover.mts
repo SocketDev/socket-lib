@@ -3,12 +3,12 @@
  *   which()-based lookup with a two-tier cache:
  *
  *   1. In-process Map — survives until the Node process exits.
- *   2. On-disk JSON at `<repo>/.cache/agent-discovery.json`, TTL 1h — survives
- *      across subprocess invocations like per-file ai-lint-fix batches without
- *      re-running which(). Cache invalidation: stale on-disk cache is detected
- *      by mtime comparison; missing or expired → fresh which() pass + rewrite.
- *      Why two tiers: hooks and skills spawn dozens of short-lived Node
- *      processes per session. In-process alone misses the cross-process
+ *   2. On-disk JSON at `<repo>/.cache/repo/agent-discovery.json`, TTL 1h —
+ *      survives across subprocess invocations like per-file ai-lint-fix batches
+ *      without re-running which(). Cache invalidation: stale on-disk cache is
+ *      detected by mtime comparison; missing or expired → fresh which() pass +
+ *      rewrite. Why two tiers: hooks and skills spawn dozens of short-lived
+ *      Node processes per session. In-process alone misses the cross-process
  *      speedup; on-disk alone hits the filesystem on every call. The
  *      combination keeps repeated lookups under a millisecond after the
  *      cold-start cost.
@@ -47,7 +47,7 @@ export interface OnDiskCache {
 
 export function cachePathFor(repoRoot: string): string {
   const path = getNodePath()
-  return path.join(repoRoot, '.cache', 'agent-discovery.json')
+  return path.join(repoRoot, '.cache', 'repo', 'agent-discovery.json')
 }
 
 /**

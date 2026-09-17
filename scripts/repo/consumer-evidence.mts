@@ -23,7 +23,13 @@ export function consumerEvidencePath(repoRoot: string, repo: string): string {
       'Consumer identity is invalid. Where: consumer evidence. Saw an invalid repository name; wanted one repository name. Fix: use the fleet roster identity.',
     )
   }
-  return path.join(repoRoot, '.cache', 'consumer-evidence', `${repo}.json`)
+  return path.join(
+    repoRoot,
+    '.cache',
+    'repo',
+    'consumer-evidence',
+    `${repo}.json`,
+  )
 }
 
 export function readConsumerEvidence(

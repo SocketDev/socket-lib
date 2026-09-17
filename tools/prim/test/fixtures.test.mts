@@ -116,7 +116,12 @@ async function runFixture(fixturePath: string): Promise<{
     ? path.join(tmp, 'src')
     : tmp
   const fixturePrimordialsPath = findLocalPrimordials(scanDir)
-  const capturedSurface = path.join(targetRoot, '.cache', 'primordials-surface')
+  const capturedSurface = path.join(
+    targetRoot,
+    '.cache',
+    'repo',
+    'primordials-surface',
+  )
   if (!fixturePrimordialsPath) {
     cpSync(LIB_PRIMORDIALS, capturedSurface, { recursive: true })
   }

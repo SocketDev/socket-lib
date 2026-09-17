@@ -174,7 +174,7 @@ describe('the directory walk', () => {
       lint({
         'node_modules/dep/module.mjs': 'const { Array } = primordials\n',
         'external/module.mjs': 'const { Array } = primordials\n',
-        '.cache/module.mjs': 'const { Array } = primordials\n',
+        '.cache/repo/module.mjs': 'const { Array } = primordials\n',
       }),
     ).toEqual([])
   })
