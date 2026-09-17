@@ -161,8 +161,9 @@ function runtimeDeps(): ScanCiDeps {
 
 export async function runScanCi(
   config: ScanCiConfig,
-  deps: ScanCiDeps = runtimeDeps(),
+  options: { deps?: ScanCiDeps | undefined } = {},
 ): Promise<NpmRemoteScanReceipt> {
+  const deps = options.deps ?? runtimeDeps()
   const headSha = await deps.headSha()
   if (headSha !== config.sourceSha) {
     throw new Error(

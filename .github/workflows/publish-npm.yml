@@ -507,13 +507,13 @@ jobs:
           case "$SOURCE_SHA" in "$BUMP_PREFIX"*) ;; *) exit 1 ;; esac
           grep -Eq "^[[:space:]]*\\* branch[[:space:]]+$SOURCE_SHA[[:space:]]+->[[:space:]]+FETCH_HEAD[[:space:]]*$" "$RUNNER_TEMP/publish-logs.normalized.txt"
           rm -f "$RUNNER_TEMP/publish-logs.zip" "$RUNNER_TEMP/publish-logs.txt" "$RUNNER_TEMP/publish-logs.normalized.txt"
-      - name: Require prod scan credential
+      - name: Require enterprise scan credential
         shell: bash
         env:
-          SOCKET_API_TOKEN_PROD: ${{ secrets.SOCKET_API_TOKEN_PROD }}
+          SOCKET_API_TOKEN_FOR_CLI_AND_SFW: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
         run: |
-          if [ -z "$SOCKET_API_TOKEN_PROD" ]; then
-            echo "::error::Required secret SOCKET_API_TOKEN_PROD is unavailable." >&2
+          if [ -z "$SOCKET_API_TOKEN_FOR_CLI_AND_SFW" ]; then
+            echo "::error::Required secret SOCKET_API_TOKEN_FOR_CLI_AND_SFW is unavailable." >&2
             exit 1
           fi
       - name: Set up and install
@@ -540,7 +540,7 @@ jobs:
           SCAN_STAGE_ID: ${{ inputs.scan-stage-id }}
           SCAN_STAGE_SHA1: ${{ inputs.scan-stage-sha1 }}
           SCAN_VERSION: ${{ inputs.scan-version }}
-          SOCKET_API_TOKEN: ${{ secrets.SOCKET_API_TOKEN_PROD }}
+          SOCKET_API_TOKEN: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
         run: node scripts/fleet/npm/scan-ci.mts --json
       - name: Upload scan receipt
         if: ${{ always() }}
