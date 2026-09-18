@@ -105,6 +105,7 @@ docs/design/fleet/README.md linguist-generated=true
 docs/design/fleet/components.css linguist-generated=true
 docs/design/fleet/tokens.css linguist-generated=true
 docs/fleet/agents.md linguist-generated=true
+docs/fleet/ai linguist-generated=true
 docs/fleet/ai-balancer linguist-generated=true
 docs/fleet/ai-balancer.md linguist-generated=true
 docs/fleet/development linguist-generated=true
