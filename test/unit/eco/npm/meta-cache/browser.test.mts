@@ -25,7 +25,7 @@ import type { WebStorageLike } from '../../../../../src/eco/npm/meta-cache/brows
 import type {
   NpmMetaHttpAdapter,
   RawPackument,
-} from '../../../../../src/eco/npm/meta-types.mjs'
+} from '../../../../../src/eco/npm/meta/types.mjs'
 
 const PACKUMENT: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

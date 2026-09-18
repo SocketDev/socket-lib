@@ -23,7 +23,7 @@ import type {
   NpmMetaHttpAdapter,
   PackumentMetaSlim,
   PackumentVariant,
-} from '../meta-types.mjs'
+} from '../meta/types.mjs'
 import type { TtlCache, TtlCacheOptions } from '../../../cache/ttl/types.mjs'
 
 export const NPM_REGISTRY = 'https://registry.npmjs.org'

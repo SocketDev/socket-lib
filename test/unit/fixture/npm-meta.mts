@@ -21,7 +21,7 @@ import type {
   HttpResponse,
 } from '../../../src/http-request/node.mjs'
 import { createNpmMetaCache } from '../../../src/eco/npm/meta-cache/node.mjs'
-import type { NpmMetaHttpAdapter } from '../../../src/eco/npm/meta-types.mjs'
+import type { NpmMetaHttpAdapter } from '../../../src/eco/npm/meta/types.mjs'
 import { invalidateCaches } from '../../../src/paths/rewire.mjs'
 
 import type {

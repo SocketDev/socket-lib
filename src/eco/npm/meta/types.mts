@@ -6,8 +6,8 @@
  *   types, no runtime side effects.
  */
 
-import type { TtlCache } from '../../cache/ttl/types.mjs'
-import type { NpmHttpAdapter } from './registry/index.mjs'
+import type { TtlCache } from '../../../cache/ttl/types.mjs'
+import type { NpmHttpAdapter } from '../registry/index.mjs'
 
 /**
  * Per-name/per-batch failure shape returned by `getBatch` in place of a
@@ -265,7 +265,7 @@ export interface RawNpmUser {
  * `PackumentVersion` where a `RawPackumentVersion` is expected needs an
  * explicit re-shape, since `PackumentVersion`'s `engines` and other extra
  * fields resolve through its `[field: string]: unknown` index signature.
- * `test/unit/npm/meta-types.test.mts` type-checks the fields the two
+ * `test/unit/eco/npm/meta/types.test.mts` type-checks the fields the two
  * hierarchies DO intentionally share, so a future edit to either side can't
  * silently break that overlap.
  */

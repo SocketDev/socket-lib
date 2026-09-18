@@ -138,7 +138,7 @@ export const config: ExportsConfig = {
     // from the built bytes on every check run, so either mistake fails the
     // build rather than shipping a false claim.
     './eco/npm/meta-slice',
-    './eco/npm/meta-types',
+    './eco/npm/meta/types',
     // Both registry patterns keep their `*`. A wildcard-FREE pattern is a
     // SUBTREE prefix here, so a bare `./npm/registry` also claims
     // `./npm/registry/tarball/node` — the Node twin reaching node:fs and

@@ -49,7 +49,7 @@ import type { NpmMetaCachePeers, NpmMetaPlatform } from './shared.mjs'
 import type {
   GetPackumentSlimOptions,
   PackumentMetaSlim,
-} from '../meta-types.mjs'
+} from '../meta/types.mjs'
 import type {
   BrowserTtlCacheOptions,
   TtlCache,

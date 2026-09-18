@@ -34,7 +34,7 @@ import type {
   LatestVersionResult,
   PackumentMetaSlim,
   VersionTrustInfo,
-} from '../meta-types.mjs'
+} from './types.mjs'
 
 export {
   buildMetaCacheKey,
@@ -81,7 +81,7 @@ export type {
   RawPackumentVersion,
   RawVersionDist,
   VersionTrustInfo,
-} from '../meta-types.mjs'
+} from './types.mjs'
 
 /**
  * Fetch every name with bounded concurrency, returning an index-preserving

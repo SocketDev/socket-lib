@@ -59,7 +59,7 @@ import type {
   GetPackumentSlimOptions,
   PackumentMetaSlim,
   RawPackument,
-} from '../meta-types.mjs'
+} from '../meta/types.mjs'
 import type { TtlCache } from '../../../cache/ttl/types.mjs'
 
 const ACCEPT_ABBREVIATED =

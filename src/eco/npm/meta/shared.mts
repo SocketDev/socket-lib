@@ -31,7 +31,7 @@ import type {
   LatestVersionResult,
   PackumentMetaSlim,
   VersionTrustInfo,
-} from '../meta-types.mjs'
+} from './types.mjs'
 
 const ALL_DIGITS_RE = /^\d+$/
 

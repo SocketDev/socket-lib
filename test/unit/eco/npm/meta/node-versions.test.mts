@@ -23,7 +23,7 @@ import {
   setupNpmMetaCacheIsolation,
 } from '../../../fixture/npm-meta.mts'
 
-import type { RawPackument } from '../../../../../src/eco/npm/meta-types.mjs'
+import type { RawPackument } from '../../../../../src/eco/npm/meta/types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '2.0.0', next: '3.0.0-beta.0' },

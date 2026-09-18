@@ -829,15 +829,6 @@
       "types": "./dist/eco/npm/meta-slice.d.ts",
       "default": "./dist/eco/npm/meta-slice.js"
     },
-    "./eco/npm/meta-types": {
-      "source": "./src/eco/npm/meta-types.mts",
-      "browser": {
-        "types": "./dist/eco/npm/meta-types.d.ts",
-        "default": "./dist/eco/npm/meta-types.js"
-      },
-      "types": "./dist/eco/npm/meta-types.d.ts",
-      "default": "./dist/eco/npm/meta-types.js"
-    },
     "./eco/npm/meta/browser": {
       "source": "./src/eco/npm/meta/browser.mts",
       "browser": {
@@ -851,6 +842,15 @@
       "source": "./src/eco/npm/meta/node.mts",
       "types": "./dist/eco/npm/meta/node.d.ts",
       "default": "./dist/eco/npm/meta/node.js"
+    },
+    "./eco/npm/meta/types": {
+      "source": "./src/eco/npm/meta/types.mts",
+      "browser": {
+        "types": "./dist/eco/npm/meta/types.d.ts",
+        "default": "./dist/eco/npm/meta/types.js"
+      },
+      "types": "./dist/eco/npm/meta/types.d.ts",
+      "default": "./dist/eco/npm/meta/types.js"
     },
     "./eco/npm/npm-cli/exec": {
       "source": "./src/eco/npm/npm-cli/exec.mts",

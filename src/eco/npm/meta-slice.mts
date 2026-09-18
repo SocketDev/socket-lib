@@ -10,7 +10,7 @@ import type {
   PackumentVersionMetaSlim,
   RawPackument,
   RawPackumentVersion,
-} from './meta-types.mjs'
+} from './meta/types.mjs'
 
 /**
  * Slice one raw version entry into its `PackumentVersionMetaSlim` shape.

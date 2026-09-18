@@ -11,7 +11,7 @@ import {
   sliceVersionMeta,
 } from '../../../../src/eco/npm/meta-slice.mjs'
 
-import type { RawPackument } from '../../../../src/eco/npm/meta-types.mjs'
+import type { RawPackument } from '../../../../src/eco/npm/meta/types.mjs'
 
 describe('sliceOneVersion', () => {
   it('keeps only time when the entry has no dist/engines/deprecated', () => {

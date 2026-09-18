@@ -213,9 +213,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib/eco/npm/meta-cache/browser`](../src/eco/npm/meta-cache/browser.ts)                                         | _(no description)_ |
 | [`@socketsecurity/lib/eco/npm/meta-cache/node`](../src/eco/npm/meta-cache/node.ts)                                               | _(no description)_ |
 | [`@socketsecurity/lib/eco/npm/meta-slice`](../src/eco/npm/meta-slice.ts)                                                         | _(no description)_ |
-| [`@socketsecurity/lib/eco/npm/meta-types`](../src/eco/npm/meta-types.ts)                                                         | _(no description)_ |
 | [`@socketsecurity/lib/eco/npm/meta/browser`](../src/eco/npm/meta/browser.ts)                                                     | _(no description)_ |
 | [`@socketsecurity/lib/eco/npm/meta/node`](../src/eco/npm/meta/node.ts)                                                           | _(no description)_ |
+| [`@socketsecurity/lib/eco/npm/meta/types`](../src/eco/npm/meta/types.ts)                                                         | _(no description)_ |
 | [`@socketsecurity/lib/eco/npm/npm-cli/exec`](../src/eco/npm/npm-cli/exec.ts)                                                     | _(no description)_ |
 | [`@socketsecurity/lib/eco/npm/npm-cli/extract-package-name-from-path`](../src/eco/npm/npm-cli/extract-package-name-from-path.ts) | _(no description)_ |
 | [`@socketsecurity/lib/eco/npm/npm-cli/flags`](../src/eco/npm/npm-cli/flags.ts)                                                   | _(no description)_ |
