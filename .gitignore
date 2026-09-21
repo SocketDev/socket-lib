@@ -1,10 +1,4 @@
 # <fleet>
-# <fleet-allowlist>
-!/.git-hooks/_shared/canonical/paths.mts
-!/.git-hooks/_shared/canonical/proof.mts
-!/.git-hooks/_shared/canonical/receipt.mts
-!/.git-hooks/_shared/canonical/source.mts
-# </fleet-allowlist>
 # Managed by socket-wheelhouse. Don't edit locally — edit upstream
 # in scripts/repo/commit-cascade/checks/gitignore-fleet-block.mts and
 # re-cascade via `pnpm run sync`. Project-specific ignores stay
@@ -77,7 +71,7 @@
 
 # Derived cross-harness rule adapters — generated per-repo, per-platform by
 # the multi-agent scaffolding (setup / init / sync) script from .claude/skills/
-# and CLAUDE.md, never committed. A tracked symlink checks out as a plain
+# and AGENTS.md, never committed. A tracked symlink checks out as a plain
 # pointer file on Windows, so each host gets a real symlink generated on its
 # own OS. Tracking them only produces churn + merge conflicts. Keep in sync
 # with ADAPTERS in scripts/fleet/gen/harness-adapters.mts + the .agents/ mirror
@@ -96,7 +90,7 @@
 /.kiro/
 /.opencode/
 /.windsurf/
-/AGENTS.md
+/CLAUDE.md
 /opencode.json
 
 # VS Code: ignore the dir contents so a hidden tasks.json with a `folderOpen`
@@ -158,6 +152,12 @@ pnpm-debug.log
 **/*.generated.mts
 **/*.generated.ts
 **/template/generated/**
+# <fleet-allowlist>
+!/.git-hooks/_shared/canonical/paths.mts
+!/.git-hooks/_shared/canonical/proof.mts
+!/.git-hooks/_shared/canonical/receipt.mts
+!/.git-hooks/_shared/canonical/source.mts
+# </fleet-allowlist>
 # <fleet-pack>
 # Fleet-pack untrack set — managed by scripts/repo/bootstrap/fleet.mjs.
 # REGENERATED from the release-bundle manifest on every hydrate; stale
@@ -4412,7 +4412,6 @@ dist/
 # ============================================================================
 # Claude Code configuration
 # ============================================================================
-/.claude/*
 !/.claude/agents/
 !/.claude/commands/
 !/.claude/output-styles/

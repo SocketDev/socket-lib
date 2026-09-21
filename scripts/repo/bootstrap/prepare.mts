@@ -811,6 +811,17 @@ export function resolveRepoRoot(startDir: string): string {
 export async function hydrateWorkspace(
   options?: { strict?: boolean | undefined } | undefined,
 ): Promise<boolean> {
+  // Runs before the pack applies: the rule file's repo-owned half rides in the
+  // same file as the fleet block, so it is renamed, never recreated.
+  const fleetSeed = path.join(HERE, 'fleet.mjs')
+  if (existsSync(fleetSeed)) {
+    try {
+      const { migrateRuleFile } = await import(pathToFileURL(fleetSeed).href)
+      if (typeof migrateRuleFile === 'function') {
+        migrateRuleFile(REPO_ROOT)
+      }
+    } catch {}
+  }
   if (!fetchBundle() && options?.strict !== false) return false
   const wsPath = path.join(REPO_ROOT, 'pnpm-workspace.yaml')
   if (existsSync(wsPath)) {

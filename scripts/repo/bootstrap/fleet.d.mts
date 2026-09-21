@@ -1,3 +1,10 @@
+//#region scripts/repo/gen/bootstrap/src/rule-file-migration.d.mts
+/**
+ * Carries a member's rule file across the rename. Its repo-owned half rides in
+ * the same file as the fleet block, so a recreate would drop it.
+ */
+export declare function migrateRuleFile(dest: string): boolean;
+//#endregion
 //#region scripts/repo/gen/bootstrap/src/workspace-migration.d.mts
 export declare function migrateWorkspaceSettings(dest: string, yaml: string): string;
 //#endregion
@@ -257,7 +264,7 @@ export declare function filterManifestForShape<T extends FleetFileManifest>(mani
 /**
  * Compute the gitignore entries for thin mode — the wholly-fleet files that the
  * download/fetch action supplies, so they need not be git-tracked. Hybrid paths
- * (manifest.segments — CLAUDE.md, pnpm-workspace.yaml, …) are merged per repo
+ * (manifest.segments — AGENTS.md, pnpm-workspace.yaml, …) are merged per repo
  * and stay tracked, so they're excluded. The DESIGNATED sentinel-splice files
  * are hybrids too — they carry a member tail below the fleet-canonical end
  * sentinel that only the member's git history preserves; untracking one turns
@@ -287,7 +294,7 @@ export declare function extractFleetBlockLines(target: string): string[];
  * Non-Claude harness surfaces the fleet GENERATES, never tracks.
  *
  * Each is a projection of a Claude-side source: `AGENTS.md` and the rule dirs
- * point at CLAUDE.md, `opencode.json` / `.codex/` project `.mcp.json`, and
+ * point at AGENTS.md, `opencode.json` / `.codex/` project `.mcp.json`, and
  * `.agents/skills/` flattens `.claude/skills/` for the hosts that discover
  * skills one level deep. Regenerating them is cheap; tracking them means every
  * member carries a copy that drifts and conflicts.
@@ -547,7 +554,7 @@ export declare function readBuildShape(dest: string): MemberBuildShape;
  * groups: a `@capability`-tagged hook is placed only when the member
  * declares the capability.
  */
-export declare function readDeclaredCapabilities(dest: string): string[];
+export declare function readDeclaredCapabilities(dest: string): string[] | undefined;
 export declare function readAppliedRef(dest: string): string | undefined;
 /**
  * The file list the LAST applied bundle owned, or undefined when no record

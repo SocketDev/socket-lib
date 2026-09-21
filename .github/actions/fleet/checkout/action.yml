@@ -293,31 +293,39 @@ runs:
         # dependency: losing the audit on win-arm64 is worse than
         # failing the whole build there.
         PLATFORM_TOOL="${GITHUB_ACTION_PATH}/../_shared/platform.mjs"
+        RESOLVER="${GITHUB_ACTION_PATH}/../_shared/resolve-external-tool-asset.generated.mjs"
         PLATFORM="$(node "$PLATFORM_TOOL")"
         # Schema-lookup key for external-tools.json `platforms` (win32-*).
         # NOT $PLATFORM, which is the prose shape (win-*) and misses on Windows.
         PLATFORM_KEY="$(node "${GITHUB_ACTION_PATH}/../_shared/platform-key.mjs")"
-        # Soft-skip when zizmor upstream has no binary for this
-        # platform. SOCKET_TOOL_ZIZMOR_AVAILABLE=false signals the
-        # Audit step to skip cleanly. lib/jq.mjs exits non-zero when
-        # the key is missing — capture that without tripping set -e.
-        ASSET=""
-        if ASSET_TRY="$(node "$JQ" "$TOOLS_FILE" $NS zizmor platforms "$PLATFORM_KEY" asset 2>/dev/null)"; then
-          ASSET="$ASSET_TRY"
-        fi
-        if [ -z "$ASSET" ]; then
+        # The resolver validates the catalog and returns 42 only when the
+        # selected platform is genuinely absent. Preserve every other error.
+        ZIZMOR_PLAN_JSON=""
+        if ZIZMOR_PLAN_JSON="$(node "$RESOLVER" --tool zizmor --platform-key "$PLATFORM_KEY" --tools-file "$TOOLS_FILE")"; then
+          ASSET="$(printf '%s' "$ZIZMOR_PLAN_JSON" | node "$JQ" - asset)"
+          INTEGRITY="$(printf '%s' "$ZIZMOR_PLAN_JSON" | node "$JQ" - integrity)"
+          SRC="$(printf '%s' "$ZIZMOR_PLAN_JSON" | node "$JQ" - src 2>/dev/null || true)"
+          DATE="$(printf '%s' "$ZIZMOR_PLAN_JSON" | node "$JQ" - date 2>/dev/null || true)"
+        else
+          RESOLVER_STATUS=$?
+          if [ "$RESOLVER_STATUS" -ne 42 ]; then
+            exit "$RESOLVER_STATUS"
+          fi
           echo "ℹ zizmor is not published for ${PLATFORM_KEY} at v${ZIZMOR_VERSION} — skipping audit on this runner."
           echo "  See external-tools.json zizmor._notes for the supported set."
           echo "SOCKET_TOOL_ZIZMOR_AVAILABLE=false" >> "${GITHUB_ENV:-/dev/null}"
           exit 0
         fi
-        INTEGRITY="$(node "$JQ" "$TOOLS_FILE" $NS zizmor platforms "$PLATFORM_KEY" integrity)"
+        if [ -z "$ASSET" ] || [ -z "$INTEGRITY" ]; then
+          echo "× zizmor resolver returned incomplete asset metadata for ${PLATFORM_KEY}." >&2
+          exit 1
+        fi
         INSTALL_TOOL="${GITHUB_ACTION_PATH}/../_shared/install-tool.mjs"
-        ZIZMOR_URL="https://github.com/zizmorcore/zizmor/releases/download/v${ZIZMOR_VERSION}/${ASSET}"
+        ZIZMOR_URL="$ASSET"
         ZIZMOR_DIR="$(node "$INSTALL_TOOL" --directory "${RUNNER_TEMP:-/tmp}/zizmor-bin" "$ZIZMOR_URL" "$INTEGRITY")"
         ZIZMOR_BIN="$ZIZMOR_DIR/zizmor"
         [[ "$ASSET" == *.zip ]] && ZIZMOR_BIN="$ZIZMOR_DIR/zizmor.exe"
-        node "$INSTALL_TOOL" "$ZIZMOR_URL" "$INTEGRITY" "$ZIZMOR_DIR" --cache
+        node "$INSTALL_TOOL" "$ZIZMOR_URL" "$INTEGRITY" "$ZIZMOR_DIR" --cache --src "$SRC" --date "$DATE"
         if [ ! -x "$ZIZMOR_BIN" ]; then
           echo "Zizmor install failed at $ZIZMOR_BIN: expected the verified executable. Check the pinned release asset." >&2
           exit 1

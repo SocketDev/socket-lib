@@ -89,6 +89,7 @@
       "description": "Socket Firewall (enterprise tier) — package manager command wrapper",
       "version": "1.15.2",
       "repository": "github:SocketDev/firewall-release",
+      "tag": "v1.15.2",
       "binaryName": "sfw",
       "platforms": {
         "darwin-arm64": {
@@ -135,6 +136,7 @@
       "description": "Socket Firewall (free tier) — package manager command wrapper",
       "version": "1.15.2",
       "repository": "github:SocketDev/sfw-free",
+      "tag": "v1.15.2",
       "binaryName": "sfw",
       "platforms": {
         "darwin-arm64": {
@@ -181,6 +183,7 @@
       "description": "uv — Astral Python package/project manager (pinned, SRI-verified)",
       "repository": "github:astral-sh/uv",
       "version": "0.12.15",
+      "tag": "0.12.15",
       "versionDate": "2026-09-15",
       "binaryName": "uv",
       "platforms": {
@@ -220,6 +223,7 @@
       "description": "GitHub Actions security linter — audits .github/ for workflow-injection / credential-leak patterns.",
       "version": "1.30.1",
       "repository": "github:zizmorcore/zizmor",
+      "tag": "v1.30.1",
       "notes": [
         "Required: CI (blocks merges on medium+ findings)",
         "Installed by the setup-and-install composite; SRI-verified (sha512) per platform"
