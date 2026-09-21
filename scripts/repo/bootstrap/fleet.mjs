@@ -5892,18 +5892,18 @@ const CODEX_SPEC_PATH = path.join(
 /**
  * @file Render the Codex lifecycle hook config from config.json.
  */
-function readCodexHooksSpec() {
+function readCodexHooksSpec(specPath = CODEX_SPEC_PATH) {
   let parsed
   try {
-    parsed = JSON.parse(readFileSync(CODEX_SPEC_PATH, 'utf8'))
+    parsed = JSON.parse(readFileSync(specPath, 'utf8'))
   } catch {
     throw new Error(
-      `Invalid Codex hooks spec. Where: ${CODEX_SPEC_PATH}. Saw unparseable JSON; wanted a JSON object. Fix the file's syntax.`,
+      `Invalid Codex hooks spec. Where: ${specPath}. Saw unparseable JSON; wanted a JSON object. Fix the file's syntax.`,
     )
   }
   if (parsed === null || typeof parsed !== 'object')
     throw new Error(
-      `Invalid Codex hooks spec. Where: ${CODEX_SPEC_PATH}. Saw a non-object; wanted a JSON object. Fix the file's shape.`,
+      `Invalid Codex hooks spec. Where: ${specPath}. Saw a non-object; wanted a JSON object. Fix the file's shape.`,
     )
   const record = parsed
   const command = record['command']
@@ -5912,19 +5912,19 @@ function readCodexHooksSpec() {
   const events = record['events']
   if (typeof command !== 'string' || command.length === 0)
     throw new Error(
-      `Invalid Codex hooks spec. Where: ${CODEX_SPEC_PATH} command. Saw ${String(command)}; wanted a non-empty command. Fix the command field.`,
+      `Invalid Codex hooks spec. Where: ${specPath} command. Saw ${String(command)}; wanted a non-empty command. Fix the command field.`,
     )
   if (typeof generatedDescription !== 'string')
     throw new Error(
-      `Invalid Codex hooks spec. Where: ${CODEX_SPEC_PATH} generatedDescription. Saw ${typeof generatedDescription}; wanted a string. Fix the generatedDescription field.`,
+      `Invalid Codex hooks spec. Where: ${specPath} generatedDescription. Saw ${typeof generatedDescription}; wanted a string. Fix the generatedDescription field.`,
     )
   if (typeof timeoutSeconds !== 'number')
     throw new Error(
-      `Invalid Codex hooks spec. Where: ${CODEX_SPEC_PATH} timeoutSeconds. Saw ${typeof timeoutSeconds}; wanted a number. Fix the timeoutSeconds field.`,
+      `Invalid Codex hooks spec. Where: ${specPath} timeoutSeconds. Saw ${typeof timeoutSeconds}; wanted a number. Fix the timeoutSeconds field.`,
     )
   if (events === null || typeof events !== 'object')
     throw new Error(
-      `Invalid Codex hooks spec. Where: ${CODEX_SPEC_PATH} events. Saw a non-object; wanted a map of event names. Fix the events field.`,
+      `Invalid Codex hooks spec. Where: ${specPath} events. Saw a non-object; wanted a map of event names. Fix the events field.`,
     )
   const entries = Object.entries(events)
   const resolved = /* @__PURE__ */ new Map()
@@ -5932,12 +5932,12 @@ function readCodexHooksSpec() {
     const { 0: name, 1: entry } = entries[i]
     if (entry === null || typeof entry !== 'object')
       throw new Error(
-        `Invalid Codex hook event. Where: ${CODEX_SPEC_PATH} events.${name}. Saw a non-object; wanted an object. Fix the entry.`,
+        `Invalid Codex hook event. Where: ${specPath} events.${name}. Saw a non-object; wanted an object. Fix the entry.`,
       )
     const matcher = entry['matcher']
     if (matcher !== void 0 && typeof matcher !== 'string')
       throw new Error(
-        `Invalid Codex hook matcher. Where: ${CODEX_SPEC_PATH} events.${name}.matcher. Saw ${typeof matcher}; wanted a string. Fix the matcher field.`,
+        `Invalid Codex hook matcher. Where: ${specPath} events.${name}.matcher. Saw ${typeof matcher}; wanted a string. Fix the matcher field.`,
       )
     resolved.set(name, { matcher })
   }
@@ -5948,8 +5948,8 @@ function readCodexHooksSpec() {
     timeoutSeconds,
   }
 }
-function renderCodexHooksConfig() {
-  const spec = readCodexHooksSpec()
+function renderCodexHooksConfig(specPath = CODEX_SPEC_PATH) {
+  const spec = readCodexHooksSpec(specPath)
   const events = [...spec.events]
   const hooks = /* @__PURE__ */ new Map()
   for (let i = 0, { length } = events; i < length; i += 1) {
@@ -28899,7 +28899,9 @@ function projectInstalledAdapters(dest) {
   )
   writes.push([
     path.join(dest, '.codex', 'hooks.json'),
-    renderCodexHooksConfig(),
+    renderCodexHooksConfig(
+      path.join(dest, 'scripts/fleet/setup/codex/config.json'),
+    ),
   ])
   for (const [file, content] of writes) writeIfChanged(file, content)
   for (let i = 0, { length } = ADAPTERS; i < length; i += 1) {
