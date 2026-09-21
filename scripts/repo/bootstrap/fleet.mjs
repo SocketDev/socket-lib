@@ -5893,6 +5893,9 @@ const CODEX_SPEC_PATH = path.join(
  * @file Render the Codex lifecycle hook config from config.json.
  */
 function readCodexHooksSpec(specPath = CODEX_SPEC_PATH) {
+  return readCodexHooksSpecFile(specPath)
+}
+function readCodexHooksSpecFile(specPath) {
   let parsed
   try {
     parsed = JSON.parse(readFileSync(specPath, 'utf8'))
@@ -5948,8 +5951,7 @@ function readCodexHooksSpec(specPath = CODEX_SPEC_PATH) {
     timeoutSeconds,
   }
 }
-function renderCodexHooksConfig(specPath = CODEX_SPEC_PATH) {
-  const spec = readCodexHooksSpec(specPath)
+function renderCodexHooksConfig(spec = readCodexHooksSpec()) {
   const events = [...spec.events]
   const hooks = /* @__PURE__ */ new Map()
   for (let i = 0, { length } = events; i < length; i += 1) {
@@ -5982,6 +5984,25 @@ function renderCodexHooksConfig(specPath = CODEX_SPEC_PATH) {
     },
     (0, import_format.getDefaultFormatting)(),
   )
+}
+
+//#endregion
+//#region template/base/universal/scripts/fleet/setup/codex/config.json
+var config_default = {
+  description:
+    'Codex CLI lifecycle hook wiring the fleet generates into .codex/hooks.json. Every event routes to the same cross-CLI runner, so the command and timeout are declared once. An event carrying a matcher applies to every tool.',
+  target: '.codex/hooks.json',
+  generatedDescription:
+    'Fleet lifecycle guards generated from the canonical Claude hook registry.',
+  command: 'node scripts/fleet/cross-cli/run.mts',
+  timeoutSeconds: 10,
+  events: {
+    PostToolUse: { matcher: '.*' },
+    PreToolUse: { matcher: '.*' },
+    SessionStart: {},
+    Stop: {},
+    UserPromptSubmit: {},
+  },
 }
 
 //#endregion
@@ -28899,9 +28920,10 @@ function projectInstalledAdapters(dest) {
   )
   writes.push([
     path.join(dest, '.codex', 'hooks.json'),
-    renderCodexHooksConfig(
-      path.join(dest, 'scripts/fleet/setup/codex/config.json'),
-    ),
+    renderCodexHooksConfig({
+      ...config_default,
+      events: new Map(Object.entries(config_default.events)),
+    }),
   ])
   for (const [file, content] of writes) writeIfChanged(file, content)
   for (let i = 0, { length } = ADAPTERS; i < length; i += 1) {
