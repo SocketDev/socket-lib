@@ -16711,7 +16711,7 @@ function fleetTrackedAllowlist(manifest, current, aliases) {
   ].toSorted()
   const entries = /* @__PURE__ */ new Set()
   for (const entry of allowed) {
-    const parts = entry.split('/')
+    const parts = normalizeBundlePath(entry).split('/')
     for (let index = 1; index < parts.length; index += 1)
       entries.add(`!/${parts.slice(0, index).join('/')}/`)
     entries.add(`!/${entry}`)
