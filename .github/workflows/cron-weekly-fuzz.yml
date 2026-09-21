@@ -210,9 +210,7 @@ jobs:
           # `cargo install` would build it from source — minutes on a cold
           # cache, and it verifies nothing.
           SHARED=".github/actions/fleet/_shared"
-          # The fleet registry has ONE home. The _shared/ .mjs helpers beside
-          # the composites are code that ships with them; the pins are not.
-          TOOLS_FILE="scripts/fleet/setup/external-tools.json"
+          TOOLS_FILE=".github/actions/fleet/setup/external-tools.generated.json"
           PLATFORM_KEY="$(node "$SHARED/platform-key.mjs")"
           RESOLVER="$SHARED/resolve-external-tool-asset.generated.mjs"
           # cargo-fuzz publishes x86_64 assets only. Build from source when

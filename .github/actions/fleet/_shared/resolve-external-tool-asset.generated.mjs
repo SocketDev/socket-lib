@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, readFileSync, readdirSync, realpathSync } from "node:fs";
-import path from "node:path";
 import process from "node:process";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 //#region template/base/universal/.github/actions/fleet/_shared/release-asset.mts
 const GITHUB_ORIGIN = "https://github.com";
@@ -292,10 +291,17 @@ function resolveGoAssetFromManifest(manifest, version, canonicalKey) {
  */
 const PLATFORM_UNAVAILABLE_EXIT_CODE = 42;
 function errorMessage(error) {
-  return error instanceof Error ? error.message : String(error);
+  if (error instanceof Error) return error.message || "Unknown error";
+  if (error === null || error === void 0) return "Unknown error";
+  const message = String(error);
+  if (message === "" || message === "[object Object]") return "Unknown error";
+  return message;
 }
-function isRecord(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+function isPlainObject(value) {
+  if (value === null || typeof value !== "object" || Array.isArray(value))
+    return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === null || prototype === Object.prototype;
 }
 function fail(msg) {
   console.error(msg);
@@ -321,9 +327,8 @@ function argValue(name) {
 function loadToolsCatalog(toolsFileArg) {
   const toolsFile =
     toolsFileArg ||
-    path.join(
-      process.env["GITHUB_WORKSPACE"] ?? ".",
-      "scripts/fleet/setup/external-tools.json",
+    fileURLToPath(
+      new URL("../setup/external-tools.generated.json", import.meta.url),
     );
   if (!existsSync(toolsFile)) {
     fail(`× external-tools.json not found at ${toolsFile}`);
@@ -336,8 +341,8 @@ function loadToolsCatalog(toolsFileArg) {
     fail(`× could not parse ${toolsFile}: ${errorMessage(e)}`);
     process.exit(1);
   }
-  const tools = isRecord(toolsData) ? toolsData["tools"] : void 0;
-  if (!isRecord(tools)) {
+  const tools = isPlainObject(toolsData) ? toolsData["tools"] : void 0;
+  if (!isPlainObject(tools)) {
     fail(`× ${toolsFile} has no valid tools map`);
     process.exit(1);
   }
@@ -349,18 +354,18 @@ function loadToolsCatalog(toolsFileArg) {
 }
 function selectToolEntry(tools, toolName, toolsFile) {
   const tool = tools[toolName];
-  if (!isRecord(tool)) {
+  if (!isPlainObject(tool)) {
     fail(`× no '${toolName}' entry in ${toolsFile}`);
     process.exit(1);
   }
   const platforms = tool["platforms"];
-  if (!isRecord(platforms)) {
+  if (!isPlainObject(platforms)) {
     fail(`× '${toolName}' has no platforms map in ${toolsFile}`);
     process.exit(1);
   }
   for (const [platformKey, entry] of Object.entries(platforms))
     if (
-      !isRecord(entry) ||
+      !isPlainObject(entry) ||
       typeof entry["asset"] !== "string" ||
       entry["asset"].length === 0 ||
       !integrityValue(entry["integrity"])

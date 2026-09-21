@@ -10,6 +10,8 @@ interface GoOsArch {
   readonly os: string
 }
 
+type PlatformKey = `${string}-${string}`
+
 interface GoManifestFile {
   readonly arch?: string
   readonly filename?: string
@@ -37,7 +39,7 @@ export const GO_OS_ARCH = {
   'linux-x64-musl': { os: 'linux', arch: 'amd64' },
   'win32-arm64': { os: 'windows', arch: 'arm64' },
   'win32-x64': { os: 'windows', arch: 'amd64' },
-} as unknown as Readonly<Record<string, GoOsArch>>
+} as unknown as Readonly<Partial<Record<PlatformKey, GoOsArch>>>
 
 // Return the canonical Socket platform key for this runner.
 export function canonicalPlatformKey(): string {
@@ -90,13 +92,13 @@ export function canonicalPlatformKey(): string {
 }
 
 export function resolvePlatformEntry(
-  platforms: Readonly<Record<string, PlatformEntry>>,
+  platforms: Readonly<Partial<Record<PlatformKey, PlatformEntry>>>,
   canonicalKey: string,
 ): {
   readonly entry: PlatformEntry | undefined
   readonly fallbackKey: string | undefined
 } {
-  const entry = platforms[canonicalKey]
+  const entry = platforms[canonicalKey as PlatformKey]
   if (entry) {
     return { __proto__: null, entry, fallbackKey: undefined } as {
       readonly entry: PlatformEntry | undefined
@@ -105,7 +107,7 @@ export function resolvePlatformEntry(
   }
   if (canonicalKey.endsWith('-musl')) {
     const glibcKey = canonicalKey.slice(0, -5)
-    const fallback = platforms[glibcKey]
+    const fallback = platforms[glibcKey as PlatformKey]
     if (fallback) {
       return { __proto__: null, entry: fallback, fallbackKey: glibcKey } as {
         readonly entry: PlatformEntry | undefined
@@ -138,7 +140,7 @@ export function resolveGoAssetFromManifest(
   readonly integrity: string
   readonly version: string
 } {
-  const goOsArch = GO_OS_ARCH[canonicalKey]
+  const goOsArch = GO_OS_ARCH[canonicalKey as PlatformKey]
   if (!goOsArch) {
     throw new Error(`go: no os/arch mapping for ${canonicalKey}`)
   }

@@ -246,7 +246,7 @@ runs:
         set -euo pipefail
         # The checkout action runs while the workspace may still contain only
         # the initial .github/ sparse checkout. Keep its pins beside the action.
-        TOOLS_FILE="${GITHUB_WORKSPACE}/scripts/fleet/setup/external-tools.json"
+        TOOLS_FILE="${GITHUB_ACTION_PATH}/../setup/external-tools.generated.json"
         # A THIN member's pin file used to be absent here — the payload only
         # landed five steps later, during `pnpm install`'s `prepare` lifecycle
         # — so this step soft-skipped rather than hard-failing on a state that
@@ -257,7 +257,7 @@ runs:
         # pin file here is therefore always a genuine packaging bug — the
         # hard failure below is the only branch left, no soft-skip.
         if [ ! -f "$TOOLS_FILE" ]; then
-          echo "× fleet pin file not found at ${TOOLS_FILE} — this member is missing scripts/fleet/setup/external-tools.json; re-run the cascade." >&2
+          echo "× fleet pin file not found at ${TOOLS_FILE}; re-run the cascade." >&2
           echo "  This is a packaging bug in the fleet scaffolding, not a consumer issue. File a bug." >&2
           echo "" >&2
           echo "  Diagnostics — what's actually present at runtime:" >&2

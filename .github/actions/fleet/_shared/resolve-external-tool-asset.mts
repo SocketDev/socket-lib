@@ -29,9 +29,8 @@
  */
 
 import { existsSync, readFileSync, realpathSync } from 'node:fs'
-import path from 'node:path'
 import process from 'node:process'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { integrityValue, resolveCatalogAsset } from './release-asset.mts'
 import type { ReleaseAssetTool } from './release-asset.mts'
@@ -70,11 +69,25 @@ interface ToolsCatalog {
 }
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error)
+  if (error instanceof Error) {
+    return error.message || 'Unknown error'
+  }
+  if (error === null || error === undefined) {
+    return 'Unknown error'
+  }
+  const message = String(error)
+  if (message === '' || message === '[object Object]') {
+    return 'Unknown error'
+  }
+  return message
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === null || prototype === Object.prototype
 }
 
 // Composite-action helper runs on the raw runner BEFORE setup-node finishes
@@ -90,7 +103,7 @@ function fail(msg: string): void {
 // jq.mjs). Wrapped so the stream is reached inside a function, not at module
 // eval (not V8-snapshot-safe).
 function emit(obj: unknown): void {
-  // oxlint-disable-next-line socket/no-direct-stream-write -- bootstrap stdout contract
+  // oxlint-disable-next-line socket/no-direct-stream-write -- dep-0
   process.stdout.write(JSON.stringify(obj))
 }
 
@@ -125,9 +138,8 @@ function argValue(name: string): string {
 function loadToolsCatalog(toolsFileArg: string): ToolsCatalog {
   const toolsFile =
     toolsFileArg ||
-    path.join(
-      process.env['GITHUB_WORKSPACE'] ?? '.',
-      'scripts/fleet/setup/external-tools.json',
+    fileURLToPath(
+      new URL('../setup/external-tools.generated.json', import.meta.url),
     )
   if (!existsSync(toolsFile)) {
     fail(`× external-tools.json not found at ${toolsFile}`)
@@ -140,8 +152,8 @@ function loadToolsCatalog(toolsFileArg: string): ToolsCatalog {
     fail(`× could not parse ${toolsFile}: ${errorMessage(e)}`)
     process.exit(1)
   }
-  const tools = isRecord(toolsData) ? toolsData['tools'] : undefined
-  if (!isRecord(tools)) {
+  const tools = isPlainObject(toolsData) ? toolsData['tools'] : undefined
+  if (!isPlainObject(tools)) {
     fail(`× ${toolsFile} has no valid tools map`)
     process.exit(1)
   }
@@ -156,18 +168,18 @@ function selectToolEntry(
   toolsFile: string,
 ): CatalogTool {
   const tool = tools[toolName]
-  if (!isRecord(tool)) {
+  if (!isPlainObject(tool)) {
     fail(`× no '${toolName}' entry in ${toolsFile}`)
     process.exit(1)
   }
   const platforms = tool['platforms']
-  if (!isRecord(platforms)) {
+  if (!isPlainObject(platforms)) {
     fail(`× '${toolName}' has no platforms map in ${toolsFile}`)
     process.exit(1)
   }
   for (const [platformKey, entry] of Object.entries(platforms)) {
     if (
-      !isRecord(entry) ||
+      !isPlainObject(entry) ||
       typeof entry['asset'] !== 'string' ||
       entry['asset'].length === 0 ||
       !integrityValue(entry['integrity'])
