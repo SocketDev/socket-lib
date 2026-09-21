@@ -4,6 +4,7 @@
   "tools": {
     "gh": {
       "version": "2.99.0",
+      "tag": "v2.99.0",
       "repository": "github:cli/cli",
       "origin": "gh-asset",
       "platforms": {
