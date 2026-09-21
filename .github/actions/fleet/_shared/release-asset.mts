@@ -2,7 +2,7 @@ const GITHUB_ORIGIN = 'https://github.com'
 
 export function integrityValue(integrity: unknown): string {
   if (typeof integrity === 'object' && integrity !== null) {
-    const value = (integrity as { readonly value?: unknown }).value
+    const value = (integrity as { readonly value?: unknown | undefined }).value
     return typeof value === 'string' ? value : ''
   }
   return typeof integrity === 'string' ? integrity : ''
@@ -14,8 +14,8 @@ export function integrityProvenance(integrity: unknown): {
 } {
   if (typeof integrity === 'object' && integrity !== null) {
     const record = integrity as {
-      readonly src?: unknown
-      readonly date?: unknown
+      readonly src?: unknown | undefined
+      readonly date?: unknown | undefined
     }
     return {
       __proto__: null,
@@ -66,25 +66,25 @@ function githubRepositorySlug(repository: unknown): string {
 }
 
 export interface ReleaseAssetTool {
-  readonly origin?: unknown
-  readonly repository?: unknown
-  readonly tag?: unknown
-  readonly version?: unknown
+  readonly origin?: unknown | undefined
+  readonly repository?: unknown | undefined
+  readonly tag?: unknown | undefined
+  readonly version?: unknown | undefined
 }
 
 export interface ReleaseAssetEntry {
-  readonly asset?: unknown
-  readonly integrity?: unknown
+  readonly asset?: unknown | undefined
+  readonly integrity?: unknown | undefined
 }
 
 export interface ResolvedCatalogAsset {
   readonly asset: string
-  readonly assetName?: string
+  readonly assetName?: string | undefined
   readonly integrity: string
-  readonly repository?: string
+  readonly repository?: string | undefined
   readonly src: string
   readonly date: string
-  readonly tag?: string
+  readonly tag?: string | undefined
   readonly version: string
 }
 
@@ -150,7 +150,7 @@ export function resolveCatalogAsset(
   }
   const asset = entry.asset
   const integrity = integrityValue(entry.integrity)
-  if (typeof asset !== 'string' || !/^https:\/\//u.test(asset)) {
+  if (typeof asset !== 'string' || !asset.startsWith('https://')) {
     throw new Error(
       `external-tools.json ${canonicalKey} entry is missing an HTTPS asset URL`,
     )

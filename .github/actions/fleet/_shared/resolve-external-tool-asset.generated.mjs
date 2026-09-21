@@ -108,7 +108,7 @@ function resolveCatalogAsset(tool, entry, canonicalKey) {
     return resolveGithubReleaseAsset(tool, entry, canonicalKey);
   const asset = entry.asset;
   const integrity = integrityValue(entry.integrity);
-  if (typeof asset !== "string" || !/^https:\/\//u.test(asset))
+  if (typeof asset !== "string" || !asset.startsWith("https://"))
     throw new Error(
       `external-tools.json ${canonicalKey} entry is missing an HTTPS asset URL`,
     );

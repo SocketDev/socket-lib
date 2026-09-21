@@ -59,8 +59,8 @@ export {
 } from './resolve-external-tool-platform.mts'
 
 interface CatalogTool extends ReleaseAssetTool {
-  readonly manager?: unknown
-  readonly platforms?: Readonly<Record<string, PlatformEntry>>
+  readonly manager?: unknown | undefined
+  readonly platforms?: Readonly<Record<string, PlatformEntry>> | undefined
 }
 
 interface ToolsCatalog {

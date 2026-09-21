@@ -13,17 +13,17 @@ interface GoOsArch {
 type PlatformKey = `${string}-${string}`
 
 interface GoManifestFile {
-  readonly arch?: string
-  readonly filename?: string
-  readonly kind?: string
-  readonly os?: string
-  readonly sha256?: string
+  readonly arch?: string | undefined
+  readonly filename?: string | undefined
+  readonly kind?: string | undefined
+  readonly os?: string | undefined
+  readonly sha256?: string | undefined
 }
 
 interface GoManifestRelease {
-  readonly files?: readonly GoManifestFile[]
-  readonly stable?: boolean
-  readonly version?: string
+  readonly files?: readonly GoManifestFile[] | undefined
+  readonly stable?: boolean | undefined
+  readonly version?: string | undefined
 }
 
 // Canonical → Go os/arch. Go ships no musl tarball — the glibc archive is
@@ -65,7 +65,11 @@ export function canonicalPlatformKey(): string {
   let suffix = ''
   if (platform === 'linux') {
     const report = process.report?.getReport?.() as
-      | { readonly header?: { readonly glibcVersionRuntime?: unknown } }
+      | {
+          readonly header?:
+            | { readonly glibcVersionRuntime?: unknown | undefined }
+            | undefined
+        }
       | undefined
     const libc = report?.header?.glibcVersionRuntime
     if (libc === 'musl') {
