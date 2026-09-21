@@ -55,6 +55,7 @@ for (let i = 0, { length } = entryFiles; i < length; i += 1) {
 const version = JSON.stringify(rootPkgJson.version)
 
 export const buildConfig: RolldownOptions = {
+  experimental: { attachDebugInfo: 'none' },
   // Keep each source file as its own module with inter-file requires intact
   // (verified: rolldown does not inline siblings under preserveModules). The
   // `src/external/*` tree is built separately into CJS `module.exports = X`
@@ -112,5 +113,4 @@ export const buildConfig: RolldownOptions = {
       ),
     },
   },
-experimental: { attachDebugInfo: 'none' },
 }

@@ -28,6 +28,7 @@ import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 import { normalizePrimSchemaExamples } from '../../scripts/repo/build/schema-examples.mts'
 
 export const primBuildConfig: RolldownOptions = {
+  experimental: { attachDebugInfo: 'none' },
   input: path.join(REPO_ROOT, 'tools/prim/bin/prim.mts'),
   output: {
     file: path.join(REPO_ROOT, 'dist/bin/prim.cjs'),
@@ -49,5 +50,4 @@ export const primBuildConfig: RolldownOptions = {
       },
     },
   ],
-experimental: { attachDebugInfo: 'none' },
 }

@@ -318,7 +318,7 @@ export function getRolldownConfig(
       banner: packageOpts.banner ?? '"use strict";',
       ...(packageOpts.footer ? { footer: packageOpts.footer } : {}),
     },
-experimental: { attachDebugInfo: 'none' },
+    experimental: { attachDebugInfo: 'none' },
   }
 }
 
