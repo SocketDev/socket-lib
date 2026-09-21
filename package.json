@@ -4129,7 +4129,9 @@
     "credentials:run": "node scripts/fleet/credentials/run.mts",
     "crates:auth": "node scripts/fleet/registry-infra/crates-io-browser-auth.mts",
     "doctor:credentials": "node scripts/fleet/credentials/doctor.mts",
-    "github:release": "node scripts/fleet/release/pipeline/run.mts"
+    "github:release": "node scripts/fleet/release/pipeline/run.mts",
+    "check:deadcode": "node scripts/fleet/analysis/fallow.mts deadcode",
+    "check:duplication": "node scripts/fleet/analysis/fallow.mts duplication"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
