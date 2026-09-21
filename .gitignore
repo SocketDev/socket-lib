@@ -4419,10 +4419,6 @@ dist/
 !/.claude/hooks/
 !/.claude/settings.json
 
-# THIN member: the fleet payload is untracked; scripts/repo/bootstrap/prepare.mts
-# fetches it from the pinned fleet-pack release (bundle.ref in
-# .config/repo/socket-wheelhouse.json) before install-git-hooks runs.
-/scripts/fleet/
 # pnpm applies these at install, so an untracked patch silently stops being
 # applied for everyone else. The fleet block lists them individually because
 # they were once local-only; tracked is correct now.

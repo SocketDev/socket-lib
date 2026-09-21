@@ -1,5 +1,6 @@
 name: 'ci: fix'
 run-name: 'ci: fix'
+cache-mode: none
 
 on:
   workflow_dispatch:
