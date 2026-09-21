@@ -4103,7 +4103,6 @@
     "check:types": "node scripts/fleet/check.mts --category=types",
     "ai-balancer:doctor": "node scripts/fleet/ai/balancer/doctor.mts",
     "ai-balancer:savings": "node scripts/fleet/ai-balancer-savings.mts",
-    "setup:browser-policy": "node scripts/fleet/setup/browser/policy.mts",
     "setup:rust-coverage": "node scripts/fleet/setup/rust-coverage.mts",
     "setup:token:rotate": "node scripts/fleet/setup/token.mts --rotate",
     "setup:xcode-license": "node scripts/fleet/setup/xcode-license.mts",
@@ -4129,7 +4128,8 @@
     "credentials:migrate": "node scripts/fleet/credentials/migrate.mts",
     "credentials:run": "node scripts/fleet/credentials/run.mts",
     "crates:auth": "node scripts/fleet/registry-infra/crates-io-browser-auth.mts",
-    "doctor:credentials": "node scripts/fleet/credentials/doctor.mts"
+    "doctor:credentials": "node scripts/fleet/credentials/doctor.mts",
+    "github:release": "node scripts/fleet/release/pipeline/run.mts"
   },
   "devDependencies": {
     "@babel/core": "catalog:",

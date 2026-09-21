@@ -815,12 +815,10 @@ export async function hydrateWorkspace(
   // same file as the fleet block, so it is renamed, never recreated.
   const fleetSeed = path.join(HERE, 'fleet.mjs')
   if (existsSync(fleetSeed)) {
-    try {
-      const { migrateRuleFile } = await import(pathToFileURL(fleetSeed).href)
-      if (typeof migrateRuleFile === 'function') {
-        migrateRuleFile(REPO_ROOT)
-      }
-    } catch {}
+    const { migrateRuleFile } = await import(pathToFileURL(fleetSeed).href)
+    if (typeof migrateRuleFile === 'function') {
+      migrateRuleFile(REPO_ROOT)
+    }
   }
   if (!fetchBundle() && options?.strict !== false) return false
   const wsPath = path.join(REPO_ROOT, 'pnpm-workspace.yaml')

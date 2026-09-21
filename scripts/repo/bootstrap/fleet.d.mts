@@ -1,8 +1,4 @@
-//#region scripts/repo/gen/bootstrap/src/rule-file-migration.d.mts
-/**
- * Carries a member's rule file across the rename. Its repo-owned half rides in
- * the same file as the fleet block, so a recreate would drop it.
- */
+//#region template/base/universal/scripts/fleet/gen/harness-adapters/rule-file-migration.d.mts
 export declare function migrateRuleFile(dest: string): boolean;
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/workspace-migration.d.mts
@@ -291,7 +287,7 @@ export declare function fleetPackOwnedPaths(manifest: FleetFileManifest): string
  */
 export declare function extractFleetBlockLines(target: string): string[];
 /**
- * Non-Claude harness surfaces the fleet GENERATES, never tracks.
+ * Harness surfaces the fleet generates from tracked authority files.
  *
  * Each is a projection of a Claude-side source: `AGENTS.md` and the rule dirs
  * point at AGENTS.md, `opencode.json` / `.codex/` project `.mcp.json`, and
@@ -299,9 +295,8 @@ export declare function extractFleetBlockLines(target: string): string[];
  * skills one level deep. Regenerating them is cheap; tracking them means every
  * member carries a copy that drifts and conflicts.
  *
- * Listed here so a hydrate ignores AND untracks the whole set. Before this,
- * only `.agents/` was named, so a member that had committed `AGENTS.md` or
- * `.codex/` kept it tracked forever and the generator fought git on every run.
+ * Thin conversion ignores and untracks these generated surfaces. AGENTS.md
+ * remains tracked as the authoritative repository rules.
  */
 export declare const HARNESS_ALIAS_PATHS: readonly string[];
 /**
@@ -331,7 +326,6 @@ export declare function stripLegacyUntrackEntriesFromFleetBlock(target: string):
 /**
  * Refresh exact tracked fleet paths using the active ownership classification.
  */
-export declare function fleetTrackedAllowlist(manifest: FleetFileManifest, current: readonly string[]): string;
 export declare function refreshFleetPackIgnores(config: {
   dest: string;
   manifest: FleetFileManifest;
