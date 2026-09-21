@@ -3001,6 +3001,10 @@ scripts/fleet/ai/typed-judgment/retry-policy.mts
 scripts/fleet/ai/typed-judgment/service.mts
 scripts/fleet/ai/typed-judgment/types.mts
 scripts/fleet/ai/typed-judgment/validation.mts
+scripts/fleet/analysis/constants.mts
+scripts/fleet/analysis/fallow.mts
+scripts/fleet/analysis/public-packages.mts
+scripts/fleet/analysis/util.mts
 scripts/fleet/analyze-range-consolidation/adapter.mts
 scripts/fleet/analyze-range-consolidation/cli.mts
 scripts/fleet/analyze-range-consolidation/ecosystems/npm-declared-ranges.mts
@@ -3105,6 +3109,7 @@ scripts/fleet/browser/bridge/extension/launcher.mts
 scripts/fleet/browser/bridge/extension/manifest.json
 scripts/fleet/browser/bridge/extension/map/compass.png
 scripts/fleet/browser/bridge/extension/map/island-extended.png
+scripts/fleet/browser/bridge/extension/map/navigator-map.png
 scripts/fleet/browser/bridge/extension/map/parchment.jpg
 scripts/fleet/browser/bridge/extension/markers.mts
 scripts/fleet/browser/bridge/extension/mcp.mts
@@ -3179,6 +3184,10 @@ scripts/fleet/build-hook-snapshot.mts
 scripts/fleet/build-oxlint-bundle.mts
 scripts/fleet/build-snapshot-launcher.mts
 scripts/fleet/build/infra/lib/external-tools-schema.json
+scripts/fleet/build/infra/lib/release-checksums/consumer.mts
+scripts/fleet/build/infra/lib/release-checksums/core.mts
+scripts/fleet/build/infra/lib/release-checksums/producer.mts
+scripts/fleet/build/infra/release-assets.schema.json
 scripts/fleet/bump.mts
 scripts/fleet/bump/invocation.mts
 scripts/fleet/bump/lockstep-write.mts
@@ -3334,6 +3343,7 @@ scripts/fleet/check/external-tools-are-sorted.mts
 scripts/fleet/check/external-tools-are-valid.mts
 scripts/fleet/check/external-tools-match-wheelhouse.mts
 scripts/fleet/check/fable-spawns-have-opus-fallback.mts
+scripts/fleet/check/fallow-configuration-is-valid.mts
 scripts/fleet/check/features-are-complete.mts
 scripts/fleet/check/fetch-allowlist-derived-copies-are-current.mts
 scripts/fleet/check/fetch-allowlist-is-gh-aw-subset.mts
@@ -3832,6 +3842,7 @@ scripts/fleet/gen/glyph.mts
 scripts/fleet/gen/harness-adapters.mts
 scripts/fleet/gen/harness-adapters/catalog.mts
 scripts/fleet/gen/harness-adapters/fleet-guards.mts
+scripts/fleet/gen/harness-adapters/rule-file-migration.mts
 scripts/fleet/gen/hook-dispatch.mts
 scripts/fleet/gen/hook-validators.mts
 scripts/fleet/gen/llms-txt.mts
@@ -4031,6 +4042,7 @@ scripts/fleet/mcp/connect.mts
 scripts/fleet/mcp/connection-process.mts
 scripts/fleet/mcp/connection-service.mts
 scripts/fleet/mcp/connection-state.mts
+scripts/fleet/mcp/fallow/run.mts
 scripts/fleet/mcp/fff/run.mts
 scripts/fleet/mcp/fleet/integrity.mts
 scripts/fleet/mcp/fleet/knowledge.mts
@@ -4261,6 +4273,7 @@ scripts/fleet/registry-infra/npm/promote.mts
 scripts/fleet/registry-infra/npm/provenance.mts
 scripts/fleet/registry-infra/npm/publish-command.mts
 scripts/fleet/registry-infra/npm/publish-failure.mts
+scripts/fleet/registry-infra/npm/region-comments.mts
 scripts/fleet/registry-infra/npm/registry.mts
 scripts/fleet/registry-infra/npm/release-assets.mts
 scripts/fleet/registry-infra/npm/remote-scan-receipt.mts
@@ -4310,6 +4323,7 @@ scripts/fleet/registry-liveness-gate.mjs
 scripts/fleet/registry-publish-date.mts
 scripts/fleet/release/changelog-path.mts
 scripts/fleet/release/channels.mts
+scripts/fleet/release/create.mts
 scripts/fleet/release/gap-recovery.mts
 scripts/fleet/release/git/reconcile.mts
 scripts/fleet/release/github/asset-protocol.mts

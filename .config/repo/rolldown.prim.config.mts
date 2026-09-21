@@ -49,4 +49,5 @@ export const primBuildConfig: RolldownOptions = {
       },
     },
   ],
+experimental: { attachDebugInfo: 'none' },
 }
