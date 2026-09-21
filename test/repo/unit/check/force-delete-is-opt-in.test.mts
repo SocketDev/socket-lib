@@ -11,6 +11,30 @@ import {
 import { runWithTempDir } from '../../../unit/util/temp-files.mjs'
 
 describe('probeDeleteGuard', () => {
+  it('checks containment from a temporary checkout outside automatic deletion roots', async () => {
+    await runWithTempDir(async repository => {
+      const base = prepareDeleteFixtureRoot(repository)
+      const root = await fs.mkdtemp(path.join(base, 'probe-test-'))
+      const cwd = path.join(root, 'cwd')
+      await fs.mkdir(cwd)
+      try {
+        expect(
+          await probeDeleteGuard({
+            cwd,
+            root,
+            safe: {
+              safeDelete: async (target, options) => {
+                await deleteFixtureDirectory(target, { cwd, ...options })
+              },
+            },
+          }),
+        ).toEqual([])
+      } finally {
+        await deleteFixtureDirectory(root, { allowedDirs: [root] })
+      }
+    }, 'delete-guard-checkout-')
+  })
+
   it('keeps the refusal probe unconfigured and scopes cleanup to its own directory', async () => {
     await runWithTempDir(async root => {
       const cwd = path.join(root, 'project')

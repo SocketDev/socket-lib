@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * @file Check the built safeDelete containment contract.
- *   A path outside cwd must be refused without options. A descendant of cwd
- *   must remain deletable. Cleanup authorizes only the probe directory.
- *   Usage: node scripts/repo/check/force-delete-is-opt-in.mts [--quiet]
+ * @file Check the built safeDelete containment contract. A path outside cwd and
+ *   automatic deletion roots must be refused. A descendant of cwd must remain
+ *   deletable. Cleanup authorizes only the probe directory. Usage: node
+ *   scripts/repo/check/force-delete-is-opt-in.mts [--quiet]
  */
 
 import {
@@ -14,8 +14,14 @@ import {
   writeFileSync,
 } from 'node:fs'
 import path from 'node:path'
+import os from 'node:os'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { isPathWithinRoot } from '@socketsecurity/lib-stable/paths/predicates'
+import {
+  getOsTmpDir,
+  getSocketCacacheDir,
+  getSocketUserDir,
+} from '@socketsecurity/lib-stable/paths/socket'
 import process from 'node:process'
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
 import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
@@ -135,6 +141,12 @@ export async function probeDeleteGuard(config: {
   return findings
 }
 
+function resolveFixturePath(target: string): string {
+  return existsSync(target)
+    ? realpathSync(target)
+    : path.join(resolveFixturePath(path.dirname(target)), path.basename(target))
+}
+
 export function prepareDeleteFixtureRoot(repoRoot: string): string {
   const cache = path.join(repoRoot, '.cache')
   const fixtureBase = path.join(cache, 'delete-guard')
@@ -147,6 +159,27 @@ export function prepareDeleteFixtureRoot(repoRoot: string): string {
         'Delete fixture escapes the repository. Fix: remove the escaping cache symlink before running the check.',
       )
     }
+  }
+  const allowedRoots = [
+    getOsTmpDir(),
+    getSocketCacacheDir(),
+    getSocketUserDir(),
+  ]
+  if (
+    allowedRoots.some(root =>
+      isPathWithinRoot(
+        resolveFixturePath(fixtureBase),
+        existsSync(root) ? realpathSync(root) : path.resolve(root),
+      ),
+    )
+  ) {
+    const home = os.homedir()
+    if (realpathSync(repoRoot) === realpathSync(home)) {
+      throw new Error(
+        'Delete fixture has no restricted root. Where: user home. Saw an automatically allowed deletion tree; wanted a fixture outside temporary and Socket cache roots. Fix: run the check with a home outside those roots.',
+      )
+    }
+    return prepareDeleteFixtureRoot(home)
   }
   mkdirSync(fixtureBase, { recursive: true })
   return fixtureBase
