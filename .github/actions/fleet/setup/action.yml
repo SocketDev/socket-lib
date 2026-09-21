@@ -73,7 +73,7 @@ runs:
         set -euo pipefail
         # Bundle fleet pins beside the action so sparse bootstrap checkouts have them.
         # A repo's own .config/repo/external-tools.json is optional and may contain repo-only tools.
-        TOOLS_FILE="${GITHUB_WORKSPACE}/scripts/fleet/setup/external-tools.json"
+        TOOLS_FILE="${GITHUB_ACTION_PATH}/external-tools.generated.json"
         # Tool paths used by both the normal (TOOLS_FILE present) and
         # bootstrap (TOOLS_FILE absent) branches below.
         PLAN="${GITHUB_ACTION_PATH}/plan-setup-tools.mjs"
@@ -354,16 +354,17 @@ runs:
       shell: bash
       run: | # zizmor: ignore[github-env]
         set -euo pipefail
-        TOOLS_FILE="${GITHUB_WORKSPACE}/scripts/fleet/setup/external-tools.json"
+        TOOLS_FILE="${GITHUB_ACTION_PATH}/external-tools.generated.json"
         JQ="${GITHUB_ACTION_PATH}/../_shared/jq.mjs"
         INSTALL_TOOL="${GITHUB_ACTION_PATH}/../_shared/install-tool.mjs"
         RESOLVER="${GITHUB_ACTION_PATH}/../_shared/resolve-external-tool-asset.generated.mjs"
         PLATFORM_KEY="$(node "${GITHUB_ACTION_PATH}/../_shared/platform-key.mjs")"
         export TOOLS_FILE
         NS="$(node "${GITHUB_ACTION_PATH}/plan-setup-tools.mjs" namespace)"
-        UV_PLAN_JSON="$(node "$RESOLVER" --tool uv --tools-file "$TOOLS_FILE")"
+        UV_PLAN_JSON="$(node "$RESOLVER" --tool uv --platform-key "$PLATFORM_KEY" --tools-file "$TOOLS_FILE")"
         UV_VERSION="$(printf '%s' "$UV_PLAN_JSON" | node "$JQ" - version)"
         ASSET="$(printf '%s' "$UV_PLAN_JSON" | node "$JQ" - asset)"
+        ASSET_NAME="$(printf '%s' "$UV_PLAN_JSON" | node "$JQ" - assetName)"
         INTEGRITY="$(printf '%s' "$UV_PLAN_JSON" | node "$JQ" - integrity)"
         SRC="$(printf '%s' "$UV_PLAN_JSON" | node "$JQ" - src 2>/dev/null || true)"
         DATE="$(printf '%s' "$UV_PLAN_JSON" | node "$JQ" - date 2>/dev/null || true)"
@@ -373,7 +374,7 @@ runs:
           UV_BIN_DIR="$UV_DIR"
           UV_EXECUTABLE="uv.exe"
         else
-          UV_BIN_DIR="${UV_DIR}/${ASSET%.tar.gz}"
+          UV_BIN_DIR="${UV_DIR}/${ASSET_NAME%.tar.gz}"
           UV_EXECUTABLE="uv"
         fi
         UV_BIN="${UV_BIN_DIR}/${UV_EXECUTABLE}"
@@ -408,7 +409,7 @@ runs:
         # platform's integrity (SRI string) there in the same commit.
         # The lib/ scripts below resolve platform → asset → URL →
         # install at the currently-detected runner.
-        TOOLS_FILE="${GITHUB_WORKSPACE}/scripts/fleet/setup/external-tools.json"
+        TOOLS_FILE="${GITHUB_ACTION_PATH}/external-tools.generated.json"
         JQ="${GITHUB_ACTION_PATH}/../_shared/jq.mjs"
         PLATFORM_TOOL="${GITHUB_ACTION_PATH}/../_shared/platform.mjs"
         RESOLVER="${GITHUB_ACTION_PATH}/../_shared/resolve-external-tool-asset.generated.mjs"

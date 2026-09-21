@@ -3520,14 +3520,14 @@ function ensureDirectoryMirrorsMatch(filesDir, dest, mirrorEntries, options) {
         copyDirectorySync(sourcePath, stagePath, opts)
         const preserved = [...targetFiles].filter(
           file =>
-            !sourceFiles.has(file) &&
-            (skip(`${entry.path}/${file}`) ||
-              RELEASE_ONLY_DIR_MIRROR_FILES.includes(`${entry.path}/${file}`)),
+            skip(`${entry.path}/${file}`) ||
+            RELEASE_ONLY_DIR_MIRROR_FILES.includes(`${entry.path}/${file}`),
         )
         for (const file of preserved) {
           const source = path.join(targetPath, file)
           const staged = path.join(stagePath, file)
           mkdirSync(path.dirname(staged), { recursive: true })
+          if (existsSync(staged)) chmodSync(staged, 420)
           copyFileSync(source, staged)
           opts.lock?.(staged)
         }
@@ -3747,15 +3747,20 @@ function materializeFromLocalTemplate(dest, manifest, options) {
     total.refreshedTracked.push(...result.refreshedTracked)
   }
   const mirrorEntries = loadMirrorEntriesFromBundle(dest)
-  if (mirrorEntries.length > 0)
+  if (mirrorEntries.length > 0) {
+    const skipMirrorPath = mirrorSkipPredicate(manifest, shaped, mirrorEntries)
     ensureDirectoryMirrorsMatch(filesDir, dest, mirrorEntries, {
       lock: mirrorLockFor(
         dest,
         new Set((manifest.generatedPaths ?? []).map(normalizeBundlePath)),
         computeHybridPaths(manifest),
       ),
-      skip: mirrorSkipPredicate(manifest, shaped, mirrorEntries),
+      skip: relative =>
+        skipMirrorPath(relative) ||
+        isPreservedInstallPath(relative, { preservedPaths }) ||
+        (options?.refreshTracked !== true && isAlwaysTrackedSurface(relative)),
     })
+  }
   return total
 }
 /**
@@ -5892,7 +5897,8 @@ const CODEX_SPEC_PATH = path.join(
 /**
  * @file Render the Codex lifecycle hook config from config.json.
  */
-function readCodexHooksSpec(specPath = CODEX_SPEC_PATH) {
+function readCodexHooksSpec(options = {}) {
+  const { specPath = CODEX_SPEC_PATH } = options
   return readCodexHooksSpecFile(specPath)
 }
 function readCodexHooksSpecFile(specPath) {
@@ -5951,7 +5957,8 @@ function readCodexHooksSpecFile(specPath) {
     timeoutSeconds,
   }
 }
-function renderCodexHooksConfig(spec = readCodexHooksSpec()) {
+function renderCodexHooksConfig(options = {}) {
+  const { spec = readCodexHooksSpec() } = options
   const events = [...spec.events]
   const hooks = /* @__PURE__ */ new Map()
   for (let i = 0, { length } = events; i < length; i += 1) {
@@ -28836,6 +28843,7 @@ const ADAPTERS = [
 
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/adapter-projection.mts
+init_mirror_lock()
 const INSTALLED_ADAPTER_PATHS = [
   ...ADAPTERS.map(adapter => adapter.dest),
   CODEX_MCP_CONFIG_REL,
@@ -28881,10 +28889,18 @@ function projectMcpClientConfigs(dest) {
     )}\n`,
   )
 }
+function assertRegularDestination(file) {
+  const entry = lstatSync(file, { throwIfNoEntry: false })
+  if (entry && !entry.isFile())
+    throw new TypeError(
+      `Adapter projection failed. Where: ${file}. Saw: non-regular destination; wanted a regular file. Fix: remove the conflicting entry and retry installation.`,
+    )
+}
 function writeIfChanged(file, content) {
+  assertRegularDestination(file)
   if (existsSync(file) && readFileSync(file, 'utf8') === content) return
   mkdirSync(path.dirname(file), { recursive: true })
-  writeFileSync(file, content, 'utf8')
+  withMirrorLockLiftedSync(file, () => writeFileSync(file, content, 'utf8'))
 }
 function writeRuleAlias(dest, relative) {
   const target = path.posix.relative(path.posix.dirname(relative), 'AGENTS.md')
@@ -28921,8 +28937,10 @@ function projectInstalledAdapters(dest) {
   writes.push([
     path.join(dest, '.codex', 'hooks.json'),
     renderCodexHooksConfig({
-      ...config_default,
-      events: new Map(Object.entries(config_default.events)),
+      spec: {
+        ...config_default,
+        events: new Map(Object.entries(config_default.events)),
+      },
     }),
   ])
   for (const [file, content] of writes) writeIfChanged(file, content)
@@ -28935,13 +28953,16 @@ function projectInstalledAdapters(dest) {
     }
     if (adapter.kind !== 'copy') continue
     const source = path.join(dest, adapter.sourceRel)
+    assertRegularDestination(destination)
     if (
       existsSync(destination) &&
       readFileSync(source).equals(readFileSync(destination))
     )
       continue
     mkdirSync(path.dirname(destination), { recursive: true })
-    copyFileSync(source, destination)
+    withMirrorLockLiftedSync(destination, () =>
+      copyFileSync(source, destination),
+    )
   }
   projectMcpClientConfigs(dest)
   return INSTALLED_ADAPTER_PATHS
