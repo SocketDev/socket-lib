@@ -4131,7 +4131,8 @@
     "doctor:credentials": "node scripts/fleet/credentials/doctor.mts",
     "github:release": "node scripts/fleet/release/pipeline/run.mts",
     "check:deadcode": "node scripts/fleet/analysis/fallow.mts deadcode",
-    "check:duplication": "node scripts/fleet/analysis/fallow.mts duplication"
+    "check:duplication": "node scripts/fleet/analysis/fallow.mts duplication",
+    "sweep": "node scripts/fleet/sweep.mts"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
@@ -4206,7 +4207,6 @@
     "normalize-package-data": "catalog:",
     "npm-high-impact": "catalog:",
     "npm-package-arg": "catalog:",
-    "npm-run-all2": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
