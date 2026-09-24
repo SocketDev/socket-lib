@@ -54,7 +54,7 @@ catalog:
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
   'typebox': 1.3.30
-  '@socketregistry/packageurl-js': 1.5.2
+  '@socketregistry/packageurl-js': 1.5.3
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
   # self-reference and resolves through the local exports map, not
@@ -65,13 +65,13 @@ catalog:
   # version regardless of where the importing file lives. src/ +
   # test/ code uses the canonical name because vitest aliases that
   # to local src/.
-  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.2'
+  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.3'
   '@socketsecurity/lib': 7.0.3
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@7.0.3'
   '@socketsecurity/registry': 2.0.5
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.5'
-  '@socketsecurity/sdk': 4.1.4
-  '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.1.4'
+  '@socketsecurity/sdk': 4.1.5
+  '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.1.5'
   '@types/mdast': 4.0.4
   '@types/node': 26.5.1
   '@types/semver': 7.8.0
@@ -156,7 +156,6 @@ catalog:
   # @ultrathink/acorn-wasm name is npm-deprecated.
   '@vitiate/core': 0.3.1
   'html5parser': 3.0.0
-  'npm-run-all2': 9.0.3
   # Source of truth for CI-provider + AI-agent env-var detection. devDep only:
   # the build-time codemod inlines its isCI/isAgent boolean expressions into
   # dist, so it never enters the runtime dependency tree. Published 2026-04-15,
@@ -522,8 +521,8 @@ overrides:
   'ansi-regex': '6.3.0'
   # Dedup: ansi-styles 4 (CJS) + 6 (ESM-only) → 6.2.3. chalk@4 was the only
   # CJS require()r of the external ansi-styles; collapsing chalk up to 5 (which
-  # vendors its own ansi-styles) leaves only ESM importers (wrap-ansi,
-  # npm-run-all2), so no compat patch is needed here.
+  # vendors its own ansi-styles) leaves only ESM importers (wrap-ansi), so no
+  # compat patch is needed here.
   'ansi-styles': '6.2.3'
   # Must match the `brace-expansion@>=4` override, the catalog pin, the soak
   # exclude and the patch key above — all four say 5.0.9. This bare key is more
