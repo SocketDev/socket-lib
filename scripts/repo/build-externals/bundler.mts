@@ -111,7 +111,13 @@ export async function bundlePackage(
     const writeTarget = Array.isArray(output) ? output[0] : output
 
     // Bundle the package with rolldown.
-    const bundle = await rolldown(inputOptions)
+    const bundle = await rolldown({
+      ...inputOptions,
+      experimental: {
+        ...inputOptions.experimental,
+        attachDebugInfo: 'none',
+      },
+    })
     try {
       await bundle.write(writeTarget)
     } finally {

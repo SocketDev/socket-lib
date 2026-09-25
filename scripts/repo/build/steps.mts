@@ -73,7 +73,13 @@ export async function buildSource(
     // config here sets an array, so take the first entry rather than widen
     // write()'s input.
     const writeTarget = Array.isArray(output) ? output[0] : output
-    const bundle = await rolldown(inputOptions)
+    const bundle = await rolldown({
+      ...inputOptions,
+      experimental: {
+        ...inputOptions.experimental,
+        attachDebugInfo: 'none',
+      },
+    })
     try {
       await bundle.write(writeTarget)
     } finally {
@@ -201,7 +207,13 @@ export async function buildPrim(
     // config here sets an array, so take the first entry rather than widen
     // write()'s input.
     const writeTarget = Array.isArray(output) ? output[0] : output
-    const bundle = await rolldown(inputOptions)
+    const bundle = await rolldown({
+      ...inputOptions,
+      experimental: {
+        ...inputOptions.experimental,
+        attachDebugInfo: 'none',
+      },
+    })
     try {
       await bundle.write(writeTarget)
     } finally {
