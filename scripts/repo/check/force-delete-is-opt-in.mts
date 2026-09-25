@@ -24,9 +24,9 @@ import {
 } from '@socketsecurity/lib-stable/paths/socket'
 import process from 'node:process'
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/main/run.mts'
 import { getScriptLogger } from '../../fleet/process/script-output.mts'
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/main/run.mts'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const REPO_ROOT = path.resolve(

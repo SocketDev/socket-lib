@@ -25,11 +25,11 @@ import {
 } from '../build-stubs/unexposed.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { runMain } from '../../fleet/process/main/run.mts'
 
 import type { ReachableStubFinding } from '../build-stubs/dist-graph.mts'
 import type { FleetLibUsageReport } from '../audit-fleet-lib-usage.mts'
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/main/run.mts'
 
 const logger = getScriptLogger()
 

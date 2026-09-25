@@ -48,7 +48,7 @@ import { getScriptLogger } from '../../fleet/process/script-output.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
 import { isAgent } from '@socketsecurity/lib-stable/env/agents'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { runMain } from '../../fleet/process/main/run.mts'
 import {
   findPathBack,
   listDistFiles,
@@ -61,7 +61,7 @@ import {
 
 import type { ProbeFinding } from './_shared/undefined-bindings-probe.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/main/run.mts'
 
 const execFileAsync = promisify(execFile)
 

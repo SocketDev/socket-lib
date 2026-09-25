@@ -47,10 +47,10 @@ import {
   readConsumerRoster,
 } from './consumer-evidence.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { isJsonRequested, runMain } from '../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../fleet/process/main/run.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import type { ScriptMeta } from '../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../fleet/process/main/run.mts'
 
 const logger = getScriptLogger()
 
