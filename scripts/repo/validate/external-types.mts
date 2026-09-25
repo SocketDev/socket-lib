@@ -18,9 +18,9 @@ import process from 'node:process'
 import { SRC_EXTERNAL_DIR } from '../_shared/paths.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { runMain } from '../../fleet/process/main/run.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/main/run.mts'
 
 const require = createRequire(import.meta.url)
 

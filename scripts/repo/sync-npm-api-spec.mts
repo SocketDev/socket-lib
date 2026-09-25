@@ -21,7 +21,7 @@ import process from 'node:process'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { isJsonRequested, runMain } from '../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../fleet/process/main/run.mts'
 import {
   buildSpecInventory,
   formatGeneratedFiles,
@@ -45,7 +45,7 @@ import {
 } from './npm-api-spec/spec-fetch.mts'
 
 import type { SpecPin } from './npm-api-spec/pin.mts'
-import type { ScriptMeta } from '../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../fleet/process/main/run.mts'
 
 const logger = getDefaultLogger()
 

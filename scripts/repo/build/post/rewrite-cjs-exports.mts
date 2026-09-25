@@ -16,11 +16,11 @@ import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
 import { getScriptLogger } from '../../../fleet/process/script-output.mts'
 
 import { isMainModule } from '../../../fleet/process/is-main-module.mts'
-import { runMain } from '../../../fleet/process/run-main.mts'
+import { runMain } from '../../../fleet/process/main/run.mts'
 
 import { REPO_ROOT } from '../../../fleet/paths.mts'
 
-import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../../fleet/process/main/run.mts'
 
 const logger = getScriptLogger()
 
