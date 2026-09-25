@@ -156,7 +156,6 @@ catalog:
   # @ultrathink/acorn-wasm name is npm-deprecated.
   '@vitiate/core': 0.3.1
   'html5parser': 3.0.0
-  'npm-run-all2': 9.0.3
   # Source of truth for CI-provider + AI-agent env-var detection. devDep only:
   # the build-time codemod inlines its isCI/isAgent boolean expressions into
   # dist, so it never enters the runtime dependency tree. Published 2026-04-15,
@@ -438,8 +437,8 @@ overrides:
   'ansi-regex': '6.3.0'
   # Dedup: ansi-styles 4 (CJS) + 6 (ESM-only) → 6.2.3. chalk@4 was the only
   # CJS require()r of the external ansi-styles; collapsing chalk up to 5 (which
-  # vendors its own ansi-styles) leaves only ESM importers (wrap-ansi,
-  # npm-run-all2), so no compat patch is needed here.
+  # vendors its own ansi-styles) leaves only ESM importers (wrap-ansi), so no
+  # compat patch is needed here.
   'ansi-styles': '6.2.3'
   # Must match the `brace-expansion@>=4` override, the catalog pin, the soak
   # exclude and the patch key above — all four say 5.0.9. This bare key is more

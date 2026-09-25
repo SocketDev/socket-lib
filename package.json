@@ -3462,6 +3462,11 @@
       "types": "./dist/secrets/socket-api-token.d.ts",
       "default": "./dist/secrets/socket-api-token.js"
     },
+    "./secrets/socket-oauth": {
+      "source": "./src/secrets/socket-oauth.mts",
+      "types": "./dist/secrets/socket-oauth.d.ts",
+      "default": "./dist/secrets/socket-oauth.js"
+    },
     "./secrets/types": {
       "source": "./src/secrets/types.mts",
       "types": "./dist/secrets/types.d.ts",
@@ -4279,8 +4284,5 @@
     "puppeteer": false,
     "rolldown": true,
     "ssh2": false
-  },
-  "npm-run-all2": {
-    "nodeRun": true
   }
 }

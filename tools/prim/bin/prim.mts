@@ -6,8 +6,8 @@
 import process from 'node:process'
 
 import { isMainModule } from '../../../scripts/fleet/process/is-main-module.mts'
-import { runMain } from '../../../scripts/fleet/process/run-main.mts'
-import type { ScriptMeta } from '../../../scripts/fleet/process/run-main.mts'
+import { runMain } from '../../../scripts/fleet/process/main/run.mts'
+import type { ScriptMeta } from '../../../scripts/fleet/process/main/run.mts'
 import { runCli } from '../src/cli.mts'
 import { HELP } from '../src/describe.mts'
 
