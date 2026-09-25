@@ -2397,6 +2397,10 @@ importers:
         version: 26.6.1
 
   .claude/hooks/fleet/no-pr-from-default-branch-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@7.0.3(typescript@7.1.0-dev.20260917.1)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
