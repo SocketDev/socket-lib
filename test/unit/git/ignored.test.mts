@@ -38,7 +38,6 @@ describe('getTrackedIgnoredFiles', () => {
       const fixture = copyGitSeed(dir)
       await fs.writeFile(path.join(dir, 'alpha.txt'), 'hi\n')
       fixture.git('add', 'alpha.txt')
-      fixture.git('commit', '-m', 'seed')
       expect(await getTrackedIgnoredFiles({ cwd: dir })).toEqual([])
     })
   })
@@ -50,7 +49,6 @@ describe('getTrackedIgnoredFiles', () => {
       await fs.writeFile(path.join(dir, 'dist', 'bundle.js'), '//x\n')
       await fs.writeFile(path.join(dir, 'keep.ts'), 'export {}\n')
       fixture.git('add', '-A')
-      fixture.git('commit', '-m', 'seed')
       // dist/ is now ignored, but dist/bundle.js is already tracked = the bug.
       await fs.writeFile(path.join(dir, '.gitignore'), 'dist/\n')
       expect(await getTrackedIgnoredFiles({ cwd: dir })).toEqual([
@@ -64,7 +62,6 @@ describe('getTrackedIgnoredFiles', () => {
       const fixture = copyGitSeed(dir)
       await fs.writeFile(path.join(dir, 'important.tmp'), 'keep me\n')
       fixture.git('add', '-A')
-      fixture.git('commit', '-m', 'seed')
       await fs.writeFile(
         path.join(dir, '.gitignore'),
         '*.tmp\n!important.tmp\n',
@@ -85,7 +82,6 @@ describe('getTrackedIgnoredFiles', () => {
       await fs.mkdir(path.join(dir, 'dist'))
       await fs.writeFile(path.join(dir, 'dist', 'café.js'), '//x\n')
       fixture.git('add', '-A')
-      fixture.git('commit', '-m', 'seed')
       await fs.writeFile(path.join(dir, '.gitignore'), 'dist/\n')
       // Without `-z`, git would return the escaped `"dist/caf\303\251.js"`.
       expect(await getTrackedIgnoredFiles({ cwd: dir })).toEqual([

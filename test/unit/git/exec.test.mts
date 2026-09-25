@@ -27,8 +27,6 @@ vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 })
 
 function initRepo(cwd: string): void {
   spawnSync('git', ['init'], { cwd })
-  spawnSync('git', ['config', 'user.name', 'Test User'], { cwd })
-  spawnSync('git', ['config', 'user.email', 'test@example.com'], { cwd })
 }
 
 describe('gitSpawn', () => {

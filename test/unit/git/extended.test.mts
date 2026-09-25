@@ -265,10 +265,6 @@ describe('git extended tests', () => {
     it('should handle short porcelain lines', async () => {
       await runWithTempDir(async tmpDir => {
         spawnSync('git', ['init'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-          cwd: tmpDir,
-        })
 
         const testFile = path.join(tmpDir, 'alpha.txt')
         await fs.writeFile(testFile, 'content', 'utf8')
@@ -288,10 +284,6 @@ describe('git extended tests', () => {
       // on macOS runners when projectRoot grew large.
       await runWithTempDir(async tmpDir => {
         spawnSync('git', ['init'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-          cwd: tmpDir,
-        })
         await fs.writeFile(path.join(tmpDir, 'alpha.txt'), 'a', 'utf8')
         await fs.writeFile(path.join(tmpDir, 'beta.txt'), 'b', 'utf8')
 
@@ -376,10 +368,6 @@ describe('git extended tests', () => {
     it('should handle empty stdout', async () => {
       await runWithTempDir(async tmpDir => {
         spawnSync('git', ['init'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
-        spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-          cwd: tmpDir,
-        })
 
         // Empty repo with no files
         const changed = await getChangedFiles({ cwd: tmpDir })

@@ -23,8 +23,6 @@ import { runWithTempDir } from '../util/temp-files.mjs'
 
 function initRepo(dir: string): void {
   spawnSync('git', ['init'], { cwd: dir })
-  spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: dir })
-  spawnSync('git', ['config', 'user.email', 'test@example.com'], { cwd: dir })
 }
 
 describe('pathIsUnderSubmodule (pure)', () => {
@@ -110,7 +108,6 @@ describe('isTracked + isUntrackedNonSubmodulePath (real temp repo)', () => {
       initRepo(tmpDir)
       await fs.writeFile(path.join(tmpDir, 'src.ts'), 'export const a = 1\n')
       spawnSync('git', ['add', 'src.ts'], { cwd: tmpDir })
-      spawnSync('git', ['commit', '-m', 'init'], { cwd: tmpDir })
       // An untracked junk file.
       await fs.writeFile(path.join(tmpDir, '.DS_Store'), 'junk')
       // A declared (uninitialized) submodule + a stray file in its dir.
