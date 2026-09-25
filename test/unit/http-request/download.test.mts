@@ -141,6 +141,27 @@ describe('http-request/download — happy path', { concurrent: false }, () => {
     expect(readFileSync(dest, 'utf8')).toBe(body)
   })
 
+  test('waits for the download stream to close before publishing the file', async () => {
+    const dest = path.join(tmpRoot, 'closed-stream.bin')
+    let closed = false
+    const createDownloadStream = (streamPath: string) => {
+      const stream = createWriteStream(streamPath)
+      stream.once('close', () => {
+        closed = true
+      })
+      return stream
+    }
+    mockHttpRequestAttempt.mockResolvedValueOnce(
+      makeFakeResponse({ body: 'executable-bytes' }),
+    )
+    const { httpDownload } = await loadFresh()
+    await httpDownload('https://example.com/tool', dest, {
+      createWriteStream: createDownloadStream,
+    })
+    expect(closed).toBe(true)
+    expect(existsSync(dest)).toBe(true)
+  })
+
   test('uses the regular file writer when Content-Length is unavailable', async () => {
     const dest = path.join(tmpRoot, 'unknown-size.bin')
     const createDownloadStream = vi.fn(() => createWriteStream(dest))

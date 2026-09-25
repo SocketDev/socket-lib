@@ -281,6 +281,7 @@ export async function httpDownloadAttempt(
 
   return await new PromiseCtor((resolve, reject) => {
     let downloadedSize = 0
+    let completedResult: HttpDownloadResult | undefined
     const sha256Hash = crypto.createHash('sha256')
     const sha512Hash = crypto.createHash('sha512')
     const fileStream =
@@ -328,15 +329,10 @@ export async function httpDownloadAttempt(
       }
     })
 
-    // Settle on `fileStream` 'finish', NOT `res` 'end'. `res.pipe`
-    // calls `fileStream.end()` on res-end, but the buffered writes
-    // may still be draining to disk when that happens. `'finish'`
-    // fires after the final write callback completes — that's the
-    // correct settle point. Resolving on `res.end` can return a
-    // truncated file when the network is fast and the disk is slow
-    // (or backpressure builds on `fileStream.write`).
+    // Wait for close after the final write so the downloaded file can be
+    // executed immediately on Linux.
     fileStream.on('finish', () => {
-      resolve({
+      completedResult = {
         headers: response.headers,
         integrity: `sha512-${sha512Hash.digest('base64')}`,
         ok: true,
@@ -345,7 +341,17 @@ export async function httpDownloadAttempt(
         size: downloadedSize,
         status: response.status,
         statusText: response.statusText,
-      })
+      }
+    })
+
+    fileStream.on('close', () => {
+      if (completedResult) {
+        resolve(completedResult)
+      } else {
+        reject(
+          new ErrorCtor(`Download stream closed before completion: ${url}`),
+        )
+      }
     })
 
     res.on('error', (error: Error) => {
