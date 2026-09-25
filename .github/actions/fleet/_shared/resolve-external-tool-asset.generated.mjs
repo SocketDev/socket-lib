@@ -3,7 +3,6 @@ import { existsSync, readFileSync, readdirSync, realpathSync } from "node:fs";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-//#region template/base/universal/.github/actions/fleet/_shared/release-asset.mts
 const GITHUB_ORIGIN = "https://github.com";
 function integrityValue(integrity) {
   if (typeof integrity === "object" && integrity !== null) {
@@ -127,8 +126,6 @@ function resolveCatalogAsset(tool, entry, canonicalKey) {
   };
 }
 
-//#endregion
-//#region template/base/universal/.github/actions/fleet/_shared/resolve-external-tool-platform.mts
 const GO_OS_ARCH = {
   __proto__: null,
   "darwin-arm64": {
@@ -258,8 +255,6 @@ function resolveGoAssetFromManifest(manifest, version, canonicalKey) {
   };
 }
 
-//#endregion
-//#region template/base/universal/.github/actions/fleet/_shared/resolve-external-tool-asset.mts
 /**
  * @file Resolve a pinned external-tool asset + SRI integrity for THIS runner,
  *   from scripts/fleet/setup/external-tools.json. Replaces the curl-with-no-
@@ -484,7 +479,6 @@ async function main() {
 }
 if (isMainModule()) main();
 
-//#endregion
 export {
   GO_OS_ARCH,
   PLATFORM_UNAVAILABLE_EXIT_CODE,
