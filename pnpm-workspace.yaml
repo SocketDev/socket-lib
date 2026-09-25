@@ -53,7 +53,7 @@ catalog:
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
-  'typebox': 1.3.30
+  'typebox': 1.3.32
   '@socketregistry/packageurl-js': 1.5.3
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
@@ -73,15 +73,15 @@ catalog:
   '@socketsecurity/sdk': 4.1.5
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.1.5'
   '@types/mdast': 4.0.4
-  '@types/node': 26.5.1
+  '@types/node': 26.6.1
   '@types/semver': 7.8.0
   '@types/shell-quote': 1.7.5
   'compromise': 14.17.0
   # fast-check — property-based testing for pure fleet-script logic (pin
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
-  'fast-check': 4.10.0
-  'magic-string': 1.3.1
+  'fast-check': 4.10.1
+  'magic-string': 1.4.1
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   # GFM pair for render-faithful markdown parsing (tables, footnotes,
@@ -141,15 +141,15 @@ catalog:
   # override below pins every transitive `vite` (vitest, @vitest/*,
   # plugin authors) to it.
   'typescript': 7.1.0-dev.20260913.1
-  'vitest': 5.0.0
-  '@vitest/coverage-v8': 5.0.0
+  'vitest': 5.0.1
+  '@vitest/coverage-v8': 5.0.1
   '@bcoe/v8-coverage': 1.0.2
   ast-v8-to-istanbul: 1.0.6
   'chrome-devtools-mcp': 1.9.0
   # Playwright MCP server — agent-driven browsing with the fleet agent-banner
   # init script (see .config/fleet/playwright/).
   '@playwright/mcp': 0.0.81
-  '@vitest/ui': 5.0.0
+  '@vitest/ui': 5.0.1
   c8: 12.0.0
   # Alias to the post-rename artifact at the version this repo already
   # installs (dedup: one acorn.rs.wasm major); the pre-rename
@@ -165,27 +165,27 @@ catalog:
   # Test-only tar extraction seam for archives coverage; single-sourced here so
   # the devDep and the dedup override below stay on one pin.
   'tar-fs': 3.1.3
-  'vite': 8.2.2
+  'vite': 8.3.0
   'vitiate': 0.3.1
   # Read by scripts/fleet/constants/catalog-holds.mts, cascaded fleet payload.
   # No script keys on it, so the devDep is declared via FLEET_REQUIRED_DEVDEPS.
-  'yaml': 2.9.0
+  'yaml': 2.9.1
 
   # Repository-specific development dependencies.
   '@babel/core': '7.29.7'
   '@babel/parser': '7.29.8'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
-  '@inquirer/checkbox': '5.2.2'
-  '@inquirer/confirm': '6.2.0'
-  '@inquirer/input': '5.1.3'
-  '@inquirer/password': '5.1.2'
-  '@inquirer/search': '4.3.0'
-  '@inquirer/select': '5.2.2'
+  '@inquirer/checkbox': '5.2.5'
+  '@inquirer/confirm': '6.3.2'
+  '@inquirer/input': '5.1.6'
+  '@inquirer/password': '5.2.2'
+  '@inquirer/search': '4.3.3'
+  '@inquirer/select': '5.2.5'
   '@npmcli/arborist': '9.9.1'
   '@npmcli/package-json': '7.0.5'
   '@npmcli/promise-spawn': '8.0.3'
-  '@perryts/perry': '0.5.1220'
+  '@perryts/perry': '0.5.1520'
   '@socketregistry/is-unicode-supported': '1.0.5'
   '@socketregistry/yocto-spinner': '1.0.25'
   '@yarnpkg/extensions': '2.0.7'
@@ -197,14 +197,14 @@ catalog:
   'fast-sort': '3.4.1'
   'fflate': '0.8.3'
   'get-east-asian-width': '1.6.0'
-  'globals': '17.11.0'
+  'globals': '17.12.0'
   'has-flag': '5.0.1'
   'libnpmexec': '10.3.2'
-  'libnpmpack': '9.1.12'
+  'libnpmpack': '9.1.13'
   'make-fetch-happen': '15.0.6'
   'normalize-package-data': '8.0.0'
   'npm-package-arg': '13.0.2'
-  'p-map': '7.0.6'
+  'p-map': '7.0.8'
   'pacote': '21.5.1'
   'picomatch': '4.0.7'
   'pony-cause': '2.1.11'
@@ -216,11 +216,11 @@ catalog:
   'tar-stream': '3.2.1'
   'terminal-link': '2.1.1'
   'validate-npm-package-name': '6.0.2'
-  'webpack': '5.109.2'
+  'webpack': '5.111.0'
   'which': '5.0.0'
   'yargs-parser': '22.0.0'
   'yoctocolors-cjs': '2.1.3'
-  'zod': '4.4.3'
+  'zod': '4.6.5'
 
 # Native post-install build scripts. These three arrive transitively via
 # @redwoodjs/agent-ci's `ssh2` (optional crypto acceleration). agent-ci's
@@ -388,9 +388,9 @@ overrides:
   'hasown': 'npm:@socketregistry/hasown@1.0.7'
   'iconv-lite': '0.7.3'
   'isexe@>=3': '4.0.0'
-  'js-yaml@>=5.0.0 <5.2.2': '5.4.1'
+  'js-yaml@>=5.0.0 <5.2.2': '5.4.2'
   'lru-cache@>=10': '11.5.2'
-  'magic-string': '1.2.3'
+  'magic-string': '1.4.1'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
@@ -409,7 +409,7 @@ overrides:
   'uuid': '11.1.1'
   'which': '7.0.0'
   'wrap-ansi@>=8': '9.0.2'
-  'yaml@2': '2.9.0'
+  'yaml@2': '2.9.1'
 
   # Repo-specific overrides below.
   '@anthropic-ai/sdk': '0.91.1'
@@ -420,9 +420,9 @@ overrides:
   # encoded backslash. Reached transitively through the agent SDK's MCP SDK,
   # which still resolves a vulnerable range on its own.
   '@hono/node-server@<1.19.15': '1.19.17'
-  '@inquirer/ansi': '2.0.7'
+  '@inquirer/ansi': '2.0.8'
   '@inquirer/core': '11.2.1'
-  '@inquirer/figures': '2.0.8'
+  '@inquirer/figures': '2.0.9'
   '@npmcli/arborist': '9.9.1'
   '@npmcli/git': '6.0.3'
   '@npmcli/installed-package-contents': '4.0.0'
@@ -445,7 +445,7 @@ overrides:
   # specific, so at 5.0.8 it won and pinned resolution there, which orphaned
   # `patches/brace-expansion@5.0.9.patch` and made every install fail with
   # ERR_PNPM_UNUSED_PATCH.
-  'brace-expansion': '5.0.9'
+  'brace-expansion': '5.0.12'
   # Dedup: chalk 4 (CJS; @yarnpkg/*, type-coverage) + chalk 5 (ESM-only;
   # ecc-agentshield) → 5.6.2. chalk 5 ships no `require` export condition, so a
   # CJS require() lands on the ESM namespace rather than the callable default;
@@ -464,14 +464,14 @@ overrides:
   'debug': '4.4.3'
   'diff': '9.0.0'
   'estraverse': '5.3.0'
-  'fast-uri': '3.1.6'
+  'fast-uri': '3.1.8'
   'globby': '16.2.4'
   'has-flag': '5.0.1'
   # 4.12.25+ clears GHSA-88fw-hqm2-52qc (hono CORS wildcard+credentials reflect),
   # pulled transitively via @anthropic-ai/claude-agent-sdk.
-  'hono': '4.13.4'
+  'hono': '4.13.8'
   'hosted-git-info': '8.1.0'
-  'ip-address': '10.5.0'
+  'ip-address': '10.7.2'
   'isexe': '3.1.5'
   # Dedup: js-tokens 4 (@babel/code-frame, CJS require) + 10 (ast-v8-to-istanbul,
   # ESM import) → 10.0.0. The two majors have incompatible APIs (v4 regex vs v10
@@ -480,7 +480,7 @@ overrides:
   'js-tokens': '10.0.0'
   # 4.2.0 clears GHSA-h67p-54hq-rp68 (js-yaml quadratic merge-key DoS, <=4.1.1),
   # pulled transitively via @yarnpkg/core.
-  'js-yaml': '4.3.1'
+  'js-yaml': '4.3.2'
   'json-parse-even-better-errors': '5.0.0'
   'lru-cache': '11.5.2'
   'make-fetch-happen': '15.0.6'
@@ -504,12 +504,12 @@ overrides:
   'npm-normalize-package-bin': '5.0.0'
   'npm-package-arg': '12.0.2'
   'npm-pick-manifest': '10.0.0'
-  'p-map': '7.0.6'
+  'p-map': '7.0.8'
   'pacote': '21.5.1'
   'picomatch': '4.0.7'
-  'postcss': '8.5.26'
+  'postcss': '8.5.28'
   'proc-log': '6.1.0'
-  'qs': '6.15.3'
+  'qs': '6.16.0'
   # Unify every rolldown resolution to the catalog pin (1.1.0). vite 8.0.14
   # bundles its own rolldown (1.0.2) transitively; without this override the
   # tree would carry two rolldown versions + two sets of platform bindings.
@@ -535,7 +535,7 @@ overrides:
   'vite': 'catalog:'
   'which@>=4': '7.0.0'
   'wrap-ansi': '9.0.2'
-  'yaml': '2.9.0'
+  'yaml': '2.9.1'
   # Dedup: yargs-parser 21 (yargs@17, CJS require) + 22 (bundled into
   # src/exe/argv/parse) → 21.1.1. 22 is ESM-only (no `require` export) and would
   # break yargs@17; 21.1.1 is dual CJS/ESM with the same parse surface and is
@@ -545,7 +545,7 @@ overrides:
   # Dedup: zod 3 (ecc-agentshield, dtu-github-actions) + 4 (claude-agent-sdk peer
   # ^4.0.0, mcp-sdk) → 4.1.12. claude-agent-sdk requires v4; the v3 consumers use
   # only the v4-compatible core surface (z.object/string/array/number/coerce/parse).
-  'zod': '4.4.3'
+  'zod': '4.6.5'
 
 patchedDependencies:
   # dedup compat shim: @polka/url@1 replaced the @polka/url@0.5 default-callable
@@ -582,7 +582,6 @@ patchedDependencies:
   # This preserves membership and bounds matcher memory for fleet coverage.
   # CPU-profiled forks use the configured teardown deadline to flush profiles.
   # Ordinary forks retain the upstream 500 ms termination grace.
-  vitest@5.0.0: patches/fleet/vitest@5.0.0.patch
   # Indirects the `node-gyp/bin/node-gyp.js` require.resolve so the rolldown
   # bundle doesn't statically inline node-gyp; consumer: pacote → run-script
   # in the bundled dist tree.
