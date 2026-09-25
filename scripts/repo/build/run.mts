@@ -37,7 +37,7 @@ import {
 import { verifyDist } from './verify-dist.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/main/run.mts'
 
 import type { BuildSourceResult } from './steps.mts'
 

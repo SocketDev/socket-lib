@@ -12,14 +12,14 @@ import { fileURLToPath } from 'node:url'
 import { getScriptLogger } from '../../scripts/fleet/process/script-output.mts'
 
 import { isMainModule } from '../../scripts/fleet/process/is-main-module.mts'
-import { runMain } from '../../scripts/fleet/process/run-main.mts'
+import { runMain } from '../../scripts/fleet/process/main/run.mts'
 import { exitCodeFor, summarize } from './test262/classifier.mts'
 import { loadAllowlist, loadFeatures } from './test262/config.mts'
 import { collectCases, composePrelude } from './test262/harness.mts'
 import { runCases, writePrelude } from './test262/executor.mts'
 import { formatSummary } from './test262/report.mts'
 
-import type { ScriptMeta } from '../../scripts/fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../scripts/fleet/process/main/run.mts'
 import type { RunResult } from './test262/types.mts'
 
 const CONCURRENCY = 8

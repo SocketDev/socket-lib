@@ -21,9 +21,9 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 import { parseArgs } from '../../fleet/util/parse-args.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/main/run.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/main/run.mts'
 
 const logger = getScriptLogger()
 
