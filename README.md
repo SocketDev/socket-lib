@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-<a href="https://socket.dev/npm/package/@socketsecurity/lib"><img src="https://socket.dev/api/badge/npm/package/@socketsecurity/lib" alt="Socket Badge" height="20"></a>
+[![Socket Badge](https://badge.socket.dev/npm/package/@socketsecurity/lib/7.0.3)](https://badge.socket.dev/npm/package/@socketsecurity/lib/7.0.3)
 <picture><img src="https://raw.githubusercontent.com/SocketDev/socket-lib/HEAD/assets/repo/coverage.svg?v=d3f1fd881dda" height="20" alt="Coverage" /></picture>
 
 [![Follow @SocketSecurity](https://raw.githubusercontent.com/SocketDev/socket-lib/HEAD/assets/fleet/badge-follow-x.svg)](https://twitter.com/SocketSecurity)
@@ -40,35 +40,7 @@ Start with the [API reference](./docs/api.md) - every subpath export with a one-
 
 ## Development
 
-<details>
-<summary>Contributor commands</summary>
-
-```sh
-pnpm build            # build
-pnpm dev              # watch mode
-pnpm install          # install before build
-pnpm run cover        # tests with coverage
-pnpm run fix          # auto-fix formatting
-pnpm run lint         # check style
-pnpm test             # run tests
-```
-
-See [CLAUDE.md](./CLAUDE.md) for contributor guidelines.
-
-### Documentation map
-
-- [Getting Started](./docs/getting-started.md) – install + first examples
-- [Visual Effects](./docs/visual-effects.md) – spinners, loggers, themes
-- [File System](./docs/file-system.md) – files, globs, paths, safe deletion
-- [HTTP Utilities](./docs/http-utilities.md) – requests, downloads, retries
-- [Process Utilities](./docs/process-utilities.md) – spawn, IPC, locks
-- [Package Management](./docs/package-management.md) – npm/pnpm/yarn detection
-- [Environment](./docs/environment.md) – CI/platform detection, env getters
-- [Constants](./docs/constants.md) – Node versions, npm URLs, platform values
-- [Examples](./docs/examples.md) – real-world patterns
-- [Troubleshooting](./docs/troubleshooting.md) – common issues
-
-</details>
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
