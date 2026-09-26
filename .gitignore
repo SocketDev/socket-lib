@@ -4809,8 +4809,11 @@ scripts/fleet/test/budget/balance/input.mts
 scripts/fleet/test/budget/balance/options.mts
 scripts/fleet/test/budget/balance/plan.mts
 scripts/fleet/test/budget/headroom.mts
+scripts/fleet/test/fast.mts
 scripts/fleet/test/fix.mts
+scripts/fleet/test/lane-entrypoint.mts
 scripts/fleet/test/lane.mts
+scripts/fleet/test/mid.mts
 scripts/fleet/test/profile-preload.mts
 scripts/fleet/test/profile-report.mts
 scripts/fleet/test/profile.mts
@@ -4819,6 +4822,7 @@ scripts/fleet/test/runtime/cache.mts
 scripts/fleet/test/runtime/capacity.mts
 scripts/fleet/test/runtime/profiling.mts
 scripts/fleet/test/runtime/session.mts
+scripts/fleet/test/slow.mts
 scripts/fleet/triaging-findings/cli.mts
 scripts/fleet/triaging-findings/lib/ingest.mts
 scripts/fleet/triaging-findings/lib/report.mts
