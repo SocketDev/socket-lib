@@ -210,8 +210,8 @@ catalogs:
       specifier: 0.5.1220
       version: 0.5.1220
     '@playwright/mcp':
-      specifier: 0.0.80
-      version: 0.0.80
+      specifier: 0.0.81
+      version: 0.0.81
     '@shadscan/cli':
       specifier: 0.17.0
       version: 0.17.0
@@ -416,7 +416,7 @@ overrides:
   '@socketsecurity/registry': 2.0.5
   '@socketsecurity/sdk': 4.1.5
   '@swc/core': 1.16.1
-  brace-expansion@>=4: 5.0.9
+  brace-expansion@>=4: 5.0.12
   chalk@>=5: 5.6.2
   es-define-property: npm:@socketregistry/es-define-property@1.0.7
   es-set-tostringtag: npm:@socketregistry/es-set-tostringtag@1.0.10
@@ -534,7 +534,7 @@ patchedDependencies:
   '@polka/url@1.0.0-next.29': 60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea
   '@sigstore/sign@4.1.1': 4d806e50e530edf6761bba8ad98cd1f2867a86201f6faee419444d86f5325def
   '@yarnpkg/core@4.9.1': 90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9
-  brace-expansion@5.0.9: a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857
+  brace-expansion@5.0.12: c15cb4e3c78bc74448f2dd848dacc1d86afc3c91cc8e70d78ef52150b1d47b04
   chalk@5.6.2: 3e5adfdfa27f0c9e066fe820ac91f77773798f205f5e43ff220b250007196661
   content-type@2.1.0: b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a
   js-tokens@10.0.0: 9ca5535547c973063c8c2d0a7d33505cef80152329f2572507a54abbb4099826
@@ -604,7 +604,7 @@ importers:
         version: 0.5.1220
       '@playwright/mcp':
         specifier: 'catalog:'
-        version: 0.0.80
+        version: 0.0.81
       '@shadscan/cli':
         specifier: 'catalog:'
         version: 0.17.0
@@ -5318,8 +5318,8 @@ packages:
     engines: {node: '>=16'}
     hasBin: true
 
-  '@playwright/mcp@0.0.80':
-    resolution: {integrity: sha512-FOPXHm2SvFhAQylm10jMZ35B/SR2TaMLVkavAlwoG4N2qCb5RqbvhQYcu3zmXNyxR2DW0Ooxe+9XPVt5UjKRCQ==}
+  '@playwright/mcp@0.0.81':
+    resolution: {integrity: sha512-c4eVex1nS53IzLHlwAm0J9ZISDTvA7RndFX8oVcQOrmvIrKSkByazpq79lZHWJuWTB7Gpk0sLBQoRepyIgmneA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -6279,8 +6279,8 @@ packages:
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
-  brace-expansion@5.0.9:
-    resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
+  brace-expansion@5.0.12:
+    resolution: {integrity: sha512-YovQ3rzhaLMIrDjNDMkNS01tea93qhEhG5xy8f6+R0l+dw3Ki+5sCoIoI942iuLZTHWogWktgwVDhU09iNEimQ==}
     engines: {node: 20 || >=22}
 
   braces@3.0.3:
@@ -7651,13 +7651,13 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright-core@1.63.0-alpha-2026-08-31:
-    resolution: {integrity: sha512-1ek0Lyr12h6jcs/WTcNoVtzZkQp7D/90PsMuBW/Rm6h3AsWAbzpqj0geMv8+8Tzzr9CSUYvg9kznrVZINQMXXw==}
+  playwright-core@1.64.0-alpha-2026-09-14:
+    resolution: {integrity: sha512-VCqlQ8lEKS8NAfEU/sWx3KP7gL2oCWd/DAGzPDZncGV7dUNNHpaVxHd2LWe2pc5y53h0Hqu3SWzRiPqKqkrYQA==}
     engines: {node: '>=20'}
     hasBin: true
 
-  playwright@1.63.0-alpha-2026-08-31:
-    resolution: {integrity: sha512-3XAsuznfu8jBVJ4QxdGvBkt0+b8ZFwuwJYyOfiIw5ZjUOrNLNRhKxzLzLuydou3gJ9c6eMwVqgzdiOwhy54Kzw==}
+  playwright@1.64.0-alpha-2026-09-14:
+    resolution: {integrity: sha512-CdpbZ03/Iq4HMth9RP2NHBv/gv9exDLkR3eJEDvS2fKdAjZSNYvL2PrJum3wHe8qOSFR8KzWuyKUx3AZ5vZc4w==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -9127,10 +9127,10 @@ snapshots:
       '@perryts/perry-linux-x64-musl': 0.5.1220
       '@perryts/perry-win32-x64': 0.5.1220
 
-  '@playwright/mcp@0.0.80':
+  '@playwright/mcp@0.0.81':
     dependencies:
-      playwright: 1.63.0-alpha-2026-08-31
-      playwright-core: 1.63.0-alpha-2026-08-31
+      playwright: 1.64.0-alpha-2026-09-14
+      playwright-core: 1.64.0-alpha-2026-09-14
 
   '@polka/url@1.0.0-next.29(patch_hash=60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea)': {}
 
@@ -9912,7 +9912,7 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  brace-expansion@5.0.9(patch_hash=a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857):
+  brace-expansion@5.0.12(patch_hash=c15cb4e3c78bc74448f2dd848dacc1d86afc3c91cc8e70d78ef52150b1d47b04):
     dependencies:
       balanced-match: 4.0.4
 
@@ -11177,7 +11177,7 @@ snapshots:
 
   minimatch@10.2.6(patch_hash=83f1ea5b333d1b6fe1b36f93ccb222aa02e5dd468b2c646e285d7d53d234e174):
     dependencies:
-      brace-expansion: 5.0.9(patch_hash=a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857)
+      brace-expansion: 5.0.12(patch_hash=c15cb4e3c78bc74448f2dd848dacc1d86afc3c91cc8e70d78ef52150b1d47b04)
 
   minimizer-webpack-plugin@5.6.1(@swc/core@1.15.43)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.26)(webpack@5.109.2(@swc/core@1.15.43)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.26)):
     dependencies:
@@ -11499,11 +11499,11 @@ snapshots:
 
   playwright-core@1.63.0: {}
 
-  playwright-core@1.63.0-alpha-2026-08-31: {}
+  playwright-core@1.64.0-alpha-2026-09-14: {}
 
-  playwright@1.63.0-alpha-2026-08-31:
+  playwright@1.64.0-alpha-2026-09-14:
     dependencies:
-      playwright-core: 1.63.0-alpha-2026-08-31
+      playwright-core: 1.64.0-alpha-2026-09-14
 
   pnpm-workspace-yaml@1.8.0:
     dependencies:
