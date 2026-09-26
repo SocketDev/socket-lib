@@ -6158,11 +6158,6 @@ packages:
 
   ajv-formats@3.0.1:
     resolution: {integrity: sha512-8iUql50EUR+uUcdRQ3HDqa6EVyo3docL8g5WJ3FNcWmu62IbkGUue/pEyLBW8VGKKucTPgqeks4fIU1DA4yowQ==}
-    peerDependencies:
-      ajv: ^8.0.0
-    peerDependenciesMeta:
-      ajv:
-        optional: true
 
   ajv-keywords@5.1.0:
     resolution: {integrity: sha512-YCS/JNFAUyr5vAuhk1DWm1CBxRHW9LbJ2ozWeemrIqpbsqKjHVxYPyi5GC0rjZIT5JxJ3virVTS8wk4i/Z+krw==}
@@ -6988,7 +6983,6 @@ packages:
 
   jsonparse@1.3.1:
     resolution: {integrity: sha512-POQXvpdL69+CluYsillJ7SUhKvytYjW9vG/GKpnf+xP8UWgYEM/RaMzHHofbALDiKbbP1W8UEYmgGl39WkPZsg==}
-    engines: {'0': node >= 0.2.0}
 
   jsonpointer@5.0.1:
     resolution: {integrity: sha512-p/nXbhSEcu3pZRdkW1OfJhpsVtW1gd4Wa1fnQc9YLiTfAjn0312eMKimbdIQzuZl9aa9xUGaRlP9T/CJE/ditQ==}
@@ -8371,21 +8365,29 @@ snapshots:
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
 
-  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141':
+    optional: true
 
-  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141':
+    optional: true
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141':
+    optional: true
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141':
+    optional: true
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141':
+    optional: true
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141':
+    optional: true
 
-  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141':
+    optional: true
 
-  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141': {}
+  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141':
+    optional: true
 
   '@anthropic-ai/claude-agent-sdk@0.2.141(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:
@@ -8789,7 +8791,7 @@ snapshots:
     dependencies:
       '@hono/node-server': 1.19.17(hono@4.13.4)
       ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
+      ajv-formats: 3.0.1
       content-type: 2.1.0(patch_hash=b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a)
       cors: 2.8.6
       cross-spawn: 7.0.6
@@ -9797,8 +9799,8 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ajv-formats@3.0.1(ajv@8.20.0):
-    optionalDependencies:
+  ajv-formats@3.0.1:
+    dependencies:
       ajv: 8.20.0
 
   ajv-keywords@5.1.0(ajv@8.20.0):
@@ -11694,7 +11696,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
       ajv: 8.20.0
-      ajv-formats: 3.0.1(ajv@8.20.0)
+      ajv-formats: 3.0.1
       ajv-keywords: 5.1.0(ajv@8.20.0)
 
   semver@7.8.5: {}
