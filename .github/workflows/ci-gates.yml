@@ -39,7 +39,7 @@ jobs:
   # non-matrix check job, skips it in the test matrix).
   check:
     name: Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       # First step cannot call the local ./.github/actions/fleet/checkout
@@ -99,7 +99,7 @@ jobs:
       matrix:
         # JS/TS tests only need a fast Linux run; cross-platform behavior is
         # covered by unit tests, not the CI matrix.
-        os: [ubuntu-latest]
+        os: [ubuntu-26.04]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
@@ -172,7 +172,7 @@ jobs:
     outputs:
       shard-count: ${{ strategy.job-total }}
     name: Coverage collection (${{ matrix.shard }}/${{ strategy.job-total }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -240,7 +240,7 @@ jobs:
     name: Cover
     needs: [cover-shards]
     if: ${{ !cancelled() && github.event_name != 'pull_request' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - name: Require successful coverage collection

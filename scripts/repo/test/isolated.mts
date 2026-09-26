@@ -13,24 +13,39 @@ const SCRIPT_META: ScriptMeta = {
   json: 'result',
 }
 
-function main(): number {
-  const configPath = fileURLToPath(
-    new URL(
-      '../../../.config/repo/vitest.config.isolated.mts',
-      import.meta.url,
-    ),
-  )
+export type IsolatedTestOptions = {
+  args?: string[] | undefined
+  configPath?: string | undefined
+  run?: typeof runFleetTestScript | undefined
+}
+
+export function runIsolatedTestScript(
+  options: IsolatedTestOptions = {},
+): number {
+  const configPath =
+    options.configPath ??
+    fileURLToPath(
+      new URL(
+        '../../../.config/repo/vitest.config.isolated.mts',
+        import.meta.url,
+      ),
+    )
   if (!existsSync(configPath)) {
     throw new Error(
       `Isolated Vitest configuration is missing. Where: ${configPath}. Saw: no file; wanted the repo-owned isolated config. Fix: add .config/repo/vitest.config.isolated.mts.`,
     )
   }
-  return runFleetTestScript('test-runner/run-vitest.mts', [
+  const run = options.run ?? runFleetTestScript
+  return run('test-runner/run-vitest.mts', [
     'run',
     '--config',
     configPath,
-    ...getScriptArgs(),
+    ...(options.args ?? getScriptArgs()),
   ])
+}
+
+function main(): number {
+  return runIsolatedTestScript()
 }
 
 if (isMainModule(import.meta.url)) {

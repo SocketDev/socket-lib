@@ -8,7 +8,7 @@ import { runFleetTestScript } from '../../../../scripts/repo/test/run-lane.mts'
 
 test('runFleetTestScript targets the fleet runner from the repo root', () => {
   let command: string | undefined
-  let args: string[] | undefined
+  let args: readonly string[] | undefined
   const status = runFleetTestScript(
     'test-runner/run-vitest.mts',
     ['run', '--config', '.config/repo/vitest.config.isolated.mts'],
