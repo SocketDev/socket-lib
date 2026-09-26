@@ -355,6 +355,7 @@
     "**/test/fleet/nock-loopback-passthrough.test.mts",
     "**/test/fleet/unit/ci/gates/run.test.mts",
     "**/test/fleet/unit/comment-voice.test.mts",
+    "**/test/fleet/unit/credentials/otp/bindings.test.mts",
     "**/test/fleet/unit/fix/plan.test.mts",
     "**/test/fleet/unit/fix/run.test.mts",
     "**/test/fleet/unit/lockstep/emit-mirror-globs.test.mts",
