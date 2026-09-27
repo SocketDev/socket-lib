@@ -15,7 +15,7 @@ import type { ScriptResult } from '../process/script-result.mts'
 import { resolveReleaseSubject } from '../release/subject.mts'
 import { scanStagedEntryDetailed } from '../registry-infra/npm/scan.mts'
 import type { StagedScanVerdict } from '../registry-infra/npm/scan.mts'
-import { defaultPackTarball } from '../registry-infra/npm/staged.mts'
+import { defaultDownloadStagedTarball } from '../registry-infra/npm/staged.mts'
 import { resolveNpmWorkspaceLayout } from '../registry-infra/npm/workspace.mts'
 import { rootPath, runCapture } from '../registry-infra/shared.mts'
 import {
@@ -46,7 +46,7 @@ export interface ScanCiConfig {
 
 interface ScanCiDeps {
   headSha: () => Promise<string>
-  pack: typeof defaultPackTarball
+  download: typeof defaultDownloadStagedTarball
   scan: typeof scanStagedEntryDetailed
   subject: (root: string) => { name: string; version: string }
   writeReceipt: (receipt: NpmRemoteScanReceipt) => Promise<void>
@@ -153,7 +153,7 @@ function receiptFrom(
 function runtimeDeps(packageName: string): ScanCiDeps {
   return {
     headSha: currentHeadSha,
-    pack: defaultPackTarball,
+    download: defaultDownloadStagedTarball,
     scan: scanStagedEntryDetailed,
     subject(root) {
       const layout = resolveNpmWorkspaceLayout(root)
@@ -187,16 +187,14 @@ export async function runScanCi(
     subject.version !== config.packageVersion
   ) {
     throw new Error(
-      `Package mismatch. Where: rebuilt publish subject. Saw: ${subject.name}@${subject.version}; wanted ${config.packageName}@${config.packageVersion}. Fix: use the exact signed bump SHA.`,
+      `Package mismatch. Where: signed release subject. Saw: ${subject.name}@${subject.version}; wanted ${config.packageName}@${config.packageVersion}. Fix: use the exact signed bump SHA.`,
     )
   }
-  const tarball = await deps.pack(
-    config.packageName,
-    config.packageVersion,
-    rootPath,
-  )
+  const tarball = await deps.download(config.stageId)
   if (!tarball) {
-    throw new Error('Canonical npm pack produced no tarball.')
+    throw new Error(
+      `Staged tarball unavailable. Where: npm stage download ${config.stageId}. Saw: no tarball; wanted the registry-held bytes. Fix: restore npm staged-download authentication before scanning.`,
+    )
   }
   try {
     const verdict = await deps.scan(
@@ -221,7 +219,7 @@ export async function main(): Promise<ScriptResult> {
 
 const SCRIPT_META: ScriptMeta = {
   describe:
-    'rebuilds exact staged npm bytes in CI and records a Socket policy scan',
+    'downloads exact staged npm bytes in CI and records a Socket policy scan',
   help: `Usage: pnpm run npm:scan:ci [--json]\n\nCI only. Inputs come from the publish-npm workflow environment.`,
   json: 'result',
 }

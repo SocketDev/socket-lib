@@ -3328,6 +3328,7 @@ scripts/fleet/browser/bridge/extension/npm/account.mts
 scripts/fleet/browser/bridge/extension/npm/actions.mts
 scripts/fleet/browser/bridge/extension/npm/otp-guidance.mts
 scripts/fleet/browser/bridge/extension/npm/read.mts
+scripts/fleet/browser/bridge/extension/npm/staged-approve.mts
 scripts/fleet/browser/bridge/extension/npm/trusted-publisher-dom.mts
 scripts/fleet/browser/bridge/extension/npm/trusted-publisher-form-dom.mts
 scripts/fleet/browser/bridge/extension/otp.mts
@@ -4497,6 +4498,7 @@ scripts/fleet/registry-infra/npm/account-inventory-options.mts
 scripts/fleet/registry-infra/npm/account-inventory-read.mts
 scripts/fleet/registry-infra/npm/account-inventory-snapshot.mts
 scripts/fleet/registry-infra/npm/account-inventory.mts
+scripts/fleet/registry-infra/npm/approve-staged-browser.mts
 scripts/fleet/registry-infra/npm/approve.mts
 scripts/fleet/registry-infra/npm/auth-identity.mts
 scripts/fleet/registry-infra/npm/auth-posture.mts
@@ -4653,6 +4655,7 @@ scripts/fleet/setup/bootstrap-zero-dep-packages.mjs
 scripts/fleet/setup/bootstrap/zero-dep-packages.d.mts
 scripts/fleet/setup/brew.mts
 scripts/fleet/setup/browser/activate.mts
+scripts/fleet/setup/browser/activity.mts
 scripts/fleet/setup/browser/bridge.mts
 scripts/fleet/setup/browser/chrome.mts
 scripts/fleet/setup/browser/install.mts
