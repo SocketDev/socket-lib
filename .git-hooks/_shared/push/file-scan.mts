@@ -17,7 +17,7 @@ import { readFileForScan, shouldSkipFile } from '../file-scan.mts'
 import { gitLines } from '../git.mts'
 import { stripTemplateLayer, suppressionFor } from '../scan-core.mts'
 
-import type { LineHit } from './scan-core.mts'
+import type { LineHit } from '../scan-core.mts'
 import { scanCrossRepoPaths, scanLoggerLeaks } from '../scan-code-refs.mts'
 import {
   scanAwsKeys,

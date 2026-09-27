@@ -48,7 +48,7 @@ import {
   TYPECHECK_CACHE_DIR,
 } from '../../../scripts/fleet/paths.mts'
 
-import type { TypecheckVerdict } from './typecheck-cache.mts'
+import type { TypecheckVerdict } from '../typecheck-cache.mts'
 import { scanSoakExcludeDateAnnotations } from '../scan-supply-chain.mts'
 
 const logger = getDefaultLogger()
