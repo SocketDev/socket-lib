@@ -433,6 +433,8 @@ overrides:
   '@sigstore/core': '3.2.1'
   '@sigstore/sign': '4.1.1'
   '@types/unist': '3.0.3'
+  # Vitiate 0.3.1's wasm instrumenter requires the SWC 1.15 host format.
+  '@vitiate/core>@swc/core': '1.15.43'
   'ajv-formats': '3.0.1'
   'ansi-regex': '6.3.0'
   # Dedup: ansi-styles 4 (CJS) + 6 (ESM-only) → 6.2.3. chalk@4 was the only

@@ -81,7 +81,9 @@ describe('a directory spec with no readable manifest', () => {
     // npm-package-arg leaves `name` unset for a bare file: spec, so the
     // manifest is the only source for it.
     const dir = packageDir({ name: '@example/package', version: '1.0.0' })
-    const result = await isolatePackage(`file:${dir}`)
+    const result = await isolatePackage(`file:${dir}`, {
+      install: async () => {},
+    })
     tmpDirs.push(result.tmpdir)
     expect(result.tmpdir).toContain('example-package')
   })
