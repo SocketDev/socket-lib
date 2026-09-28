@@ -4509,6 +4509,7 @@ scripts/fleet/registry-infra/npm/bump.mts
 scripts/fleet/registry-infra/npm/cancel-failed-run.mts
 scripts/fleet/registry-infra/npm/challenge-gate.mts
 scripts/fleet/registry-infra/npm/lifecycle-scripts.mts
+scripts/fleet/registry-infra/npm/local-scan-approve.mts
 scripts/fleet/registry-infra/npm/login.mts
 scripts/fleet/registry-infra/npm/native-login.mts
 scripts/fleet/registry-infra/npm/otp-runner.mts
