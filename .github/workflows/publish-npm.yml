@@ -279,6 +279,8 @@ jobs:
           }
           for (let index = 0; index < sources.length; index++) renameSync(sources[index], targets[index]);
           NODE
+      - name: Build
+        run: pnpm run build
       - name: 'Run coverage'
         id: coverage_collection
         uses: ./.github/actions/fleet/run-script
@@ -427,6 +429,8 @@ jobs:
       - name: Install cargo-llvm-cov
         if: ${{ hashFiles('**/Cargo.toml') != '' }}
         run: pnpm run setup:rust-coverage
+      - name: Build
+        run: pnpm run build
       - name: Aggregate coverage
         if: ${{ needs.coverage-plan.outputs.runner == 'vitest' }}
         env:
