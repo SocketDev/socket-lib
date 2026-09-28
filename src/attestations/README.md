@@ -36,6 +36,7 @@ A valid signature can authenticate an older artifact.
 Validate the returned `predicate` against the application's schema and expected release metadata before using the artifact.
 
 The policy compares the issuer and certificate SAN as literal strings.
+The certificate must contain one ASCII URI or email SAN.
 Issuer claims require valid UTF-8 and unique extension OIDs.
 Modern DER and legacy issuer claims must agree when both are present.
 It compares required certificate extension OIDs as DER UTF8String values.

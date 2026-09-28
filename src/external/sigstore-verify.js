@@ -35,7 +35,7 @@ function createSigstoreCoreVerifier(trustedRoot, evidence) {
       claims[oid] = readCertificateClaim(oids, oid, true)
     }
     return {
-      identity: signer.identity?.subjectAlternativeName,
+      identity: readCertificateIdentity(oids),
       issuer,
       certificateClaims: claims,
       payloadType: bundle.content.dsseEnvelope.payloadType,
@@ -58,6 +58,23 @@ function readCertificateClaim(oids, oid, der) {
     value = claim.value
   }
   return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(value)
+}
+
+function readCertificateIdentity(oids) {
+  const matches = oids.filter(item => item.oid?.id.join('.') === '2.5.29.17')
+  if (matches.length !== 1) throw new Error('Attestation certificate SAN is missing or duplicated')
+  const rawValue = matches[0].value
+  const names = ASN1Obj.parseBuffer(rawValue)
+  if (!names.tag.isUniversal() || !names.tag.constructed || names.tag.number !== 16 ||
+      !names.toDER().equals(rawValue)) {
+    throw new Error('Attestation certificate SAN is not a DER sequence')
+  }
+  const identities = names.subs.filter(item => item.tag.isContextSpecific(1) || item.tag.isContextSpecific(6))
+  if (identities.length !== 1 || identities[0].tag.constructed || identities[0].value.length === 0 ||
+      identities[0].value.some(byte => byte > 0x7f)) {
+    throw new Error('Attestation certificate requires one ASCII URI or email SAN')
+  }
+  return identities[0].value.toString('ascii')
 }
 
 function readCertificateIssuer(oids) {
