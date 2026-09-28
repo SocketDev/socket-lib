@@ -4153,7 +4153,10 @@
     "ai:drive:doctor": "node scripts/fleet/browser/bridge/doctor.mts",
     "ai:drive:setup": "node scripts/fleet/setup/browser/bridge.mts",
     "ai:drive:verify": "node scripts/fleet/browser/bridge/verify-installed.mts",
-    "gen:mcp:config": "node scripts/fleet/mcp/config.mts"
+    "gen:mcp:config": "node scripts/fleet/mcp/config.mts",
+    "search:code": "node scripts/fleet/ai/search/run.mts",
+    "setup:fff": "node scripts/fleet/setup/fff.mts",
+    "npm:approve:browser": "node scripts/fleet/registry-infra/npm/approve-staged-browser.mts"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
