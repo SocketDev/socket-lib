@@ -83,7 +83,7 @@ describe('authenticated issuer claim decoding', () => {
     ).toBe(issuer)
   })
 
-  it.each([
+  it.for([
     [],
     [
       certificateOid(modernOid, derUtf8(issuer)),
@@ -118,7 +118,7 @@ describe('authenticated SAN decoding', () => {
       identity,
     )
   })
-  it.each([
+  it.for([
     [],
     [
       certificateOid(sanOid, derSan(identity)),
