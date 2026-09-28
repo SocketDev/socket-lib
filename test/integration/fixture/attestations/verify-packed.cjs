@@ -5,7 +5,7 @@ const path = require('node:path')
 const { pathToFileURL } = require('node:url')
 
 async function main() {
-  const [packagePath, fixturePath] = process.argv.slice(2)
+  const { 2: packagePath, 3: fixturePath } = process.argv
   const load = createRequire(path.join(packagePath, 'package.json'))
   assert.equal(
     load('@socketsecurity/lib/crypto/integrity').computeHash(
@@ -52,7 +52,8 @@ async function main() {
         '8508708ffa43a8883393305230a5d81f42699b18fbfb059458ebf27c8efbc97c',
     },
   ]
-  for (const fixture of cases) {
+  for (let index = 0, { length } = cases; index < length; index += 1) {
+    const fixture = cases[index]
     const verifier = await createSigstoreVerifier({
       trustedRoot: readFixture(`${fixture.kind}-root.json`),
       policy: {
@@ -71,7 +72,7 @@ async function main() {
     assert.throws(() => verifier.verify(input), /digest/)
   }
   assert.equal(isLoaded(), true)
-  console.log(
+  process.stdout.write(
     JSON.stringify({
       verified: cases.length,
       lazy: true,
@@ -80,6 +81,6 @@ async function main() {
   )
 }
 main().catch(error => {
-  console.error(error)
+  process.stderr.write(`${error.stack ?? error}\n`)
   process.exitCode = 1
 })
