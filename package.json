@@ -374,6 +374,16 @@
       "types": "./dist/arrays/unique.d.ts",
       "default": "./dist/arrays/unique.js"
     },
+    "./attestations/types": {
+      "source": "./src/attestations/types.mts",
+      "types": "./dist/attestations/types.d.ts",
+      "default": "./dist/attestations/types.js"
+    },
+    "./attestations/verify": {
+      "source": "./src/attestations/verify.mts",
+      "types": "./dist/attestations/verify.d.ts",
+      "default": "./dist/attestations/verify.js"
+    },
     "./cacache/clear": {
       "source": "./src/cacache/clear.mts",
       "types": "./dist/cacache/clear.d.ts",
@@ -4165,6 +4175,10 @@
     "@perryts/perry": "catalog:",
     "@playwright/mcp": "catalog:",
     "@shadscan/cli": "catalog:",
+    "@sigstore/bundle": "catalog:",
+    "@sigstore/core": "catalog:",
+    "@sigstore/protobuf-specs": "catalog:",
+    "@sigstore/verify": "catalog:",
     "@sinclair/typebox": "catalog:",
     "@socketregistry/is-unicode-supported": "catalog:",
     "@socketregistry/packageurl-js": "catalog:",

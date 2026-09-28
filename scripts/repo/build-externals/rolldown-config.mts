@@ -259,6 +259,7 @@ interface PackageOpts {
   banner?: string | undefined
   footer?: string | undefined
   plugins?: Plugin[] | undefined
+  stubModules?: boolean | undefined
 }
 
 /**
@@ -285,7 +286,7 @@ export function getRolldownConfig(
       prefixExternals.some(p => id.startsWith(p)),
     plugins: [
       createForceNodeModulesPlugin(),
-      createStubPlugin(),
+      ...(packageOpts.stubModules === false ? [] : [createStubPlugin()]),
       // Collapse vendored engine gates that are dead at or below the
       // engines.node floor (e.g. @npmcli/fs cp's `useNative =
       // node.satisfies('>=16.7.0')`) so the gate's helper binding never
@@ -339,7 +340,9 @@ export function getRolldownConfig(
 export function getPackageSpecificOptions(packageName: string): PackageOpts {
   const opts: PackageOpts = {}
 
-  if (packageName === 'browserslist') {
+  if (packageName === 'sigstore-verify') {
+    opts.stubModules = false
+  } else if (packageName === 'browserslist') {
     opts.define = { 'process.versions.node': '"18.0.0"' }
   } else if (packageName === '@socketregistry/packageurl-js-stable') {
     // packageurl-js imports from socket-lib, creating a circular dependency.

@@ -26,6 +26,14 @@
         "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
       },
       {
+        "leaf": "attestations/types",
+        "reason": "Wheelhouse fleet-pack verification consumes this leaf before payload hydration. The initial package release precedes consumer adoption."
+      },
+      {
+        "leaf": "attestations/verify",
+        "reason": "Wheelhouse fleet-pack verification consumes this leaf before payload hydration. The initial package release precedes consumer adoption."
+      },
+      {
         "leaf": "eco/npm/meta-cache/browser",
         "reason": "Reached through the browser/default condition of a twin entry (./eco/npm/meta, ./eco/npm/meta-cache, ./eco/npm/registry/tarball). A leaf reachable only through an exports CONDITION is invisible to the fleet-usage leg, which asks who imports a specifier."
       },

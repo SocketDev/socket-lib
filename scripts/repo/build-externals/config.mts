@@ -24,6 +24,7 @@ export const externalPackages = [
   { name: 'npm-package-arg', bundle: false },
   { name: 'normalize-package-data', bundle: false },
   { name: 'semver', bundle: true },
+  { name: 'sigstore-verify', bundle: true },
   // Utilities
   { name: 'debug', bundle: true },
   { name: 'tar-fs', bundle: true },

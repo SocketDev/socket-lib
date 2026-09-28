@@ -29,6 +29,10 @@ enableGlobalVirtualStore: true
   # the high-severity security exception; exact-pinned so a future version
   # re-soaks.
 catalog:
+  '@sigstore/bundle': 5.0.0
+  '@sigstore/core': 4.0.1
+  '@sigstore/protobuf-specs': 0.5.1
+  '@sigstore/verify': 4.1.2
   '@mdn/browser-compat-data': 8.1.1
   '@modelcontextprotocol/client': 2.0.0
   # run-local-ci (bin: local-ci, formerly published as @redwoodjs/agent-ci)
@@ -430,7 +434,7 @@ overrides:
   '@npmcli/promise-spawn': '9.0.1'
   '@npmcli/redact': '4.0.0'
   '@npmcli/run-script': '10.0.4'
-  '@sigstore/core': '3.2.1'
+  '@sigstore/core@<4': '3.2.1'
   '@sigstore/sign': '4.1.1'
   '@types/unist': '3.0.3'
   # Vitiate 0.3.1's wasm instrumenter requires the SWC 1.15 host format.
