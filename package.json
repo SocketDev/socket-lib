@@ -2698,6 +2698,15 @@
       "types": "./dist/objects/mutate.d.ts",
       "default": "./dist/objects/mutate.js"
     },
+    "./objects/options": {
+      "source": "./src/objects/options.mts",
+      "browser": {
+        "types": "./dist/objects/options.d.ts",
+        "default": "./dist/objects/options.js"
+      },
+      "types": "./dist/objects/options.d.ts",
+      "default": "./dist/objects/options.js"
+    },
     "./objects/predicates": {
       "source": "./src/objects/predicates.mts",
       "browser": {
