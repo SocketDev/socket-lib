@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
-import { createFastOptions } from '../../../src/objects/options.mjs'
+import { fastNullObject } from '../../../src/objects/options.mjs'
 
-describe('objects/options — createFastOptions', () => {
+describe('objects/options — fastNullObject', () => {
   it('copies own enumerable values onto a null-prototype object', () => {
     const inherited = { inherited: 'ignored' }
     const input = Object.assign(Object.create(inherited), {
@@ -10,8 +10,9 @@ describe('objects/options — createFastOptions', () => {
       verbose: false,
     })
 
-    const options = createFastOptions(input)
+    const options = fastNullObject(input)
 
+    expect(Object.getPrototypeOf(input)).toBe(inherited)
     expect(Object.getPrototypeOf(options)).toBe(null)
     expect(options).toEqual({ dry: true, verbose: false })
     expect('inherited' in options).toBe(false)
@@ -23,7 +24,7 @@ describe('objects/options — createFastOptions', () => {
       unknown
     >
 
-    const options = createFastOptions(input)
+    const options = fastNullObject(input)
 
     expect(Object.getPrototypeOf(options)).toBe(null)
     expect(Object.hasOwn(options, '__proto__')).toBe(true)
@@ -34,7 +35,7 @@ describe('objects/options — createFastOptions', () => {
   })
 
   it('accepts omitted options', () => {
-    const options = createFastOptions()
+    const options = fastNullObject()
 
     expect(Object.getPrototypeOf(options)).toBe(null)
     expect(Object.keys(options)).toEqual([])

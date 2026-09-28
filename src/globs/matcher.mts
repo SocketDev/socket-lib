@@ -8,6 +8,7 @@
 import { ArrayIsArray } from '../primordials/array.mjs'
 import { JSONStringify } from '../primordials/json.mjs'
 import { ObjectKeys } from '../primordials/object.mjs'
+import { fastNullObject } from '../objects/options.mjs'
 import { arrayToSorted } from '../polyfills/array.mjs'
 import { StringPrototypeStartsWith } from '../primordials/string.mjs'
 
@@ -52,6 +53,8 @@ let matchesGlobProbed = false
  *   const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
  *   ```
  */
+// `fastNullObject` sets the copied object's null prototype with a primordial.
+// oxlint-disable-next-line socket/options-null-proto -- shared helper
 export function getGlobMatcher(
   glob: Pattern | Pattern[],
   options?:
@@ -62,7 +65,7 @@ export function getGlobMatcher(
       }
     | undefined,
 ): (path: string) => boolean {
-  options = { __proto__: null, ...options } as typeof options
+  options = fastNullObject(options)
   const patterns = ArrayIsArray(glob) ? glob : [glob]
   // Create stable cache key by sorting patterns and option keys.
   // Option values that are arrays (e.g. `ignore: ['a', 'b']`) get sorted
