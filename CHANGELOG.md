@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.0) - 2026-09-28
+
+### Added
+
+- **`attestations`** — verify sigstore bundles offline
+- **`test`** — route lane scripts through repo wrappers
+- **`oauth`** — add keychain-backed device credentials
+
+### Fixed
+
+- **`attestations`** — validate literal certificate san identities
+- **`attestations`** — decode issuer claims without normalization
+- **`test`** — stabilize fuzz and CI test lanes
+- **`test`** — prepare build output for type checks
+- **`build`** — update process runner imports
+- **`build`** — update process runner imports
+- **`prim`** — update runner import
+- **`tooling`** — bind github cli to its verified release tag
+
+### Internal
+
+- **`deps`** — select verified pnpm manager
+- **`deps`** — sync pnpm lockfile metadata
+- **`deps`** — restore pinned pnpm manager selection
+- **`ci`** — repair socket lib test gates
+- **`check`** — probe deletion outside automatic cleanup roots
+- **`ci`** — preserve trusted scans and disable repair caches
+- **`deps`** — lock newly installed fleet hook workspaces
+
 ## [7.0.3](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.3) - 2026-09-21
 
 ### Fixed
