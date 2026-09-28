@@ -3,6 +3,9 @@ const { readFileSync } = require('node:fs')
 const { createRequire } = require('node:module')
 const path = require('node:path')
 const { pathToFileURL } = require('node:url')
+// The evidence gate requires `require` in call position, so read the shared
+// module cache through an untracked binding instead of `require.cache`.
+const moduleCache = require('node:module')._cache
 
 async function main() {
   const { 2: packagePath, 3: fixturePath } = process.argv
@@ -15,7 +18,7 @@ async function main() {
     '2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824',
   )
   const isLoaded = () =>
-    Object.keys(require.cache).some(name =>
+    Object.keys(moduleCache).some(name =>
       name.endsWith(path.join('external', 'sigstore-verify.js')),
     )
   assert.equal(isLoaded(), false)
