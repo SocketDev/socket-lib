@@ -1,6 +1,6 @@
 /**
  * @file Type-level tests for the string shape types in
- *   `src/strings/shapes.mts`. These assertions run at compile time via
+ *   `src/strings/shape-types.mts`. These assertions run at compile time via
  *   `pnpm run type`, which type-checks test/**, and every negative case is a
  *   `@ts-expect-error` — if the shapes ever widen (e.g. a refactor drops the
  *   `& {}` trick or the `End` marker), tsc reports the unused directive and
@@ -17,7 +17,7 @@ import type {
   ExactChars,
   ExactDigits,
   NonEmpty,
-} from '../../../src/strings/shapes.mts'
+} from '../../../src/strings/shape-types.mts'
 
 describe('strings/shapes — NonEmpty', () => {
   it('accepts any non-empty string literal', () => {

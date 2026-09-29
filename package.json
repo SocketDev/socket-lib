@@ -78,7 +78,6 @@
     "node:dns/promises": false,
     "node:domain": false,
     "node:events": false,
-    "node:ffi": false,
     "node:fs": false,
     "node:fs/promises": false,
     "node:http": false,
@@ -3673,14 +3672,14 @@
       "types": "./dist/strings/search.d.ts",
       "default": "./dist/strings/search.js"
     },
-    "./strings/shapes": {
-      "source": "./src/strings/shapes.mts",
+    "./strings/shape-types": {
+      "source": "./src/strings/shape-types.mts",
       "browser": {
-        "types": "./dist/strings/shapes.d.ts",
-        "default": "./dist/strings/shapes.js"
+        "types": "./dist/strings/shape-types.d.ts",
+        "default": "./dist/strings/shape-types.js"
       },
-      "types": "./dist/strings/shapes.d.ts",
-      "default": "./dist/strings/shapes.js"
+      "types": "./dist/strings/shape-types.d.ts",
+      "default": "./dist/strings/shape-types.js"
     },
     "./strings/transform": {
       "source": "./src/strings/transform.mts",
