@@ -588,6 +588,7 @@ patchedDependencies:
   # This preserves membership and bounds matcher memory for fleet coverage.
   # CPU-profiled forks use the configured teardown deadline to flush profiles.
   # Ordinary forks retain the upstream 500 ms termination grace.
+  vitest@5.0.1: patches/fleet/vitest@5.0.1.patch
   # Indirects the `node-gyp/bin/node-gyp.js` require.resolve so the rolldown
   # bundle doesn't statically inline node-gyp; consumer: pacote → run-script
   # in the bundled dist tree.

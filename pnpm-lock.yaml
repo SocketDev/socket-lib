@@ -558,6 +558,7 @@ patchedDependencies:
   node-gyp@12.4.0: 140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9
   pony-cause@2.1.11: 39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8
   run-local-ci@0.18.1: a335253820e963c2659ec1b08ee143e865eb39ec80ca7d313fff50c33e157d99
+  vitest@5.0.1: 065993cceebda16dedb4662626ed60c0aeb40f02240c8d0e540b4dc6d9674df2
 
 importers:
 
@@ -880,7 +881,7 @@ importers:
         version: 6.0.2
       vitest:
         specifier: 'catalog:'
-        version: 5.0.1(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
+        version: 5.0.1(patch_hash=065993cceebda16dedb4662626ed60c0aeb40f02240c8d0e540b4dc6d9674df2)(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
       vitiate:
         specifier: 'catalog:'
         version: 0.3.1(typescript@7.1.0-dev.20260921.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))(vitest@5.0.1)
@@ -9506,7 +9507,7 @@ snapshots:
       obug: 2.1.4
       std-env: 4.2.0
       tinyrainbow: 3.1.1
-      vitest: 5.0.1(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
+      vitest: 5.0.1(patch_hash=065993cceebda16dedb4662626ed60c0aeb40f02240c8d0e540b4dc6d9674df2)(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
 
   '@vitest/istanbul-lib-coverage@1.0.1': {}
 
@@ -9537,7 +9538,7 @@ snapshots:
       pathe: 2.0.3
       sirv: 3.0.2
       tinyrainbow: 3.1.1
-      vitest: 5.0.1(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
+      vitest: 5.0.1(patch_hash=065993cceebda16dedb4662626ed60c0aeb40f02240c8d0e540b4dc6d9674df2)(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
 
   '@vitest/utils@5.0.1':
     dependencies:
@@ -9558,7 +9559,7 @@ snapshots:
       magic-string: 1.4.1
       valibot: 1.4.2(typescript@7.1.0-dev.20260921.1)
       vite: 8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1)
-      vitest: 5.0.1(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
+      vitest: 5.0.1(patch_hash=065993cceebda16dedb4662626ed60c0aeb40f02240c8d0e540b4dc6d9674df2)(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - '@swc/helpers'
       - typescript
@@ -12099,7 +12100,7 @@ snapshots:
       terser: 5.48.0
       yaml: 2.9.1
 
-  vitest@5.0.1(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1)):
+  vitest@5.0.1(patch_hash=065993cceebda16dedb4662626ed60c0aeb40f02240c8d0e540b4dc6d9674df2)(@types/node@26.6.2)(@vitest/coverage-v8@5.0.1)(@vitest/ui@5.0.1)(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
       '@vitest/mocker': 5.0.1(vite@8.3.0(@types/node@26.6.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.1))
