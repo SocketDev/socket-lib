@@ -361,7 +361,6 @@
     "**/test/fleet/unit/lockstep/emit-mirror-globs.test.mts",
     "**/test/fleet/unit/registry-infra/cargo/placeholder.test.mts",
     "**/test/fleet/unit/registry-infra/npm/placeholder.test.mts",
-    "**/test/fleet/unit/setup/lib/pnpm-path.test.mts",
     "</fleet>",
     "#fleet-canonical-end",
     "<repo>",

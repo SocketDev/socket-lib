@@ -201,41 +201,41 @@
       ],
       "description": "fff-mcp — file-search MCP server (pinned, SRI-verified per platform)",
       "repository": "github:dmtrKovalenko/fff",
-      "version": "0.11.0",
-      "tag": "v0.11.0",
+      "version": "0.10.6",
+      "tag": "v0.10.6",
       "binaryName": "fff-mcp",
       "platforms": {
         "darwin-arm64": {
           "asset": "fff-mcp-aarch64-apple-darwin",
-          "integrity": "sha512-bhrXZ3knCtECIPP9OBUWwFbxHoU31UjhPdQy6PR/enl6Qdfalx5vruaYK34pK5wIWfJXtFZwEnh3kgtyM0G5dg=="
+          "integrity": "sha512-VbyMeWW2JeNwHJL7lITiPkz+ZTCcAX0qrZ2zkNsGD/4Z7UXH9bKUYYYaYQI+pH8r1ocJlCQ8dAyfce/9sFKm7A=="
         },
         "darwin-x64": {
           "asset": "fff-mcp-x86_64-apple-darwin",
-          "integrity": "sha512-FeD/LohaHhTvVhXhfZgHMmFsB2Mz2apMMDDwMtN24onTPe8MIsQWrom51UaDU5+lyN1Y6m1te51M1YCjrs4O3g=="
+          "integrity": "sha512-tM1/o68xY5IxSNJpj37AZb8cTeu7qIg9TU9eVokc2aq6Uvu5rWJzDCLVgsrEEB9MWrQq5oKAGJNkOe6AjazH6g=="
         },
         "linux-arm64": {
           "asset": "fff-mcp-aarch64-unknown-linux-gnu",
-          "integrity": "sha512-d6ag1LQvrIsOsSWyBNa8ZN0DQRNGS3gVw8MvcE48xTwoOp3/HkvX/ym/JhqW5RtG71DTVTQ7GGIAGEifxabVig=="
+          "integrity": "sha512-3LzyyvariFdoEwXeojLFcJshPN1/fls616d6RORWYEO5iUpGOG8Yk3tezhY25wmtRdE+MLlV8kZ6C5gnN7D0FA=="
         },
         "linux-arm64-musl": {
           "asset": "fff-mcp-aarch64-unknown-linux-musl",
-          "integrity": "sha512-ZKKRO8LEIWoUmLVuPKHoEaPZAfcz6xPLw3OC+1TaGUAvRw5P7rIDStXcLKG+yRkXP7rmelkD86FcXQq9OM10qw=="
+          "integrity": "sha512-YNZQGSyxCeDTF6dWcMXNDY2228amO2qz4bRv2nQbxi9HqbzdEojroAoRYqCP9lha5daGbGP3srdz2j36MBoKmw=="
         },
         "linux-x64": {
           "asset": "fff-mcp-x86_64-unknown-linux-gnu",
-          "integrity": "sha512-QLCGlAbYjj/mte8t50WcLXqSYb7TdsmMwGcPu44OLWNTpZdWC5fwEzR5982QimhforqVsYy7fR+iigAn6oMj6Q=="
+          "integrity": "sha512-g3jBM57thrgkbTagonlLSrI2Pl3h+BK5P3U4JVcrI9cYgWUpYqbaJyq+rftTshVh0I3S/u5hfsarQt84z6AfOQ=="
         },
         "linux-x64-musl": {
           "asset": "fff-mcp-x86_64-unknown-linux-musl",
-          "integrity": "sha512-k0bDPOuHDvTZ/Rf/nNVqdURPzzem4l/D98Kl9YDmMmedU3N13jKpnn5Vtkq+mMjbjDHT04PU1tGem9neZkJrFw=="
+          "integrity": "sha512-uvW4Qo4BAcc9Gj+M2LwDR9xQ4rd0JAUTDIfKptF6/mPHbeFy1bMzqtjiaZOMyaQ57866W2uTT8ep2sy7XtkJsw=="
         },
         "win32-arm64": {
           "asset": "fff-mcp-aarch64-pc-windows-msvc.exe",
-          "integrity": "sha512-TqAtd7tSPTBCB5gLfOw6d2JCr19pPjeM4u0DbMVAjjmsnvGjXJOU2bql/HBtI3EzaXqQhqQtGeT4Z7GIwESHvw=="
+          "integrity": "sha512-MPB7uvbzGSEOldHkZGEVenQeEJc/+Qy4kIo2WWnDOdjARP62TIDINcv0E+Cr3GW+iUImwZZhdNHDRXWZNhlCwg=="
         },
         "win32-x64": {
           "asset": "fff-mcp-x86_64-pc-windows-msvc.exe",
-          "integrity": "sha512-Kau32/aSX5y1YLiUq0uGiZQvGUD1VSS7x+78qYb60x1FBfn3HFF7M0W+Wlq2KIu1DXZMtdcpxp4e8Et9dq0ZnQ=="
+          "integrity": "sha512-hNpJCAAEvlmYPQ3W65lK6GySD14NtKjE5+mTkDQ/iKBR9FBkjnrrBLSapQez27u1K7blnBiGB778DWi4Q4ePaA=="
         }
       },
       "origin": "gh-asset"

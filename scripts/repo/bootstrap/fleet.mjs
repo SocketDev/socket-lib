@@ -16354,7 +16354,7 @@ function githubReleaseEnabled(config) {
 }
 var init_config = __esmMin(() => {})
 
-function isPlainObject$4(value) {
+function isPlainObject$3(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value))
     return false
   const prototype = Object.getPrototypeOf(value)
@@ -16362,7 +16362,7 @@ function isPlainObject$4(value) {
 }
 function hasCodeql(raw) {
   const github = raw['github']
-  return isPlainObject$4(github) && github['codeql'] === true
+  return isPlainObject$3(github) && github['codeql'] === true
 }
 function markerCompilesRust(value) {
   const build = value['build']
@@ -16386,26 +16386,26 @@ function markerCompilesRust(value) {
 }
 function hasNonEmptyPrebakes(raw) {
   const docker = raw['docker']
-  if (!isPlainObject$4(docker)) return false
+  if (!isPlainObject$3(docker)) return false
   const prebakes = docker['prebakes']
-  if (!isPlainObject$4(prebakes)) return false
+  if (!isPlainObject$3(prebakes)) return false
   const list = prebakes['prebakes']
   return Array.isArray(list) && list.length > 0
 }
 function hasNapiPlatforms(raw) {
   const napi = raw['napi']
-  if (!isPlainObject$4(napi)) return false
+  if (!isPlainObject$3(napi)) return false
   const platforms = napi['platforms']
   return Array.isArray(platforms) && platforms.length > 0
 }
 function buildsAsGithubAction(raw) {
   const build = raw['build']
-  if (!isPlainObject$4(build)) return false
+  if (!isPlainObject$3(build)) return false
   return build['from'] === 'github-action'
 }
 function publishesToGhcr(raw) {
   const ghcr = raw['ghcr']
-  return isPlainObject$4(ghcr)
+  return isPlainObject$3(ghcr)
 }
 /**
  * True when the repo bundles VENDORED dependencies, so it needs the fleet
@@ -16416,14 +16416,14 @@ function publishesToGhcr(raw) {
  */
 function bundlesVendoredDeps(raw) {
   const build = raw['build']
-  return isPlainObject$4(build) && build['bundlesVendoredDeps'] === true
+  return isPlainObject$3(build) && build['bundlesVendoredDeps'] === true
 }
 function publishesCrates(raw) {
   return publishesRegistry(raw, 'crates-registry')
 }
 function publishesNpm(raw) {
   const release = raw['release']
-  if (isPlainObject$4(release)) {
+  if (isPlainObject$3(release)) {
     const packages = release['publishedPackages']
     if (Array.isArray(packages) && packages.length === 0) return false
   }
@@ -16434,7 +16434,7 @@ function publishesRegistry(raw, registry) {
   const secondaries = raw['secondaries']
   if (Array.isArray(secondaries)) channels.push(...secondaries)
   return channels.some(
-    channel => isPlainObject$4(channel) && channel['from'] === registry,
+    channel => isPlainObject$3(channel) && channel['from'] === registry,
   )
 }
 /**
@@ -20535,6 +20535,48 @@ var config_default = {
   },
 }
 
+var require_strings = /* @__PURE__ */ __commonJSMin(exports => {
+  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
+  /**
+   * @file Plain string comparison. The straight-ASCII three-way compare, no
+   *   locale/numeric awareness — use `localeCompare` / `naturalCompare` from
+   *   the sibling files when those matter.
+   */
+  /**
+   * Simple string comparison.
+   *
+   * @example
+   *   ;```typescript
+   *   compareStr('a', 'b') // -1
+   *   compareStr('b', 'a') // 1
+   *   compareStr('a', 'a') // 0
+   *   ```
+   */
+  function compareStr(a, b) {
+    return a < b ? -1 : a > b ? 1 : 0
+  }
+  /**
+   * Compare two strings by length, longest first.
+   *
+   * This is the order a matcher wants when one candidate is a prefix of
+   * another: it makes the longer name win the span instead of the shorter one
+   * claiming it first. A regex alternation built from an unsorted token list
+   * matches `qodo-ai` inside `qodo-ai-bot`; sorted longest-first, it does not.
+   *
+   * @example
+   *   ;```typescript
+   *   arrayToSorted(['ab', 'abcd', 'abc'], compareStrLengthDesc)
+   *   // ['abcd', 'abc', 'ab']
+   *   ```
+   */
+  function compareStrLengthDesc(a, b) {
+    return b.length - a.length
+  }
+  exports.compareStr = compareStr
+  exports.compareStrLengthDesc = compareStrLengthDesc
+})
+
+var import_strings = require_strings()
 /**
  * @file Entrypoint detection for fleet scripts. The naive
  *   `import.meta.url === file://argv[1]` comparison is symlink-fragile:
@@ -45830,48 +45872,6 @@ function canonicalMcpConfigPath(repoRoot) {
     : mcpConfigFilePath(repoRoot, MCP_CONFIG_REL)
 }
 
-var require_strings = /* @__PURE__ */ __commonJSMin(exports => {
-  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  /**
-   * @file Plain string comparison. The straight-ASCII three-way compare, no
-   *   locale/numeric awareness — use `localeCompare` / `naturalCompare` from
-   *   the sibling files when those matter.
-   */
-  /**
-   * Simple string comparison.
-   *
-   * @example
-   *   ;```typescript
-   *   compareStr('a', 'b') // -1
-   *   compareStr('b', 'a') // 1
-   *   compareStr('a', 'a') // 0
-   *   ```
-   */
-  function compareStr(a, b) {
-    return a < b ? -1 : a > b ? 1 : 0
-  }
-  /**
-   * Compare two strings by length, longest first.
-   *
-   * This is the order a matcher wants when one candidate is a prefix of
-   * another: it makes the longer name win the span instead of the shorter one
-   * claiming it first. A regex alternation built from an unsorted token list
-   * matches `qodo-ai` inside `qodo-ai-bot`; sorted longest-first, it does not.
-   *
-   * @example
-   *   ;```typescript
-   *   arrayToSorted(['ab', 'abcd', 'abc'], compareStrLengthDesc)
-   *   // ['abcd', 'abc', 'ab']
-   *   ```
-   */
-  function compareStrLengthDesc(a, b) {
-    return b.length - a.length
-  }
-  exports.compareStr = compareStr
-  exports.compareStrLengthDesc = compareStrLengthDesc
-})
-
-var import_strings = require_strings()
 var import_predicates = require_predicates$3()
 const MCP_PROVIDERS = {
   linear: {
@@ -46106,20 +46106,16 @@ function assertMcpUrlHasNoCredentials(value) {
   assertMcpConfigHasNoCredentials(Object.fromEntries(url.searchParams))
 }
 
+/**
+ * @file Pure adapters from the fleet-canonical Claude `.mcp.json` shape to
+ *   project-local Codex and OpenCode configs.
+ *   Credentials never belong in the canonical or generated project files; each
+ *   client owns OAuth state in its user data directory.
+ */
+init_mirror_lock()
+init_paths()
 const OPENCODE_COMMAND_INDENT = ' '.repeat(6)
 const OPENCODE_COMMAND_ITEM_INDENT = ' '.repeat(8)
-function clientMcpServers(servers, client) {
-  return Object.entries(sortRecord(servers)).filter(
-    ([name]) =>
-      findMcpProviderForServer(name)?.clients[client].kind !==
-      'registration-unavailable',
-  )
-}
-function codexMcpOAuth(name, server) {
-  const support = findMcpProviderForServer(name)?.clients.codex
-  if (support?.kind !== 'oauth') return server.oauth
-  return support.clientId || support.callbackPort ? support : void 0
-}
 function compactOpenCodeCommandArrays(text, servers) {
   let result = text
   const items = Object.values(servers)
@@ -46141,35 +46137,36 @@ function compactOpenCodeCommandArrays(text, servers) {
   }
   return result
 }
-function createOpenCodeMcpConfig(servers) {
-  const entries = {}
-  for (const [name, server] of clientMcpServers(servers, 'opencode'))
-    entries[name] =
-      server.kind === 'http'
-        ? {
-            type: 'remote',
-            url: server.url,
-            ...(server.oauth === void 0 ? {} : { oauth: server.oauth }),
-            ...(server.bearerTokenEnv === void 0
-              ? {}
-              : {
-                  headers: {
-                    Authorization: `Bearer {env:${server.bearerTokenEnv}}`,
-                  },
-                  oauth: false,
-                }),
-          }
-        : {
-            command: [server.command, ...server.args],
-            type: 'local',
-          }
-  return {
-    $schema: 'https://opencode.ai/config.json',
-    mcp: entries,
-  }
+function main$1() {
+  writeMcpClientConfigs(REPO_ROOT)
+  writeScriptStdout('Generated .codex/config.toml and opencode.json.\n')
 }
-function formatOpenCodeMcpConfig(config, servers) {
-  return `${compactOpenCodeCommandArrays(JSON.stringify(config, void 0, 2), servers)}\n`
+function parseStringArray(value, field) {
+  if (!Array.isArray(value) || value.some(item => typeof item !== 'string'))
+    throw new Error(`MCP server ${field} must be an array of strings`)
+  return [...value]
+}
+function sortRecord(record) {
+  return Object.fromEntries(
+    Object.entries(record).toSorted(([left], [right]) =>
+      (0, import_strings.compareStr)(left, right),
+    ),
+  )
+}
+function clientMcpServers(servers, client) {
+  return Object.entries(sortRecord(servers)).filter(
+    ([name]) =>
+      findMcpProviderForServer(name)?.clients[client].kind !==
+      'registration-unavailable',
+  )
+}
+function tomlString(value) {
+  return JSON.stringify(value)
+}
+function tomlStringArray(values) {
+  const compact = JSON.stringify(values)
+  if (`args = ${compact}`.length <= 80) return [`args = ${compact}`]
+  return ['args = [', ...values.map(value => `  ${tomlString(value)},`), ']']
 }
 /**
  * Parse and validate the one committed MCP authority.
@@ -46217,10 +46214,10 @@ function parseCanonicalMcpConfig(text) {
   }
   return sortRecord(servers)
 }
-function parseStringArray(value, field) {
-  if (!Array.isArray(value) || value.some(item => typeof item !== 'string'))
-    throw new Error(`MCP server ${field} must be an array of strings`)
-  return [...value]
+function readCanonicalMcpConfig(repoRoot) {
+  return parseCanonicalMcpConfig(
+    readFileSync(canonicalMcpConfigPath(repoRoot), 'utf8'),
+  )
 }
 /**
  * Render the trusted-project `.codex/config.toml` MCP section.
@@ -46254,41 +46251,43 @@ function renderCodexMcpConfig(servers) {
   }
   return `${lines.join('\n')}\n`
 }
+function codexMcpOAuth(name, server) {
+  const support = findMcpProviderForServer(name)?.clients.codex
+  if (support?.kind !== 'oauth') return server.oauth
+  return support.clientId || support.callbackPort ? support : void 0
+}
+function createOpenCodeMcpConfig(servers) {
+  const entries = {}
+  for (const [name, server] of clientMcpServers(servers, 'opencode'))
+    entries[name] =
+      server.kind === 'http'
+        ? {
+            type: 'remote',
+            url: server.url,
+            ...(server.oauth === void 0 ? {} : { oauth: server.oauth }),
+            ...(server.bearerTokenEnv === void 0
+              ? {}
+              : {
+                  headers: {
+                    Authorization: `Bearer {env:${server.bearerTokenEnv}}`,
+                  },
+                  oauth: false,
+                }),
+          }
+        : {
+            command: [server.command, ...server.args],
+            type: 'local',
+          }
+  return {
+    $schema: 'https://opencode.ai/config.json',
+    mcp: entries,
+  }
+}
+function formatOpenCodeMcpConfig(config, servers) {
+  return `${compactOpenCodeCommandArrays(JSON.stringify(config, void 0, 2), servers)}\n`
+}
 function renderOpenCodeMcpConfig(servers) {
   return formatOpenCodeMcpConfig(createOpenCodeMcpConfig(servers), servers)
-}
-function sortRecord(record) {
-  return Object.fromEntries(
-    Object.entries(record).toSorted(([left], [right]) =>
-      (0, import_strings.compareStr)(left, right),
-    ),
-  )
-}
-function tomlString(value) {
-  return JSON.stringify(value)
-}
-function tomlStringArray(values) {
-  const compact = JSON.stringify(values)
-  if (`args = ${compact}`.length <= 80) return [`args = ${compact}`]
-  return ['args = [', ...values.map(value => `  ${tomlString(value)},`), ']']
-}
-
-/**
- * @file Write adapters from the fleet-canonical Claude `.mcp.json` shape to
- *   project-local Codex and OpenCode configs.
- *   Credentials never belong in the canonical or generated project files; each
- *   client owns OAuth state in its user data directory.
- */
-init_mirror_lock()
-init_paths()
-function main$1() {
-  writeMcpClientConfigs(REPO_ROOT)
-  writeScriptStdout('Generated .codex/config.toml and opencode.json.\n')
-}
-function readCanonicalMcpConfig(repoRoot) {
-  return parseCanonicalMcpConfig(
-    readFileSync(canonicalMcpConfigPath(repoRoot), 'utf8'),
-  )
 }
 const CODEX_ADAPTERS = [
   {

@@ -134,7 +134,6 @@ scripts/fleet/setup/lib/error-message.mjs linguist-generated=true
 scripts/fleet/setup/lib/install-tool.mjs linguist-generated=true
 scripts/fleet/setup/lib/read-package-integrity.mjs linguist-generated=true
 scripts/fleet/setup/lib/read-pinned-version.mjs linguist-generated=true
-scripts/fleet/setup/socket-token-presence.generated.mjs linguist-generated=true
 scripts/repo/bootstrap linguist-generated=true
 test/fleet/_shared/lib linguist-generated=true
 test/fleet/common/fixture linguist-generated=true
@@ -150,7 +149,6 @@ test/fleet/unit/fix/run.test.mts linguist-generated=true
 test/fleet/unit/lockstep/emit-mirror-globs.test.mts linguist-generated=true
 test/fleet/unit/registry-infra/cargo/placeholder.test.mts linguist-generated=true
 test/fleet/unit/registry-infra/npm/placeholder.test.mts linguist-generated=true
-test/fleet/unit/setup/lib/pnpm-path.test.mts linguist-generated=true
 *.patch whitespace=-blank-at-eol,-space-before-tab
 # </fleet>
 # <repo>
