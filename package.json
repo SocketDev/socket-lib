@@ -3673,6 +3673,15 @@
       "types": "./dist/strings/search.d.ts",
       "default": "./dist/strings/search.js"
     },
+    "./strings/shapes": {
+      "source": "./src/strings/shapes.mts",
+      "browser": {
+        "types": "./dist/strings/shapes.d.ts",
+        "default": "./dist/strings/shapes.js"
+      },
+      "types": "./dist/strings/shapes.d.ts",
+      "default": "./dist/strings/shapes.js"
+    },
     "./strings/transform": {
       "source": "./src/strings/transform.mts",
       "browser": {
