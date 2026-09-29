@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 685 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 687 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -573,6 +573,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/objects/getters](./dist/objects/getters.d.ts)
 - [@socketsecurity/lib/objects/inspect](./dist/objects/inspect.d.ts)
 - [@socketsecurity/lib/objects/mutate](./dist/objects/mutate.d.ts)
+- [@socketsecurity/lib/objects/options](./dist/objects/options.d.ts)
 - [@socketsecurity/lib/objects/predicates](./dist/objects/predicates.d.ts)
 - [@socketsecurity/lib/objects/sort](./dist/objects/sort.d.ts)
 - [@socketsecurity/lib/objects/types](./dist/objects/types.d.ts)
@@ -810,6 +811,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/strings/lines](./dist/strings/lines.d.ts)
 - [@socketsecurity/lib/strings/predicates](./dist/strings/predicates.d.ts)
 - [@socketsecurity/lib/strings/search](./dist/strings/search.d.ts)
+- [@socketsecurity/lib/strings/shape-types](./dist/strings/shape-types.d.ts)
 - [@socketsecurity/lib/strings/transform](./dist/strings/transform.d.ts)
 - [@socketsecurity/lib/strings/types](./dist/strings/types.d.ts)
 - [@socketsecurity/lib/strings/width](./dist/strings/width.d.ts)

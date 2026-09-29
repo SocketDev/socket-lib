@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`strings`** — add compile-time string shape types
 - **`attestations`** — verify sigstore bundles offline
 - **`test`** — route lane scripts through repo wrappers
 - **`oauth`** — add keychain-backed device credentials
 
 ### Changed
 
+- format string shapes with the fleet oxfmt config
 - **`objects`** — add fastNullObject helper (#233)
 
 ### Fixed
