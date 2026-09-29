@@ -4014,8 +4014,6 @@
     "mcp:reset": "node scripts/fleet/mcp/reset.mts",
     "npm:approve": "node scripts/fleet/npm/approve.mts",
     "npm:auth": "node scripts/fleet/npm-auth.mts",
-    "npm:auth:browser": "node scripts/fleet/npm-auth-browser.mts",
-    "npm:auth:cli": "node scripts/fleet/npm-auth-cli.mts",
     "npm:dispatch": "node scripts/fleet/registry-infra/remote-npm-publish.mts",
     "npm:inventory": "node scripts/fleet/registry-infra/npm/account-inventory-read.mts",
     "npm:publish": "node scripts/fleet/npm/publish-npm.mts",
