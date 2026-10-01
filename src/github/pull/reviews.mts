@@ -23,15 +23,15 @@
  *   `getPullRequestReviewNodeId`.
  */
 
-import { httpRequest } from '../http-request/request.mjs'
-import { ErrorCtor } from '../primordials/error.mjs'
-import { JSONParse, JSONStringify } from '../primordials/json.mjs'
-import { fetchGitHub } from './request.mjs'
-import { getGitHubToken } from './token.mjs'
-import { GITHUB_GRAPHQL_URL } from './constants.mjs'
-import { GitHubEmptyBodyError } from './errors.mjs'
+import { httpRequest } from '../../http-request/request.mjs'
+import { ErrorCtor } from '../../primordials/error.mjs'
+import { JSONParse, JSONStringify } from '../../primordials/json.mjs'
+import { fetchGitHub } from '../request.mjs'
+import { getGitHubToken } from '../token.mjs'
+import { GITHUB_GRAPHQL_URL } from '../constants.mjs'
+import { GitHubEmptyBodyError } from '../errors.mjs'
 
-import type { GitHubFetchOptions } from './types.mjs'
+import type { GitHubFetchOptions } from '../types.mjs'
 
 /**
  * Resolve a pull request review's GraphQL `node_id` from its REST numeric id.

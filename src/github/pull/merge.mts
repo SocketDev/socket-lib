@@ -4,9 +4,9 @@
  */
 
 // no-platform-http-import: server-only module merging PRs over node:http; node platform is intentional.
-import { httpJson, HttpResponseError } from '../http-request/node.mjs'
-import { GITHUB_API_BASE_URL } from './constants.mjs'
-import { getGitHubToken } from './token.mjs'
+import { httpJson, HttpResponseError } from '../../http-request/node.mjs'
+import { GITHUB_API_BASE_URL } from '../constants.mjs'
+import { getGitHubToken } from '../token.mjs'
 
 /**
  * Fetch the current result for a UUID. `enqueued` is final for queue
