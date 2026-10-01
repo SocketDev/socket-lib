@@ -2156,10 +2156,10 @@
       "types": "./dist/github/packages.d.ts",
       "default": "./dist/github/packages.js"
     },
-    "./github/pull-merge-async": {
-      "source": "./src/github/pull-merge-async.mts",
-      "types": "./dist/github/pull-merge-async.d.ts",
-      "default": "./dist/github/pull-merge-async.js"
+    "./github/pull/merge": {
+      "source": "./src/github/pull/merge.mts",
+      "types": "./dist/github/pull/merge.d.ts",
+      "default": "./dist/github/pull/merge.js"
     },
     "./github/rate-limit": {
       "source": "./src/github/rate-limit.mts",
