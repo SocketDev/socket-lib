@@ -201,41 +201,41 @@
       ],
       "description": "fff-mcp — file-search MCP server (pinned, SRI-verified per platform)",
       "repository": "github:dmtrKovalenko/fff",
-      "version": "0.10.6",
-      "tag": "v0.10.6",
+      "version": "0.11.0",
+      "tag": "v0.11.0",
       "binaryName": "fff-mcp",
       "platforms": {
         "darwin-arm64": {
           "asset": "fff-mcp-aarch64-apple-darwin",
-          "integrity": "sha512-VbyMeWW2JeNwHJL7lITiPkz+ZTCcAX0qrZ2zkNsGD/4Z7UXH9bKUYYYaYQI+pH8r1ocJlCQ8dAyfce/9sFKm7A=="
+          "integrity": "sha512-bhrXZ3knCtECIPP9OBUWwFbxHoU31UjhPdQy6PR/enl6Qdfalx5vruaYK34pK5wIWfJXtFZwEnh3kgtyM0G5dg=="
         },
         "darwin-x64": {
           "asset": "fff-mcp-x86_64-apple-darwin",
-          "integrity": "sha512-tM1/o68xY5IxSNJpj37AZb8cTeu7qIg9TU9eVokc2aq6Uvu5rWJzDCLVgsrEEB9MWrQq5oKAGJNkOe6AjazH6g=="
+          "integrity": "sha512-FeD/LohaHhTvVhXhfZgHMmFsB2Mz2apMMDDwMtN24onTPe8MIsQWrom51UaDU5+lyN1Y6m1te51M1YCjrs4O3g=="
         },
         "linux-arm64": {
           "asset": "fff-mcp-aarch64-unknown-linux-gnu",
-          "integrity": "sha512-3LzyyvariFdoEwXeojLFcJshPN1/fls616d6RORWYEO5iUpGOG8Yk3tezhY25wmtRdE+MLlV8kZ6C5gnN7D0FA=="
+          "integrity": "sha512-d6ag1LQvrIsOsSWyBNa8ZN0DQRNGS3gVw8MvcE48xTwoOp3/HkvX/ym/JhqW5RtG71DTVTQ7GGIAGEifxabVig=="
         },
         "linux-arm64-musl": {
           "asset": "fff-mcp-aarch64-unknown-linux-musl",
-          "integrity": "sha512-YNZQGSyxCeDTF6dWcMXNDY2228amO2qz4bRv2nQbxi9HqbzdEojroAoRYqCP9lha5daGbGP3srdz2j36MBoKmw=="
+          "integrity": "sha512-ZKKRO8LEIWoUmLVuPKHoEaPZAfcz6xPLw3OC+1TaGUAvRw5P7rIDStXcLKG+yRkXP7rmelkD86FcXQq9OM10qw=="
         },
         "linux-x64": {
           "asset": "fff-mcp-x86_64-unknown-linux-gnu",
-          "integrity": "sha512-g3jBM57thrgkbTagonlLSrI2Pl3h+BK5P3U4JVcrI9cYgWUpYqbaJyq+rftTshVh0I3S/u5hfsarQt84z6AfOQ=="
+          "integrity": "sha512-QLCGlAbYjj/mte8t50WcLXqSYb7TdsmMwGcPu44OLWNTpZdWC5fwEzR5982QimhforqVsYy7fR+iigAn6oMj6Q=="
         },
         "linux-x64-musl": {
           "asset": "fff-mcp-x86_64-unknown-linux-musl",
-          "integrity": "sha512-uvW4Qo4BAcc9Gj+M2LwDR9xQ4rd0JAUTDIfKptF6/mPHbeFy1bMzqtjiaZOMyaQ57866W2uTT8ep2sy7XtkJsw=="
+          "integrity": "sha512-k0bDPOuHDvTZ/Rf/nNVqdURPzzem4l/D98Kl9YDmMmedU3N13jKpnn5Vtkq+mMjbjDHT04PU1tGem9neZkJrFw=="
         },
         "win32-arm64": {
           "asset": "fff-mcp-aarch64-pc-windows-msvc.exe",
-          "integrity": "sha512-MPB7uvbzGSEOldHkZGEVenQeEJc/+Qy4kIo2WWnDOdjARP62TIDINcv0E+Cr3GW+iUImwZZhdNHDRXWZNhlCwg=="
+          "integrity": "sha512-TqAtd7tSPTBCB5gLfOw6d2JCr19pPjeM4u0DbMVAjjmsnvGjXJOU2bql/HBtI3EzaXqQhqQtGeT4Z7GIwESHvw=="
         },
         "win32-x64": {
           "asset": "fff-mcp-x86_64-pc-windows-msvc.exe",
-          "integrity": "sha512-hNpJCAAEvlmYPQ3W65lK6GySD14NtKjE5+mTkDQ/iKBR9FBkjnrrBLSapQez27u1K7blnBiGB778DWi4Q4ePaA=="
+          "integrity": "sha512-Kau32/aSX5y1YLiUq0uGiZQvGUD1VSS7x+78qYb60x1FBfn3HFF7M0W+Wlq2KIu1DXZMtdcpxp4e8Et9dq0ZnQ=="
         }
       },
       "origin": "gh-asset"
@@ -400,29 +400,34 @@
       "origin": "gh-asset"
     },
     "mbx": {
-      "version": "1.15.0",
-      "tag": "v1.15.0",
+      "version": "1.22.0",
+      "tag": "v1.22.0",
       "repository": "github:jdx/mr-boxington",
       "origin": "gh-asset",
       "platforms": {
         "darwin-arm64": {
           "asset": "mbx-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-5ZpyeIOfWhyQCYNQoUwgba9ccVrjfJ85EyfoWmfzadUIsQzyMcnlZ3lYpR2hU3MZWWt+ZVxcCq74j8bgqOK7AA=="
+          "integrity": "sha512-Tjab3gdmPQtkmEvsjgjOqMzEWWxBCsAlQifXCcN/mv8oRH1BN8RRthm8jVdQ9PsNQjEhIhyYYlnhcysJ4+1YRg=="
         },
         "linux-arm64-musl": {
           "asset": "mbx-aarch64-unknown-linux-musl.tar.gz",
-          "integrity": "sha512-hDjzbyKeeocK6RLaJVCIiOzHOcE1bs5foEpqcs2rK1CyZ1Dw0tZ7rwGenTs34w2xLgitXK3rnmiWLfz2p/Gfyg=="
+          "integrity": "sha512-qgsbEFeo6J9K7tH4K2hfFJjV6Rm6s26na2eEd8nw/qsSLzw/8E26rWrhTqsyXPog7f160iWG3/u6XV2sgSaYvg=="
         },
         "linux-x64-musl": {
           "asset": "mbx-x86_64-unknown-linux-musl.tar.gz",
-          "integrity": "sha512-iFjaZF14RQkCoiO/M33kABPDL/ci5uc7iYfdHhGARuZm9OGFz4Z7S3ORuSDbXjdznTAvwRvw9S+1ck4L8uNOgw=="
+          "integrity": "sha512-tdOgq9JazUqnPrDkwsCd77mZpao5kNCaXSun1QdV690X/LneoSzh0AK0z/609n6X8awdg4JNGsHolJs7WNbU2g=="
         },
         "win32-x64": {
           "asset": "mbx-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-HaE49dPf5ZWQ/LrZ3nJmH1H+v8rH7v4QMbCa0qTFZHQPmUhrMtoLU7+Tv6BwV+0fsp12F9LeSoqTUdQlMY03QA=="
+          "integrity": "sha512-BflfuUwzGfNGYPnbhIjs2bDXTSjpNqpXUjZ4AjPQhN/Eklpg1K2dlnyfeJX2ZQCikLknO02e5QnowSxuFgiihw=="
         }
       },
-      "description": "Cache front-end for cargo: put mbx in front of any cargo command and one cache warms every worktree and CI run, pruning itself to a size budget."
+      "description": "Cache front-end for cargo: put mbx in front of any cargo command and one cache warms every worktree and CI run, pruning itself to a size budget.",
+      "soakBypass": {
+        "published": "2026-10-03",
+        "removable": "2026-10-10",
+        "version": "1.22.0"
+      }
     },
     "mise": {
       "binaryName": "mise",
@@ -433,8 +438,8 @@
       ],
       "origin": "gh-asset",
       "repository": "github:jdx/mise",
-      "version": "2026.9.11",
-      "tag": "v2026.9.11",
+      "version": "2026.9.12",
+      "tag": "v2026.9.12",
       "versionDate": "2026-09-18",
       "misePolicy": {
         "autoInstall": false,
@@ -452,44 +457,44 @@
       },
       "platforms": {
         "darwin-arm64": {
-          "asset": "mise-v2026.9.11-macos-arm64.tar.gz",
+          "asset": "mise-v2026.9.12-macos-arm64.tar.gz",
           "binary": "mise/bin/mise",
-          "integrity": "sha512-7qL6Lk9UAqh5DOuaArf0WQrR0uLWyZmXFJm1+9yDb8tD/GK7TjJf1I3AYrVJM71O4GJm7OJ79MJGE/mgbwpgsw=="
+          "integrity": "sha512-nF24w79GPioYGt0nSUz2rS3pN1Xtde/AL46/60fJx6MKjQp7cZLuQLrbvzou16lr2pNVEQxjjZlmoh7HYjotMQ=="
         },
         "darwin-x64": {
-          "asset": "mise-v2026.9.11-macos-x64.tar.gz",
+          "asset": "mise-v2026.9.12-macos-x64.tar.gz",
           "binary": "mise/bin/mise",
-          "integrity": "sha512-qvqdGJ9Djdh7fh4oAp3YaoDiv+mGZGV9pnEtmEVNN2l35tmiYXkfJ0tHaMrm5OU61efBvNF0Th19YSPVl6EJQw=="
+          "integrity": "sha512-QfeUOA5M4doGJSsWtrRiENoLOOBnG3Q4NJ+NwgVjdMMvTqI92KNzSH+PFBtf3pM6fh2gx+wJGStO5rY1asetwQ=="
         },
         "linux-arm64": {
-          "asset": "mise-v2026.9.11-linux-arm64.tar.gz",
+          "asset": "mise-v2026.9.12-linux-arm64.tar.gz",
           "binary": "mise/bin/mise",
-          "integrity": "sha512-0IWmborDfu6n7IJRZrSom97idqAMdLxXi2vRIyNyekJCkyIQNzZRvwPZaa0q2ofX8Ibe+QqquC7cyL3TWrTtOA=="
+          "integrity": "sha512-IZW3oagnZZaCbF/WEbgsfqpFqDmNk1luMQAR2zIfOyQ7tCg9hKBzuMLxHjbuSqAWPyC8etYGwmll2bv8/KcxoQ=="
         },
         "linux-arm64-musl": {
-          "asset": "mise-v2026.9.11-linux-arm64-musl.tar.gz",
+          "asset": "mise-v2026.9.12-linux-arm64-musl.tar.gz",
           "binary": "mise/bin/mise",
-          "integrity": "sha512-6ZeUrsUUhigRIFKumLCtNRFzgVneIBQa5vSmm9HnZjlwQFtfiaewyxHVPujzDf4dq3sTZtZpvyH4ln+aKq99zA=="
+          "integrity": "sha512-h9kZ9oxHFiwI0gKtAYWJ3u6i+nwqJWepNbob3VtASgJ2aJGGPr1bsurrEjV0CGIo14vr4VU7Q8QXpCjFIqBgpA=="
         },
         "linux-x64": {
-          "asset": "mise-v2026.9.11-linux-x64.tar.gz",
+          "asset": "mise-v2026.9.12-linux-x64.tar.gz",
           "binary": "mise/bin/mise",
-          "integrity": "sha512-c/4+a4QDlSu8P837pEjuMvxjNs1/fo2njpO5+TzvXB6OihALSiZ12NzNgLXlWJ2E0UXDbZ5FG/y6neBBoU78tA=="
+          "integrity": "sha512-qfOE91Nkr2OjABSpbubh0DmqcJVNfPPgaIIi7XiJvoLBW6OI8XQp+pwVVcR7oqLiZ4vNJxZnW7+6jp7xnDZwyw=="
         },
         "linux-x64-musl": {
-          "asset": "mise-v2026.9.11-linux-x64-musl.tar.gz",
+          "asset": "mise-v2026.9.12-linux-x64-musl.tar.gz",
           "binary": "mise/bin/mise",
-          "integrity": "sha512-scJwZUX4p13uMswkaeNPe1pSlOzQwuK3yLZoPZivEjtoUSiaVSGjpifm9n0CBDOZcYls0KGmar2AGgD+Z1mpBQ=="
+          "integrity": "sha512-8UHQl8XDoIVRCU4hKQWlh20zep5NaKJgPPIOFWBTfAJPLqcXgwEHF0JPCRJznyDHMPHeAf6Y1WaSUfGgGH1Ujw=="
         },
         "win32-arm64": {
-          "asset": "mise-v2026.9.11-windows-arm64.zip",
+          "asset": "mise-v2026.9.12-windows-arm64.zip",
           "binary": "mise/bin/mise.exe",
-          "integrity": "sha512-+F9m1ozeDPUoM4l0h0g35uNLGGPHKGG5TukEyMQkvpfUBMtugX49/vqiVA7EBt8QuhBzNZsTqK4G4SguN7AZZg=="
+          "integrity": "sha512-tCJWjUq4OIkd1lsdFpHxDj5DiSDggCrb/vnvjbXbv4e3HkKqoufxQed87i00H1SYpr5AbgU0qLFiTJEwRbI3IA=="
         },
         "win32-x64": {
-          "asset": "mise-v2026.9.11-windows-x64.zip",
+          "asset": "mise-v2026.9.12-windows-x64.zip",
           "binary": "mise/bin/mise.exe",
-          "integrity": "sha512-XBV2UYkX0MbK5D5gheQho9+/3I+H669NawQ+uQ707PS5aoFDEucXt4K7zR5CNIRwX6kKdlFmK6W4MlFZRGpVjg=="
+          "integrity": "sha512-hNj7hWSbESkWJNa8YyOWnYQFxzpc0dYnh62yPVYOuJq0SVfTKyCsngl/+n0Hl2XZuRxY5tZbtw96qjRwVhH4Cw=="
         }
       }
     },
@@ -764,76 +769,76 @@
     },
     "rustup": {
       "notes": [
-        "rustup-init — the Rust toolchain bootstrap binary, installed by the setup-rust-toolchain composite action when rustup is not already on PATH. Pinned to 1.30.0 (2026-08-18) with per-platform SHA-256 from the rustup dist sidecars at https://static.rust-lang.org/rustup/dist/<target>/rustup-init<.exe>.sha256.",
-        "The static.rust-lang.org dist URL serves the CURRENT rustup build (a floating ref); the pinned SHA-256 here is the integrity gate — if upstream ships a new rustup, the hash mismatch aborts the download loudly rather than executing an unpinned binary. Re-pin the hash (and version) deliberately on a rustup bump.",
+        "rustup-init supplies the Rust toolchain bootstrap binary when rustup is absent from PATH. Version 1.29.1 was released on 2026-09-01; its signed upstream tag is 3b0a80f56f91d9c1f102d431d853de9fac3fc444.",
+        "Each binary and checksum sidecar uses the versioned rustup archive. Every platform digest was measured against its archive binary and matched the corresponding sidecar on 2026-10-04.",
         "integrity is the object form ({ value, src, date }) — value is `sha256-<hex>` (the rustup sidecar shape), src the per-target sidecar URL, date the pin day. install-tool.mjs downloads + SRI-verifies the bare binary, then the action runs it with -y --default-toolchain none --profile minimal."
       ],
       "description": "rustup-init — the Rust toolchain bootstrap binary (pinned, SHA-256-verified per platform before execute)",
-      "version": "1.30.0",
-      "versionDate": "2026-08-18",
+      "version": "1.29.1",
+      "versionDate": "2026-09-01",
       "platforms": {
         "darwin-arm64": {
-          "asset": "https://static.rust-lang.org/rustup/dist/aarch64-apple-darwin/rustup-init",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-apple-darwin/rustup-init",
           "integrity": {
-            "value": "sha256-aeb4105778ca1bd3c6b0e75768f581c656633cd51368fa61289b6a71696ac7e1",
-            "src": "https://static.rust-lang.org/rustup/dist/aarch64-apple-darwin/rustup-init.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-ec1b9233e7f72990ecd8e62063fa7f6c3dfc2bec8e97f88bff165f9100ac696a",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-apple-darwin/rustup-init.sha256",
+            "date": "2026-10-04"
           }
         },
         "darwin-x64": {
-          "asset": "https://static.rust-lang.org/rustup/dist/x86_64-apple-darwin/rustup-init",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-apple-darwin/rustup-init",
           "integrity": {
-            "value": "sha256-33cf85df9142bc6d29cbc62fa5ca1d4c29622cddb55213a4c1a43c457fb9b2d7",
-            "src": "https://static.rust-lang.org/rustup/dist/x86_64-apple-darwin/rustup-init.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-259e2b84274434085163fe8d556510571772cda2aa6d87ca6aa664f57bc644e3",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-apple-darwin/rustup-init.sha256",
+            "date": "2026-10-04"
           }
         },
         "linux-arm64": {
-          "asset": "https://static.rust-lang.org/rustup/dist/aarch64-unknown-linux-gnu/rustup-init",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-unknown-linux-gnu/rustup-init",
           "integrity": {
-            "value": "sha256-9732d6c5e2a098d3521fca8145d826ae0aaa067ef2385ead08e6feac88fa5792",
-            "src": "https://static.rust-lang.org/rustup/dist/aarch64-unknown-linux-gnu/rustup-init.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-15f6e4ce9f583b929c996c91562bad6d4454f3281de858b02cdfdef615fac433",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-unknown-linux-gnu/rustup-init.sha256",
+            "date": "2026-10-04"
           }
         },
         "linux-arm64-musl": {
-          "asset": "https://static.rust-lang.org/rustup/dist/aarch64-unknown-linux-musl/rustup-init",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-unknown-linux-musl/rustup-init",
           "integrity": {
-            "value": "sha256-88761caacddb92cd79b0b1f939f3990ba1997d701a38b3e8dd6746a562f2a759",
-            "src": "https://static.rust-lang.org/rustup/dist/aarch64-unknown-linux-musl/rustup-init.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-1ddf36182ac5d1782dbeefcb9bea7f5f9412d88f4a0d5047b1564a223624e8c6",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-unknown-linux-musl/rustup-init.sha256",
+            "date": "2026-10-04"
           }
         },
         "linux-x64": {
-          "asset": "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-unknown-linux-gnu/rustup-init",
           "integrity": {
-            "value": "sha256-4acc9acc76d5079515b46346a485974457b5a79893cfb01112423c89aeb5aa10",
-            "src": "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-dda7234360b7f578ca8b0ddcb80145646fa61a67c1720a5abc7051b35c9fcb71",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-unknown-linux-gnu/rustup-init.sha256",
+            "date": "2026-10-04"
           }
         },
         "linux-x64-musl": {
-          "asset": "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-musl/rustup-init",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-unknown-linux-musl/rustup-init",
           "integrity": {
-            "value": "sha256-9cd3fda5fd293890e36ab271af6a786ee22084b5f6c2b83fd8323cec6f0992c1",
-            "src": "https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-musl/rustup-init.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-331228566cc931f32cd684f9bebc5956a5e5d7394c8d5de595f196a658ab98e6",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-unknown-linux-musl/rustup-init.sha256",
+            "date": "2026-10-04"
           }
         },
         "win32-arm64": {
-          "asset": "https://static.rust-lang.org/rustup/dist/aarch64-pc-windows-msvc/rustup-init.exe",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-pc-windows-msvc/rustup-init.exe",
           "integrity": {
-            "value": "sha256-3af309e6c3062aa11df0e932954f69d13b734d8a431e593812f3ecd9ff9e6ef6",
-            "src": "https://static.rust-lang.org/rustup/dist/aarch64-pc-windows-msvc/rustup-init.exe.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-01aa49cf9574a8bd0ae52005d7de2590e8f27181ded6748236e702c92aef826d",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/aarch64-pc-windows-msvc/rustup-init.exe.sha256",
+            "date": "2026-10-04"
           }
         },
         "win32-x64": {
-          "asset": "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe",
+          "asset": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-pc-windows-msvc/rustup-init.exe",
           "integrity": {
-            "value": "sha256-86478e53f769379d7f0ebfa7c9aa97cb76ca92233f79aa2cc0dbee2efaac73c7",
-            "src": "https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe.sha256",
-            "date": "2026-08-18"
+            "value": "sha256-6f4bef66261261fcb43131be8720bab817d403a09edec7455c371974b90bdb7e",
+            "src": "https://static.rust-lang.org/rustup/archive/1.29.1/x86_64-pc-windows-msvc/rustup-init.exe.sha256",
+            "date": "2026-10-04"
           }
         }
       },
