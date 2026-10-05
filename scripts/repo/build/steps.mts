@@ -22,6 +22,7 @@ import { buildConfig } from '../../../.config/rolldown.config.mts'
 import { primBuildConfig } from '../../../.config/repo/rolldown.prim.config.mts'
 import { REPO_ROOT as rootPath } from '../../fleet/paths.mts'
 import { runSequence } from '../../fleet/util/run-command.mts'
+import type { InputOptions } from 'rolldown'
 
 // `@ultrathink/acorn.rs.wasm` is declared by tools/prim, not the repo root, and
 // pnpm does not hoist it into the root node_modules. Resolve it from the
@@ -68,7 +69,14 @@ export async function buildSource(
 
   try {
     const startTime = Date.now()
-    const { output, ...inputOptions } = buildConfig
+    const { output, ...config } = buildConfig
+    const inputOptions: InputOptions = {
+      ...config,
+      experimental: {
+        ...config.experimental,
+        attachDebugInfo: 'none',
+      },
+    }
     // buildConfig's `output` is typed one-or-many; write() takes one. No
     // config here sets an array, so take the first entry rather than widen
     // write()'s input.
@@ -196,7 +204,14 @@ export async function buildPrim(
 ): Promise<number> {
   const { quiet = false } = options
   try {
-    const { output, ...inputOptions } = primBuildConfig
+    const { output, ...config } = primBuildConfig
+    const inputOptions: InputOptions = {
+      ...config,
+      experimental: {
+        ...config.experimental,
+        attachDebugInfo: 'none',
+      },
+    }
     // buildConfig's `output` is typed one-or-many; write() takes one. No
     // config here sets an array, so take the first entry rather than widen
     // write()'s input.

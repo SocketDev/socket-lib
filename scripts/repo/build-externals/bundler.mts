@@ -19,6 +19,7 @@ import {
   getLocalPackagePath,
   resolveLocalEntryPoint,
 } from './local-packages.mts'
+import type { InputOptions } from 'rolldown'
 
 const require = createRequire(import.meta.url)
 const logger = getDefaultLogger()
@@ -100,11 +101,18 @@ export async function bundlePackage(
     const packageOpts = getPackageSpecificOptions(packageName)
 
     // Get rolldown configuration.
-    const { output, ...inputOptions } = getRolldownConfig(
+    const { output, ...config } = getRolldownConfig(
       packagePath,
       outputPath,
       packageOpts,
     )
+    const inputOptions: InputOptions = {
+      ...config,
+      experimental: {
+        ...config.experimental,
+        attachDebugInfo: 'none',
+      },
+    }
     // buildConfig's `output` is typed one-or-many; write() takes one. No
     // config here sets an array, so take the first entry rather than widen
     // write()'s input.
