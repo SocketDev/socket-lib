@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 685 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 687 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -449,6 +449,8 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/github/errors](./dist/github/errors.d.ts)
 - [@socketsecurity/lib/github/ghsa](./dist/github/ghsa.d.ts)
 - [@socketsecurity/lib/github/packages](./dist/github/packages.d.ts)
+- [@socketsecurity/lib/github/pull/merge](./dist/github/pull/merge.d.ts)
+- [@socketsecurity/lib/github/pull/reviews](./dist/github/pull/reviews.d.ts)
 - [@socketsecurity/lib/github/rate-limit](./dist/github/rate-limit.d.ts)
 - [@socketsecurity/lib/github/rate-limit-wait](./dist/github/rate-limit-wait.d.ts)
 - [@socketsecurity/lib/github/refs](./dist/github/refs.d.ts)
@@ -457,7 +459,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/github/refs-rest](./dist/github/refs-rest.d.ts)
 - [@socketsecurity/lib/github/refs-write](./dist/github/refs-write.d.ts)
 - [@socketsecurity/lib/github/request](./dist/github/request.d.ts)
-- [@socketsecurity/lib/github/reviews](./dist/github/reviews.d.ts)
 - [@socketsecurity/lib/github/token](./dist/github/token.d.ts)
 - [@socketsecurity/lib/github/types](./dist/github/types.d.ts)
 - [@socketsecurity/lib/github/workflow-runs](./dist/github/workflow-runs.d.ts)
@@ -573,6 +574,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/objects/getters](./dist/objects/getters.d.ts)
 - [@socketsecurity/lib/objects/inspect](./dist/objects/inspect.d.ts)
 - [@socketsecurity/lib/objects/mutate](./dist/objects/mutate.d.ts)
+- [@socketsecurity/lib/objects/options](./dist/objects/options.d.ts)
 - [@socketsecurity/lib/objects/predicates](./dist/objects/predicates.d.ts)
 - [@socketsecurity/lib/objects/sort](./dist/objects/sort.d.ts)
 - [@socketsecurity/lib/objects/types](./dist/objects/types.d.ts)

@@ -5,10 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [7.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.0) - 2026-09-29
+## [7.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.0) - 2026-10-05
 
 ### Added
 
+- **`github`** — export github/pull modules and fix test import depth
+- **`github`** — export pull-merge-async helpers
 - **`attestations`** — verify sigstore bundles offline
 - **`test`** — route lane scripts through repo wrappers
 - **`oauth`** — add keychain-backed device credentials
@@ -19,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`lockfile`** — remove stale hook importer
 - **`attestations`** — validate literal certificate san identities
 - **`attestations`** — decode issuer claims without normalization
 - **`test`** — stabilize fuzz and CI test lanes
