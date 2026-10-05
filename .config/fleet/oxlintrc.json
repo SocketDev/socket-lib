@@ -366,6 +366,7 @@
     "</fleet>",
     "#fleet-canonical-end",
     "<repo>",
-    "</repo>"
+    "</repo>",
+    "test/fleet/unit/check/git-path-is-not-hardcoded.test.mts"
   ]
 }
