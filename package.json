@@ -4140,7 +4140,7 @@
     "setup:xcode-license": "node scripts/fleet/setup/xcode-license.mts",
     "browser:bridge": "node scripts/fleet/ai/browser/bridge/cli.mts",
     "npm:trust:browser": "node scripts/fleet/registry/npm/settings/trusted-publisher/browser.mts",
-    "npm:scan": "node scripts/fleet/registry/npm/scan/run.mts",
+    "npm:scan": "node scripts/fleet/npm/scan.mts",
     "jev:benchmark": "node scripts/fleet/ai/eval/cli.mts",
     "jev:events": "node scripts/fleet/ai/balancer/events/cli.mts",
     "jev:revision": "node scripts/fleet/ai/classifiers/cli.mts",
