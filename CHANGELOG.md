@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
+- **`ci`** — repair release metadata gates
+- **`ci`** — restore canonical release checks
 - **`deps`** — select verified pnpm manager
 - **`deps`** — sync pnpm lockfile metadata
 - **`deps`** — restore pinned pnpm manager selection
