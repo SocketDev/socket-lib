@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-<a href="https://socket.dev/npm/package/@socketsecurity/lib"><img src="https://badge.socket.dev/npm/package/@socketsecurity/lib/7.1.0" alt="Socket Badge" height="20"></a>
+<a href="https://socket.dev/npm/package/@socketsecurity/lib"><img src="https://badge.socket.dev/npm/package/@socketsecurity/lib" alt="Socket Badge" height="20"></a>
 <picture><img src="https://raw.githubusercontent.com/SocketDev/socket-lib/HEAD/assets/repo/coverage.svg?v=d3f1fd881dda" height="20" alt="Coverage" /></picture>
 
 [![Follow @SocketSecurity](https://raw.githubusercontent.com/SocketDev/socket-lib/HEAD/assets/fleet/badge-follow-x.svg)](https://twitter.com/SocketSecurity)
