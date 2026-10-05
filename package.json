@@ -78,6 +78,7 @@
     "node:dns/promises": false,
     "node:domain": false,
     "node:events": false,
+    "node:ffi": false,
     "node:fs": false,
     "node:fs/promises": false,
     "node:http": false,
@@ -2161,6 +2162,11 @@
       "types": "./dist/github/pull/merge.d.ts",
       "default": "./dist/github/pull/merge.js"
     },
+    "./github/pull/reviews": {
+      "source": "./src/github/pull/reviews.mts",
+      "types": "./dist/github/pull/reviews.d.ts",
+      "default": "./dist/github/pull/reviews.js"
+    },
     "./github/rate-limit": {
       "source": "./src/github/rate-limit.mts",
       "types": "./dist/github/rate-limit.d.ts",
@@ -2200,11 +2206,6 @@
       "source": "./src/github/request.mts",
       "types": "./dist/github/request.d.ts",
       "default": "./dist/github/request.js"
-    },
-    "./github/reviews": {
-      "source": "./src/github/reviews.mts",
-      "types": "./dist/github/reviews.d.ts",
-      "default": "./dist/github/reviews.js"
     },
     "./github/token": {
       "source": "./src/github/token.mts",
