@@ -381,7 +381,6 @@
         "github/packages",
         "github/rate-limit-wait",
         "github/refs-write",
-        "github/reviews",
         "github/workflow-runs",
         "hooks/dispatch-failure",
         "http-request/checksum-file",

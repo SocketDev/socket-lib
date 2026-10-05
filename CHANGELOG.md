@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`npm`** — use staged scan dispatcher
+- **`build`** — set Rolldown debug options
 - **`lockfile`** — remove stale hook importer
 - **`attestations`** — validate literal certificate san identities
 - **`attestations`** — decode issuer claims without normalization

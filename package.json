@@ -4169,7 +4169,6 @@
     "search:code": "node scripts/fleet/ai/search/run.mts",
     "setup:fff": "node scripts/fleet/setup/fff.mts",
     "npm:approve:browser": "node scripts/fleet/registry/npm/approve-staged-browser.mts",
-    "release:github": "node scripts/fleet/release/github/remote.mts",
     "publish:npm": "node scripts/fleet/npm/publish/run.mts",
     "setup:hook-snapshot": "node scripts/fleet/setup/hook-snapshot.mts",
     "setup:repo-steps": "node scripts/fleet/setup/repo-steps.mts",
