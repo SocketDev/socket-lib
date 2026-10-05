@@ -12,7 +12,7 @@ import { getDefaultLogger } from '../logger/default.mjs'
 import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array.mjs'
 import { DateNow } from '../primordials/date.mjs'
 import { ReflectApply } from '../primordials/reflect.mjs'
-import { getDefaultSpinner } from '../spinner/default.mjs'
+import { peekDefaultSpinner } from '../spinner/default-state.mjs'
 import { applyLinePrefix } from '../strings/format.mjs'
 
 import { getDebugJs, getPointingTriangle } from './shared.mjs'
@@ -294,14 +294,11 @@ export function debugtime(label: string) {
 }
 
 /**
- * Resolve the default spinner on Node; in a browser bundle off Node there is
- * no spinner — callers no-op through their optional chains. Construction is
- * deferred to first debug write (every call site sits behind the `isEnabled`
- * / `getSocketDebug` gates), so a browser bundle never constructs the
- * node-bound spinner even when debug output is force-enabled.
+ * Read the existing default spinner on Node; in a browser bundle off Node
+ * there is no spinner. This function never constructs the spinner.
  *
  * @private
  */
 export function getSpinner(): SpinnerInstance | undefined {
-  return IS_NODE ? getDefaultSpinner() : undefined
+  return IS_NODE ? peekDefaultSpinner() : undefined
 }
