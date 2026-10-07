@@ -12,6 +12,7 @@
 .claude/commands/fleet linguist-generated=true
 .claude/hooks/fleet linguist-generated=true
 .claude/output-styles/fleet.md linguist-generated=true
+.claude/plugins/fleet-statusline linguist-generated=true
 .claude/rules/fleet linguist-generated=true
 .claude/skills/fleet linguist-generated=true
 .claude/workflows linguist-generated=true

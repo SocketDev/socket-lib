@@ -175,7 +175,7 @@ var require_fs$1 = /* @__PURE__ */ __commonJSMin(exports => {
   exports.getNodeFs = getNodeFs
 })
 
-var require_predicates$2 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_predicates$3 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   /**
    * @file Array type-guard predicates. Currently just a re-export of native
@@ -1378,9 +1378,9 @@ var require_object = /* @__PURE__ */ __commonJSMin(exports => {
   exports.ObjectValues = ObjectValues
 })
 
-var require_predicates$1 = /* @__PURE__ */ __commonJSMin(exports => {
+var require_predicates$2 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_arrays_predicates = require_predicates$2()
+  const require_arrays_predicates = require_predicates$3()
   const require_primordials_object = require_object()
   /**
    * @file Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isPlainObject`.
@@ -1829,8 +1829,8 @@ var require_reflect = /* @__PURE__ */ __commonJSMin(exports => {
 
 var require_mutate = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
-  const require_arrays_predicates = require_predicates$2()
-  const require_objects_predicates = require_predicates$1()
+  const require_arrays_predicates = require_predicates$3()
+  const require_objects_predicates = require_predicates$2()
   const require_primordials_error = require_error$1()
   const require_primordials_map_set = require_map_set()
   require_sentinels()
@@ -2163,7 +2163,7 @@ var require_array$2 = /* @__PURE__ */ __commonJSMin(exports => {
   exports.Uint8ClampedArrayCtor = Uint8ClampedArrayCtor
 })
 
-var require_predicates = /* @__PURE__ */ __commonJSMin(exports => {
+var require_predicates$1 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_primordials_object = require_object()
   const require_primordials_error = require_error$1()
@@ -2903,7 +2903,7 @@ var require_rewire$1 = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_constants_runtime = require_runtime()
   const require_primordials_object = require_object()
-  const require_objects_predicates = require_predicates$1()
+  const require_objects_predicates = require_predicates$2()
   const require_env_boolean = require_boolean()
   const require_node_async_hooks = require_async_hooks()
   const require_primordials_map_set = require_map_set()
@@ -14945,11 +14945,11 @@ var require_del = /* @__PURE__ */ __commonJSMin((exports, module) => {
 var require_safe = /* @__PURE__ */ __commonJSMin(exports => {
   Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
   const require_node_fs = require_fs$1()
-  const require_arrays_predicates = require_predicates$2()
+  const require_arrays_predicates = require_predicates$3()
   const require_paths_shared = require_shared$2()
   const require_objects_mutate = require_mutate()
   const require_primordials_array = require_array$2()
-  const require_errors_predicates = require_predicates()
+  const require_errors_predicates = require_predicates$1()
   const require_primordials_globals = require_globals()
   const require_promises_retry = require_retry()
   const require_fs_shared = require_shared()
@@ -16517,6 +16517,9 @@ const ALWAYS_TRACKED_GITHUB_PREFIXES = [
   '.github/dependabot.yml',
   '.github/workflows/',
 ]
+function normalizePath$1(pathLike) {
+  return pathLike.replaceAll('\\', '/')
+}
 /**
  * Non-GitHub surfaces a member must keep tracked. The unifying rule for BOTH
  * lists: anything a consumer reads BEFORE our fetch runs has to be in the
@@ -16570,7 +16573,7 @@ const ALWAYS_TRACKED_PREFIXES = [
  * exported for callers that mean the CI surface specifically.
  */
 function isAlwaysTrackedSurface(relPath) {
-  const p = relPath.replaceAll('\\', '/')
+  const p = normalizePath$1(relPath)
   for (let i = 0, { length } = ALWAYS_TRACKED_PREFIXES; i < length; i += 1) {
     const prefix = ALWAYS_TRACKED_PREFIXES[i]
     if (prefix.endsWith('/') ? p.startsWith(prefix) : p === prefix) return true
@@ -16587,7 +16590,7 @@ function isAlwaysTrackedSurface(relPath) {
  * delivers it mid-job and it stays untracked.
  */
 function isAlwaysTrackedGitHubSurface(relPath) {
-  const p = relPath.replaceAll('\\', '/')
+  const p = normalizePath$1(relPath)
   for (
     let i = 0, { length } = ALWAYS_TRACKED_GITHUB_PREFIXES;
     i < length;
@@ -16785,6 +16788,649 @@ const dep0Logger = {
   },
 }
 
+var require_conversion = /* @__PURE__ */ __commonJSMin(exports => {
+  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
+  const require_constants_platform = require_platform()
+  const require_primordials_string = require_string$1()
+  const require_paths_shared = require_shared$2()
+  /**
+   * @file Path conversion utilities — MSYS↔native bridging and string-shape
+   *   helpers. Split out of `paths/normalize.ts` for size hygiene.
+   *
+   *   - `fromUnixPath` / `toUnixPath` — MSYS↔native conversion
+   *   - `splitPath` — segment-array view of a path
+   *   - `trimLeadingDotSlash` — strip a single `./` / `.\` prefix
+   */
+  /**
+   * Convert Unix-style POSIX paths to native Windows paths.
+   *
+   * This is the inverse of {@link toUnixPath}. On Windows, MSYS-style paths use
+   * `/c/` notation for drive letters and forward slashes, which PowerShell and
+   * cmd.exe cannot resolve. This function converts them to native Windows
+   * format with backslashes and proper drive letters.
+   *
+   * @example
+   *   ;```typescript
+   *   fromUnixPath('/c/projects/app/file.txt') // 'C:\\projects\\app\\file.txt' on Windows
+   *   fromUnixPath('/tmp/build/output') // '/tmp/build/output'
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The MSYS/Unix-style path to
+   *   convert.
+   *
+   * @returns {string} Native Windows path or normalized Unix path
+   */
+  function fromUnixPath(pathLike) {
+    const normalized = require_paths_shared.normalizePath(pathLike)
+    /* c8 ignore start */
+    if (require_constants_platform.isWin32())
+      return normalized.replace(/\//g, '\\')
+    /* c8 ignore stop */
+    return normalized
+  }
+  /**
+   * Split a path into an array of segments.
+   *
+   * Divides a path into individual components by splitting on both
+   * forward-slash and backslash path separators.
+   *
+   * @example
+   *   ;```typescript
+   *   splitPath('/workspace/example/file.txt') // ['', 'workspace', 'example', 'file.txt']
+   *   splitPath('C:\\Users\\John') // ['C:', 'Users', 'John']
+   *   splitPath('') // []
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The path to split.
+   *
+   * @returns {string[]} Array of path segments, or empty array for empty paths
+   */
+  function splitPath(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    if (filepath === '') return []
+    return filepath.split(require_paths_shared.slashRegExp)
+  }
+  /**
+   * Convert Windows paths to MSYS/Unix-style POSIX paths for Git Bash tools.
+   *
+   * Git for Windows and MSYS2 tools expect POSIX-style paths with forward
+   * slashes and Unix drive letter notation (`/c/` instead of `C:\`).
+   *
+   * This is the inverse of {@link fromUnixPath}.
+   *
+   * @example
+   *   ;```typescript
+   *   toUnixPath('C:\\path\\to\\file.txt') // '/c/path/to/file.txt' on Windows
+   *   toUnixPath('/workspace/example/file') // '/workspace/example/file'
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The path to convert.
+   *
+   * @returns {string} Unix-style POSIX path
+   */
+  function toUnixPath(pathLike) {
+    const normalized = require_paths_shared.normalizePath(pathLike)
+    /* c8 ignore start */
+    if (require_constants_platform.isWin32())
+      return normalized.replace(
+        /^([A-Z]):/i,
+        (_, letter) => `/${letter.toLowerCase()}`,
+      )
+    /* c8 ignore stop */
+    return normalized
+  }
+  /**
+   * Remove a leading `./` or `.\` prefix from a path.
+   *
+   * Only removes a single leading `./` or `.\`. Does not touch `../` prefixes.
+   *
+   * @example
+   *   ;```typescript
+   *   trimLeadingDotSlash('./src/index.js') // 'src/index.js'
+   *   trimLeadingDotSlash('../lib/util.js') // '../lib/util.js'
+   *   trimLeadingDotSlash('/absolute/path') // '/absolute/path'
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The path to process.
+   *
+   * @returns {string} The path without leading `./` / `.\`, or unchanged
+   */
+  function trimLeadingDotSlash(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    if (
+      require_primordials_string.StringPrototypeStartsWith(filepath, './') ||
+      require_primordials_string.StringPrototypeStartsWith(filepath, '.\\')
+    )
+      return filepath.slice(2)
+    return filepath
+  }
+  exports.fromUnixPath = fromUnixPath
+  exports.splitPath = splitPath
+  exports.toUnixPath = toUnixPath
+  exports.trimLeadingDotSlash = trimLeadingDotSlash
+})
+
+var require_predicates = /* @__PURE__ */ __commonJSMin(exports => {
+  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
+  const require_constants_platform = require_platform()
+  const require_primordials_string = require_string$1()
+  require_encoding()
+  const require_paths_shared = require_shared$2()
+  const require_primordials_regexp = require_regexp()
+  /**
+   * @file Path predicates — `is*` checks for path shape and kind. Split out of
+   *   `paths/normalize.ts` for file-size hygiene. Pure boolean predicates over
+   *   paths and character codes.
+   *
+   *   - `isAbsolute`, `isRelative` — root-anchoring shape
+   *   - `isPath` — file-path vs package-spec vs URL discriminator
+   *   - `isNodeModules`, `isUnixPath` — content-pattern checks
+   *   - `isPathSeparator`, `isWindowsDeviceRoot` — char-code primitives
+   *   - `isPathWithinRoot` — realpath containment check
+   */
+  /**
+   * Check if a path is absolute.
+   *
+   * Handles both POSIX (`/...`) and Windows (drive-letter, UNC, device)
+   * absolute path shapes.
+   *
+   * @example
+   *   ;```typescript
+   *   isAbsolute('/home/user') // true
+   *   isAbsolute('C:\\Windows') // true on Windows
+   *   isAbsolute('../relative') // false
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The path to check.
+   *
+   * @returns {boolean} `true` if absolute, `false` otherwise
+   */
+  function isAbsolute(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    const { length } = filepath
+    if (length === 0) return false
+    const code = require_primordials_string.StringPrototypeCharCodeAt(
+      filepath,
+      0,
+    )
+    if (code === 47) return true
+    if (code === 92) return true
+    /* c8 ignore start - Windows drive-letter detection. */
+    if (require_constants_platform.isWin32() && length > 2) {
+      if (
+        isWindowsDeviceRoot(code) &&
+        require_primordials_string.StringPrototypeCharCodeAt(filepath, 1) ===
+          58 &&
+        isPathSeparator(
+          require_primordials_string.StringPrototypeCharCodeAt(filepath, 2),
+        )
+      )
+        return true
+    }
+    /* c8 ignore stop */
+    return false
+  }
+  /**
+   * Check if a path contains a `node_modules` directory segment.
+   *
+   * Matches `node_modules` only as a complete path segment.
+   *
+   * @example
+   *   ;```typescript
+   *   isNodeModules('/project/node_modules/package') // true
+   *   isNodeModules('/src/my_node_modules_backup') // false
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The path to check.
+   *
+   * @returns {boolean} `true` if the path contains `node_modules`
+   */
+  function isNodeModules(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    return require_primordials_regexp.RegExpPrototypeTest(
+      require_paths_shared.nodeModulesPathRegExp,
+      filepath,
+    )
+  }
+  /**
+   * Check if a value is a valid absolute or relative file path.
+   *
+   * Distinguishes between file paths and other string formats like package
+   * names, URLs, or bare module specifiers.
+   *
+   * @example
+   *   ;```typescript
+   *   isPath('/absolute/path') // true
+   *   isPath('./relative/path') // true
+   *   isPath('@scope/name/subpath') // true
+   *   isPath('lodash') // false
+   *   isPath('http://example.com') // false
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The value to check.
+   *
+   * @returns {boolean} `true` if the value is a valid file path
+   */
+  function isPath(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    if (typeof filepath !== 'string' || filepath.length === 0) return false
+    if (/^[a-z][a-z0-9+.-]+:/i.test(filepath)) return false
+    if (filepath === '.' || filepath === '..') return true
+    if (isAbsolute(filepath)) return true
+    if (filepath.includes('/') || filepath.includes('\\')) {
+      if (
+        require_primordials_string.StringPrototypeStartsWith(filepath, '@') &&
+        !require_primordials_string.StringPrototypeStartsWith(filepath, '@/')
+      ) {
+        const parts = filepath.split('/')
+        if (parts.length <= 2 && !parts[1]?.includes('\\')) return false
+      }
+      return true
+    }
+    return false
+  }
+  /**
+   * Check if a character code is a path separator (`/` or `\`).
+   *
+   * @example
+   *   ;```typescript
+   *   isPathSeparator(47) // true — '/'
+   *   isPathSeparator(92) // true — '\'
+   *   isPathSeparator(65) // false — 'A'
+   *   ```
+   *
+   * @param {number} code - The character code to check.
+   *
+   * @returns {boolean} `true` if separator
+   */
+  function isPathSeparator(code) {
+    return code === 47 || code === 92
+  }
+  /**
+   * Report whether a path sits at or under a root. Both sides must already be
+   * realpath'd.
+   *
+   * @example
+   *   ;```typescript
+   *   isPathWithinRoot('/repo/bin/git', '/repo') // true
+   *   isPathWithinRoot('/usr/bin/git', '/repo') // false
+   *   ```
+   */
+  function isPathWithinRoot(candidate, root) {
+    const left = require_paths_shared.foldPathForCompare(candidate)
+    const right = require_paths_shared.foldPathForCompare(root)
+    return left === right || left.startsWith(`${right}/`)
+  }
+  /**
+   * Check if a path is relative (i.e., not absolute).
+   *
+   * Empty strings are treated as relative.
+   *
+   * @example
+   *   ;```typescript
+   *   isRelative('./src/index.js') // true
+   *   isRelative('src/file.js') // true
+   *   isRelative('/home/user') // false
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The path to check.
+   *
+   * @returns {boolean} `true` if the path is relative
+   */
+  function isRelative(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    /* c8 ignore start */
+    if (typeof filepath !== 'string') return false
+    /* c8 ignore stop */
+    if (filepath.length === 0) return true
+    return !isAbsolute(filepath)
+  }
+  /**
+   * Check if a value is wrapped in path separators on BOTH ends — the
+   * `/wrapped/` sigil some list formats use to mark a substring (not exact)
+   * entry. Either separator direction counts on either end, so a stray
+   * backslash-wrapped entry is still read as the sigil rather than silently
+   * treated as an exact path.
+   *
+   * @example
+   *   ;```typescript
+   *   isSeparatorWrapped('/rendering-chromium-to-png/') // true
+   *   isSeparatorWrapped('\\rendering-chromium-to-png\\') // true
+   *   isSeparatorWrapped('scripts/fleet/acquire.mts') // false
+   *   isSeparatorWrapped('//') // false
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The value to check.
+   *
+   * @returns {boolean} `true` if both ends are path separators with content
+   *   between.
+   */
+  function isSeparatorWrapped(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    const { length } = filepath
+    if (length < 3) return false
+    return (
+      isPathSeparator(
+        require_primordials_string.StringPrototypeCharCodeAt(filepath, 0),
+      ) &&
+      isPathSeparator(
+        require_primordials_string.StringPrototypeCharCodeAt(
+          filepath,
+          length - 1,
+        ),
+      )
+    )
+  }
+  /**
+   * Check if a path uses MSYS/Git Bash Unix-style drive letter notation.
+   *
+   * Detects paths in the format `/c/...` where a single letter after the
+   * leading slash represents a Windows drive letter.
+   *
+   * @example
+   *   ;```typescript
+   *   isUnixPath('/c/tools/bin') // true
+   *   isUnixPath('/tmp/build') // false
+   *   isUnixPath('C:/Windows') // false
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The path to check.
+   *
+   * @returns {boolean} `true` if the path uses MSYS drive letter notation
+   */
+  function isUnixPath(pathLike) {
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    return (
+      typeof filepath === 'string' &&
+      require_primordials_regexp.RegExpPrototypeTest(
+        require_paths_shared.msysDriveRegExp,
+        filepath,
+      )
+    )
+  }
+  /**
+   * Check if a character code is a Windows device root letter (A-Z / a-z).
+   *
+   * @example
+   *   ;```typescript
+   *   isWindowsDeviceRoot(67) // true  — 'C'
+   *   isWindowsDeviceRoot(99) // true  — 'c'
+   *   isWindowsDeviceRoot(58) // false — ':'
+   *   ```
+   *
+   * @param {number} code - The character code to check.
+   *
+   * @returns {boolean} `true` if valid drive-letter code
+   */
+  /* c8 ignore start - Only called from Windows-only branches. */
+  function isWindowsDeviceRoot(code) {
+    return (code >= 65 && code <= 90) || (code >= 97 && code <= 122)
+  }
+  /* c8 ignore stop */
+  /**
+   * The forward-slash substring form of a separator-wrapped entry, or
+   * undefined when the value is not wrapped. The inner segment's backslashes
+   * become forward slashes so the needle matches against normalized paths.
+   *
+   * @example
+   *   ;```typescript
+   *   separatorWrappedSubstring('/rendering-chromium-to-png/') // '/rendering-chromium-to-png/'
+   *   separatorWrappedSubstring('\\rendering-chromium-to-png\\') // '/rendering-chromium-to-png/'
+   *   separatorWrappedSubstring('scripts/fleet/acquire.mts') // undefined
+   *   ```
+   *
+   * @param {string | Buffer | URL} pathLike - The value to convert.
+   *
+   * @returns {string | undefined} The `/inner/` substring form, or undefined
+   */
+  function separatorWrappedSubstring(pathLike) {
+    if (!isSeparatorWrapped(pathLike)) return
+    const filepath = require_paths_shared.pathLikeToString(pathLike)
+    return `/${require_primordials_string.StringPrototypeSlice(filepath, 1, -1).replaceAll('\\', '/')}/`
+  }
+  exports.isAbsolute = isAbsolute
+  exports.isNodeModules = isNodeModules
+  exports.isPath = isPath
+  exports.isPathSeparator = isPathSeparator
+  exports.isPathWithinRoot = isPathWithinRoot
+  exports.isRelative = isRelative
+  exports.isSeparatorWrapped = isSeparatorWrapped
+  exports.isUnixPath = isUnixPath
+  exports.isWindowsDeviceRoot = isWindowsDeviceRoot
+  exports.separatorWrappedSubstring = separatorWrappedSubstring
+})
+
+var require_resolve = /* @__PURE__ */ __commonJSMin(exports => {
+  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
+  const require_constants_platform = require_platform()
+  const require_primordials_string = require_string$1()
+  require_encoding()
+  const require_paths_shared = require_shared$2()
+  const require_paths_predicates = require_predicates()
+  /**
+   * @file Path resolution utilities — `resolve`, `relative`, `relativeResolve`.
+   *   Split out of `paths/normalize.ts` for size hygiene.
+   *
+   *   - `resolve` — Node-style `path.resolve()` over absolute-path semantics
+   *   - `relative` — relative path from one absolute to another
+   *   - `relativeResolve` — `relative` + `normalizePath` convenience wrapper
+   */
+  function findCommonPathPrefix(actualFrom, actualTo) {
+    const length =
+      actualFrom.length < actualTo.length
+        ? actualFrom.length - 1
+        : actualTo.length - 1
+    let lastCommonSep = -1
+    let i = 0
+    for (; i < length; i += 1) {
+      let fromCode = require_primordials_string.StringPrototypeCharCodeAt(
+        actualFrom,
+        1 + i,
+      )
+      let toCode = require_primordials_string.StringPrototypeCharCodeAt(
+        actualTo,
+        1 + i,
+      )
+      /* c8 ignore start - Windows-only case folding. */
+      if (require_constants_platform.isWin32()) {
+        if (fromCode >= 65 && fromCode <= 90) fromCode += 32
+        if (toCode >= 65 && toCode <= 90) toCode += 32
+      }
+      /* c8 ignore stop */
+      if (fromCode !== toCode) break
+      if (
+        require_paths_predicates.isPathSeparator(
+          require_primordials_string.StringPrototypeCharCodeAt(
+            actualFrom,
+            1 + i,
+          ),
+        )
+      )
+        lastCommonSep = i
+    }
+    return {
+      __proto__: null,
+      length,
+      index: i,
+      lastCommonSep,
+    }
+  }
+  /**
+   * Calculate the relative path from one path to another.
+   *
+   * Both inputs are resolved to absolute paths first, then compared to find the
+   * longest common base, and finally a relative path is constructed using `../`
+   * for parent-directory traversal.
+   *
+   * Windows file systems are case-insensitive; the comparison reflects that.
+   *
+   * @example
+   *   ;```typescript
+   *   relative('/foo/bar', '/foo/baz') // '../baz'
+   *   relative('/foo/bar/baz', '/foo') // '../..'
+   *   relative('/foo', '/foo/bar') // 'bar'
+   *   relative('/foo/bar', '/foo/bar') // ''
+   *   ```
+   *
+   * @param {string} from - Source path.
+   * @param {string} to - Destination path.
+   *
+   * @returns {string} Relative path from `from` to `to`, or empty string if
+   *   equal.
+   */
+  function relative(from, to) {
+    if (from === to) return ''
+    const actualFrom = resolve$1(from)
+    const actualTo = resolve$1(to)
+    if (actualFrom === actualTo) return ''
+    /* c8 ignore start - Windows-only case-insensitive comparison. */
+    if (require_constants_platform.isWin32()) {
+      if (actualFrom.toLowerCase() === actualTo.toLowerCase()) return ''
+    }
+    /* c8 ignore stop */
+    const fromStart = 1
+    const fromLen = actualFrom.length - fromStart
+    const toStart = 1
+    const toLen = actualTo.length - toStart
+    const common = findCommonPathPrefix(actualFrom, actualTo)
+    const { length, index: i } = common
+    let { lastCommonSep } = common
+    /* c8 ignore start */
+    if (i === length) {
+      if (toLen > length) {
+        const toCode = require_primordials_string.StringPrototypeCharCodeAt(
+          actualTo,
+          toStart + i,
+        )
+        if (require_paths_predicates.isPathSeparator(toCode))
+          return actualTo.slice(toStart + i + 1)
+        if (i === 0) return actualTo.slice(toStart + i)
+      } else if (fromLen > length) {
+        const fromCode = require_primordials_string.StringPrototypeCharCodeAt(
+          actualFrom,
+          fromStart + i,
+        )
+        if (require_paths_predicates.isPathSeparator(fromCode))
+          lastCommonSep = i
+        else if (i === 0) lastCommonSep = 0
+      }
+    }
+    return (
+      relativePathParentSegments(actualFrom, fromStart + lastCommonSep + 1) +
+      actualTo.slice(toStart + lastCommonSep)
+    )
+  }
+  function relativePathParentSegments(actualFrom, start) {
+    const fromEnd = actualFrom.length
+    let out = ''
+    for (let i = start; i <= fromEnd; i += 1) {
+      const code = require_primordials_string.StringPrototypeCharCodeAt(
+        actualFrom,
+        i,
+      )
+      if (i === fromEnd || require_paths_predicates.isPathSeparator(code))
+        out += out.length === 0 ? '..' : '/..'
+    }
+    return out
+  }
+  /**
+   * Get the normalized relative path from one path to another.
+   *
+   * Computes the relative path using `relative()` then runs the result through
+   * `normalizePath()`. An empty string, meaning the same path, is preserved
+   * verbatim rather than collapsed to `.`.
+   *
+   * @example
+   *   ;```typescript
+   *   relativeResolve('/foo/bar', '/foo/baz') // '../baz'
+   *   relativeResolve('/foo/bar', '/foo/bar') // ''
+   *   relativeResolve('/foo/./bar', '/foo/baz') // '../baz'
+   *   ```
+   *
+   * @param {string} from - Source path.
+   * @param {string} to - Destination path.
+   *
+   * @returns {string} Normalized relative path, or empty string if equal
+   */
+  function relativeResolve(from, to) {
+    const rel = relative(from, to)
+    if (rel === '') return ''
+    return require_paths_shared.normalizePath(rel)
+  }
+  /**
+   * Resolve an absolute path from path segments.
+   *
+   * Mimics Node.js `path.resolve()`: processes segments right-to-left, stops at
+   * the first absolute segment, and prepends the cwd if no absolute segment is
+   * found. The final path is normalized.
+   *
+   * @example
+   *   ;```typescript
+   *   resolve('foo', 'bar', 'baz') // '/cwd/foo/bar/baz'
+   *   resolve('/foo', 'bar', 'baz') // '/foo/bar/baz'
+   *   resolve('foo', '/bar', 'baz') // '/bar/baz'
+   *   resolve() // '/cwd'
+   *   ```
+   *
+   * @param {...string} segments - Path segments to resolve.
+   *
+   * @returns {string} The resolved absolute path
+   */
+  function resolve$1(...segments) {
+    let resolvedPath = ''
+    let resolvedAbsolute = false
+    for (let i = segments.length - 1; i >= 0 && !resolvedAbsolute; i -= 1) {
+      const segment = segments[i]
+      /* c8 ignore start */
+      if (typeof segment !== 'string' || segment.length === 0) continue
+      resolvedPath =
+        segment + (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
+      resolvedAbsolute = require_paths_predicates.isAbsolute(segment)
+    }
+    if (!resolvedAbsolute)
+      resolvedPath =
+        /* @__PURE__ */ __require('node:process').cwd() +
+        (resolvedPath.length === 0 ? '' : `/${resolvedPath}`)
+    /* c8 ignore stop */
+    return require_paths_shared.normalizePath(resolvedPath)
+  }
+  exports.findCommonPathPrefix = findCommonPathPrefix
+  exports.relative = relative
+  exports.relativePathParentSegments = relativePathParentSegments
+  exports.relativeResolve = relativeResolve
+  exports.resolve = resolve$1
+})
+
+var require_normalize = /* @__PURE__ */ __commonJSMin(exports => {
+  Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' })
+  const require_paths_shared = require_shared$2()
+  const require_paths_conversion = require_conversion()
+  const require_paths_predicates = require_predicates()
+  const require_paths_resolve = require_resolve()
+  exports.foldPathForCompare = require_paths_shared.foldPathForCompare
+  exports.fromUnixPath = require_paths_conversion.fromUnixPath
+  exports.isAbsolute = require_paths_predicates.isAbsolute
+  exports.isNodeModules = require_paths_predicates.isNodeModules
+  exports.isPath = require_paths_predicates.isPath
+  exports.isPathSeparator = require_paths_predicates.isPathSeparator
+  exports.isRelative = require_paths_predicates.isRelative
+  exports.isSeparatorWrapped = require_paths_predicates.isSeparatorWrapped
+  exports.isUnixPath = require_paths_predicates.isUnixPath
+  exports.isWindowsDeviceRoot = require_paths_predicates.isWindowsDeviceRoot
+  exports.msysDriveToNative = require_paths_shared.msysDriveToNative
+  exports.normalizePath = require_paths_shared.normalizePath
+  exports.pathLikeToString = require_paths_shared.pathLikeToString
+  exports.relative = require_paths_resolve.relative
+  exports.relativeResolve = require_paths_resolve.relativeResolve
+  exports.resolve = require_paths_resolve.resolve
+  exports.separatorWrappedSubstring =
+    require_paths_predicates.separatorWrappedSubstring
+  exports.splitPath = require_paths_conversion.splitPath
+  exports.toUnixPath = require_paths_conversion.toUnixPath
+  exports.trimLeadingDotSlash = require_paths_conversion.trimLeadingDotSlash
+})
+
+var import_normalize = require_normalize()
 const FLEET_CANONICAL_END_SENTINEL = ['#fleet', 'canonical', 'end'].join('-')
 const FLEET_CANONICAL_SPLICE_FILES = [
   '.config/fleet/oxlintrc.json',
@@ -16796,7 +17442,9 @@ const FLEET_CANONICAL_SPLICE_FILES = [
  * segment file — the path gate every splice call site checks first.
  */
 function isFleetCanonicalSpliceFile(relPath) {
-  return FLEET_CANONICAL_SPLICE_FILES.includes(relPath.replaceAll('\\', '/'))
+  return FLEET_CANONICAL_SPLICE_FILES.includes(
+    (0, import_normalize.normalizePath)(relPath),
+  )
 }
 /**
  * Index just past the first end-sentinel token, including the closing quote
@@ -20545,7 +21193,7 @@ var require_strings = /* @__PURE__ */ __commonJSMin(exports => {
 })
 
 var import_strings = require_strings()
-var import_predicates = require_predicates$1()
+var import_predicates = require_predicates$2()
 const MCP_PROVIDERS = {
   linear: {
     connectOrder: 5,

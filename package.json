@@ -4179,7 +4179,16 @@
     "coordination:mail": "node scripts/fleet/coordination/mail.mts",
     "fix:github": "node scripts/repo/fix/github/run.mts",
     "git:admin-push": "node scripts/fleet/git/admin/push.mts",
-    "npm:auth:browser": "node scripts/fleet/npm-auth-browser.mts"
+    "npm:auth:browser": "node scripts/fleet/npm-auth-browser.mts",
+    "release:github": "node scripts/fleet/release/github/remote.mts",
+    "build:check": "node scripts/fleet/commands/run.mts build check",
+    "ci:check": "node scripts/fleet/commands/run.mts ci check",
+    "cover:check": "node scripts/fleet/commands/run.mts cover check",
+    "lint:check": "node scripts/fleet/commands/run.mts lint check",
+    "lockstep:check": "node scripts/fleet/commands/run.mts lockstep check",
+    "test:check": "node scripts/fleet/commands/run.mts test check",
+    "types:check": "node scripts/fleet/commands/run.mts types check",
+    "update:check": "node scripts/fleet/weekly-update.mts --check-updates"
   },
   "devDependencies": {
     "@babel/core": "catalog:",
