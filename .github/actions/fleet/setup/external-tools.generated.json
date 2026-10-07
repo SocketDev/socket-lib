@@ -783,7 +783,7 @@
         },
         "win32-x64": {
           "asset": "pnpm-win32-x64.zip",
-          "integrity": "sha512-+EAJeSq0IHPrh75KXr1ne6BDt07SmYB60lFNPpc3Z6n9O2T5Yh8AjFzsUe6CFfxaYIZ74ccWz01UHeNfPmxW0Q=="
+          "integrity": "sha512-+EAJeSq0IHPqO2LuMa12eqBDt04tmYB60lFNPpc3Z6n9O2T5YR+AhcDsUe6CFfxaYIZ74ccWz01UGeNfPmyFbQ=="
         }
       },
       "origin": "gh-asset",
