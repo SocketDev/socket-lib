@@ -421,6 +421,36 @@ minimumReleaseAgeExclude:
   - 'oxfmt@0.72.0'
   # published: 2026-10-05 | removable: 2026-10-12
   - 'oxlint@1.87.0'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.android-arm64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.android-x64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.darwin-arm64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.darwin-x64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.freebsd-x64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.linux-arm64-musl@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.linux-arm64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.linux-ppc64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.linux-riscv64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.linux-s390x@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.linux-x64-musl@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.linux-x64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.win32-arm64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - '@pnpm/exe.win32-x64@12.10.1'
+  # published: 2026-10-06 | removable: 2026-10-13
+  - 'pnpm@12.10.1'
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball
 # specs. Direct git deps in this repo are still allowed; this only
