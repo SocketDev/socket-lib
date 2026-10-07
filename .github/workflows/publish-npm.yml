@@ -652,6 +652,14 @@ jobs:
         with:
           allow-fill: 'true'
           require-ready: 'true'
+      - name: 'Mint PR branch token'
+        if: ${{ inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' }}
+        id: pr-branch-app
+        uses: ./.github/actions/fleet/github-pr-branch-app-token
+        with:
+          client-id: ${{ secrets.SOCKET_PR_CLIENT_ID || vars.SOCKET_PR_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
       - name: 'Mint release token'
         if: ${{ inputs.backfill-version == '' && steps.content-trust.outputs.trusted == 'true' }}
         id: release-app
@@ -670,6 +678,7 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
           RELEASE_AS: ${{ inputs.release-as }}
           RESUME_RESERVED: ${{ inputs.resume-reserved }}
+          PR_APP_TOKEN: ${{ steps.pr-branch-app.outputs.token }}
           RELEASE_APP_TOKEN: ${{ steps.release-app.outputs.token }}
           GH_TOKEN: ${{ steps.release-app.outputs.token }}
         # CHECKOUT_REF forwards on its own so a checkout-ref dispatch WITHOUT
