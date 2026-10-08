@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [7.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.0) - 2026-10-05
+## [7.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.0) - 2026-10-08
 
 ### Added
 
@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`paths`** — normalize wrapped path segments
+- **`release`** — mint PR app token for staged publish
 - **`npm`** — use staged scan dispatcher
 - **`build`** — set Rolldown debug options
 - **`lockfile`** — remove stale hook importer
@@ -35,8 +37,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
+- **`deps`** — resolve audited dependency vulnerabilities
+- **`ci`** — validate npm release task names
 - **`ci`** — repair release metadata gates
-- **`ci`** — restore canonical release checks
 - **`deps`** — select verified pnpm manager
 - **`deps`** — sync pnpm lockfile metadata
 - **`deps`** — restore pinned pnpm manager selection
