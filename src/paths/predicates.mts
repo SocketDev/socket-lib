@@ -31,6 +31,7 @@ import {
   foldPathForCompare,
   msysDriveRegExp,
   nodeModulesPathRegExp,
+  normalizePath,
   pathLikeToString,
 } from './shared.mjs'
 
@@ -335,6 +336,6 @@ export function separatorWrappedSubstring(
     return undefined
   }
   const filepath = pathLikeToString(pathLike)
-  const inner = StringPrototypeSlice(filepath, 1, -1).replaceAll('\\', '/')
+  const inner = normalizePath(StringPrototypeSlice(filepath, 1, -1))
   return `/${inner}/`
 }
