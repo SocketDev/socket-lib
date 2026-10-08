@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for
- * src/eco/npm/npm-cli/extract-package-name-from-path.ts.
+ *   src/eco/npm/npm-cli/extract-package-name-from-path.ts.
  */
 
 import { describe, expect, it } from 'vitest'

@@ -1,6 +1,6 @@
 /**
  * @file Deduplicate an array via `Set`. Preserves
- * first-occurrence order.
+ *   first-occurrence order.
  */
 
 import { SetCtor } from '../primordials/map-set.mjs'

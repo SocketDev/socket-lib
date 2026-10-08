@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for resolveBazel() — orchestrator +
- * memoization.
+ *   memoization.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'

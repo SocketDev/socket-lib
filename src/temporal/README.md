@@ -97,11 +97,11 @@ This is what an operation looks like end-to-end (excerpt from
 ```ts
 /**
  * 8.4.2 Temporal.Instant.from ( item )
- * https://tc39.es/proposal-temporal/#sec-temporal.instant.from
+ * https://tc39.es/proposal-temporal/#sec-temporal.instant.from.
  *
  * 1. If Type(item) is Object and item has an [[InitializedTemporalInstant]]
- *    internal slot, then
- *    a. Return ! CreateTemporalInstant(item.[[Nanoseconds]]).
+ *    internal slot, then a. Return !
+ *    CreateTemporalInstant(item.[[Nanoseconds]]).
  * 2. Return ? ToTemporalInstant(item).
  */
 export function from(item: unknown): Instant {
