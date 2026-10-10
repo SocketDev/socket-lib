@@ -39,8 +39,8 @@ catalog:
   '@sigstore/core': 4.0.1
   '@sigstore/protobuf-specs': 0.5.2
   '@sigstore/verify': 4.1.2
-  '@mdn/browser-compat-data': 8.1.3
-  '@modelcontextprotocol/client': 2.2.0
+  '@mdn/browser-compat-data': 8.1.4
+  '@modelcontextprotocol/client': 2.3.0
   # run-local-ci (bin: local-ci, formerly published as @redwoodjs/agent-ci)
   # runs a repo's GitHub Actions workflows locally in Docker so a change can
   # be validated before it's pushed (see the `agent-ci` skill). dtu-github-
@@ -64,7 +64,7 @@ catalog:
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
   'typebox': 1.3.34
-  '@socketregistry/packageurl-js': 1.5.3
+  '@socketregistry/packageurl-js': 1.6.0
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
   # self-reference and resolves through the local exports map, not
@@ -75,15 +75,15 @@ catalog:
   # version regardless of where the importing file lives. src/ +
   # test/ code uses the canonical name because vitest aliases that
   # to local src/.
-  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.3'
+  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.6.0'
   '@socketsecurity/lib': 7.1.0
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@7.1.0'
   '@socketsecurity/registry': 2.0.5
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.5'
-  '@socketsecurity/sdk': 4.1.5
-  '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.1.5'
+  '@socketsecurity/sdk': 4.2.0
+  '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.2.0'
   '@types/mdast': 4.0.4
-  '@types/node': 26.6.3
+  '@types/node': 26.6.4
   '@types/semver': 7.8.0
   '@types/shell-quote': 1.7.5
   'compromise': 14.17.0
@@ -131,7 +131,7 @@ catalog:
   # catalog dep; source of truth is template/pnpm-workspace.fleet.yaml.
   'playwright-core': 1.63.0
   # portless — stable HTTPS `.localhost` URLs for local page tests and rendered UI checks.
-  'portless': 0.15.6
+  'portless': 0.15.7
   # Direct bundler pin for repos that run rolldown as their build
   # (socket-packageurl-js, socket-webext, the trusted-publisher
   # extension, and the in-progress esbuild→rolldown migrations).
@@ -143,14 +143,14 @@ catalog:
   'regjsparser': 0.13.3
   'rolldown': 1.2.12
   'semver': 7.8.5
-  'shell-quote': 1.11.0
+  'shell-quote': 1.12.0
   'taze': 21.3.0
   # vite 8.0.16 swaps esbuild → rolldown natively (bundles rolldown
   # 1.0.2) and patches the <=8.0.15 advisories (GHSA-fx2h-pf6j-xcff
   # high, GHSA-v6wh-96g9-6wx3 medium). Tracked here so the pnpm
   # override below pins every transitive `vite` (vitest, @vitest/*,
   # plugin authors) to it.
-  'typescript': 7.1.0-dev.20260930.4
+  'typescript': 7.1.0-dev.20261002.1
   'vitest': 5.0.3
   '@vitest/coverage-v8': 5.0.3
   '@bcoe/v8-coverage': 1.0.2
@@ -175,7 +175,7 @@ catalog:
   # Test-only tar extraction seam for archives coverage; single-sourced here so
   # the devDep and the dedup override below stay on one pin.
   'tar-fs': 3.1.3
-  'vite': 8.3.1
+  'vite': 8.3.2
   'vitiate': 0.3.1
   # Read by scripts/fleet/constants/catalog-holds.mts, cascaded fleet payload.
   # No script keys on it, so the devDep is declared via FLEET_REQUIRED_DEVDEPS.
@@ -207,7 +207,7 @@ catalog:
   'fast-sort': '3.4.1'
   'fflate': '0.8.3'
   'get-east-asian-width': '1.7.0'
-  'globals': '17.12.0'
+  'globals': '17.13.0'
   'has-flag': '5.0.1'
   'libnpmexec': '10.3.3'
   'libnpmpack': '9.1.14'
@@ -223,7 +223,7 @@ catalog:
   'spdx-expression-parse': '4.0.0'
   'streaming-iterables': '8.0.1'
   'supports-color': '10.2.2'
-  'tar-stream': '3.2.1'
+  'tar-stream': '3.2.2'
   'terminal-link': '2.1.1'
   'validate-npm-package-name': '6.0.2'
   'webpack': '5.111.1'
@@ -497,7 +497,7 @@ overrides:
   '@inquirer/ansi': '2.0.8'
   '@inquirer/core': '11.2.1'
   '@inquirer/figures': '2.0.9'
-  '@modelcontextprotocol/sdk': '1.31.0'
+  '@modelcontextprotocol/sdk': '1.32.0'
   '@npmcli/arborist': '9.9.2'
   '@npmcli/git': '6.0.3'
   '@npmcli/installed-package-contents': '4.0.0'
@@ -517,7 +517,7 @@ overrides:
   # vendors its own ansi-styles) leaves only ESM importers (wrap-ansi), so no
   # compat patch is needed here.
   'ansi-styles': '6.2.3'
-  'baseline-browser-mapping': '2.11.26'
+  'baseline-browser-mapping': '2.11.27'
   # Must match the `brace-expansion@>=4` override, the catalog pin, the soak
   # exclude and the patch key above — all four say 5.0.9. This bare key is more
   # specific, so at 5.0.8 it won and pinned resolution there, which orphaned
@@ -551,7 +551,7 @@ overrides:
   'hono': '4.13.12'
   'hosted-git-info': '8.1.0'
   'http-cache-semantics': '4.3.0'
-  'ip-address': '10.7.2'
+  'ip-address': '10.7.3'
   'isexe': '3.1.5'
   # Dedup: js-tokens 4 (@babel/code-frame, CJS require) + 10 (ast-v8-to-istanbul,
   # ESM import) → 10.0.0. The two majors have incompatible APIs (v4 regex vs v10
@@ -613,7 +613,7 @@ overrides:
   # pin, and its tar-stream 2/3 dep along with it → 3.2.0. Both are CJS;
   # dockerode is the only tar-fs@2 consumer (latent devtool).
   'tar-fs': 'catalog:'
-  'tar-stream': '3.2.1'
+  'tar-stream': '3.2.2'
   'terminal-link': '2.1.1'
   'tslib': '2.8.1'
   'undici': '6.29.0'
