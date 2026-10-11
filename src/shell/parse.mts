@@ -55,14 +55,9 @@ export function detectShellHazards(cmd: string): {
   let processSubstitution = false
   const entries = shellParse(cmd)
   let current: string[] = []
-  // shell-quote tokenizes the three process-substitution forms differently:
-  //   `<(…)` → a single `{op:'<('}` token
-  //   `>(…)` → `{op:'>'}` then `{op:'('}`
-  //   `=(…)` → the bare string `'='` then `{op:'('}`
-  // So the reliable signal is either the `<(` op, or a `(` op whose immediately
-  // preceding token is a `<`/`>` op or a lone `=` string (the substitution
-  // lead-in). A bare `(` after a normal token is plain subshell grouping and is
-  // left alone.
+  // shell-quote tokenizes process substitution as `{op:'<('}` or `{op:'>('}`.
+  // Also detect split substitution tokens and Zsh's bare `=` then `(` tokens.
+  // A bare `(` after a normal token is plain subshell grouping.
   let prevWasSubstLead = false
   const flush = (): void => {
     if (current.length > 0 && /^=[a-zA-Z_]/.test(current[0]!)) {
@@ -74,7 +69,7 @@ export function detectShellHazards(cmd: string): {
     const entry = entries[i]
     if (entry !== null && typeof entry === 'object' && 'op' in entry) {
       const { op } = entry as { op: string }
-      if (op === '<(') {
+      if (op === '<(' || op === '>(') {
         processSubstitution = true
       } else if (op === '(' && prevWasSubstLead) {
         processSubstitution = true
