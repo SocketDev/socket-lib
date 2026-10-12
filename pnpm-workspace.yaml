@@ -91,16 +91,16 @@ catalog:
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
   'fast-check': 4.10.2
-  'magic-string': 1.4.2
+  'magic-string': 1.4.3
   'markdownlint-cli2': 0.23.3
-  'mdast-util-from-markdown': 2.0.3
+  'mdast-util-from-markdown': 2.1.0
   # GFM pair for render-faithful markdown parsing (tables, footnotes,
   # strikethrough, autolinks) — mdast-util-from-markdown must always be
   # combined with micromark-extension-gfm + mdast-util-gfm.
   'mdast-util-gfm': 3.1.0
   # The serializer half, for tools that legitimately EMIT markdown; edits to
   # existing documents stay position-based (never a whole-doc round-trip).
-  'mdast-util-to-markdown': 2.1.3
+  'mdast-util-to-markdown': 2.2.0
   'micromark': 4.0.3
   'micromark-extension-gfm': 3.0.0
   'minimatch': 10.2.6
@@ -150,7 +150,7 @@ catalog:
   # high, GHSA-v6wh-96g9-6wx3 medium). Tracked here so the pnpm
   # override below pins every transitive `vite` (vitest, @vitest/*,
   # plugin authors) to it.
-  'typescript': 7.1.0-dev.20261002.1
+  'typescript': 7.1.0-dev.20261005.1
   'vitest': 5.0.3
   '@vitest/coverage-v8': 5.0.3
   '@bcoe/v8-coverage': 1.0.2
@@ -186,12 +186,12 @@ catalog:
   '@babel/parser': '7.29.9'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
-  '@inquirer/checkbox': '5.2.5'
-  '@inquirer/confirm': '6.3.2'
-  '@inquirer/input': '5.1.6'
-  '@inquirer/password': '5.2.2'
-  '@inquirer/search': '4.3.3'
-  '@inquirer/select': '5.2.5'
+  '@inquirer/checkbox': '5.2.6'
+  '@inquirer/confirm': '6.3.3'
+  '@inquirer/input': '5.1.7'
+  '@inquirer/password': '5.2.3'
+  '@inquirer/search': '4.3.4'
+  '@inquirer/select': '5.2.6'
   '@npmcli/arborist': '9.9.2'
   '@npmcli/package-json': '7.0.5'
   '@npmcli/promise-spawn': '8.0.3'
@@ -463,7 +463,7 @@ overrides:
   'isexe@>=3': '4.0.0'
   'js-yaml@>=5.0.0 <5.2.2': '5.4.2'
   'lru-cache@>=10': '11.5.3'
-  'magic-string': '1.4.2'
+  'magic-string': '1.4.3'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
@@ -494,7 +494,7 @@ overrides:
   # encoded backslash. Reached transitively through the agent SDK's MCP SDK,
   # which still resolves a vulnerable range on its own.
   '@hono/node-server@<1.19.15': '1.19.17'
-  '@inquirer/ansi': '2.0.8'
+  '@inquirer/ansi': '2.0.9'
   '@inquirer/core': '11.2.1'
   '@inquirer/figures': '2.0.9'
   '@modelcontextprotocol/sdk': '1.32.0'
@@ -548,7 +548,7 @@ overrides:
   'has-flag': '5.0.1'
   # 4.12.25+ clears GHSA-88fw-hqm2-52qc (hono CORS wildcard+credentials reflect),
   # pulled transitively via @anthropic-ai/claude-agent-sdk.
-  'hono': '4.13.12'
+  'hono': '4.13.13'
   'hosted-git-info': '8.1.0'
   'http-cache-semantics': '4.3.0'
   'ip-address': '10.7.3'
