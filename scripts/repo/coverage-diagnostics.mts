@@ -25,7 +25,7 @@ import {
 } from '@socketsecurity/lib-stable/json/format'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
-import { runQuietCommand } from '../fleet/cover-run.mts'
+import { runQuietCommand } from '../fleet/cover/execution.mts'
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 import { runMain } from '../fleet/process/main/run.mts'
