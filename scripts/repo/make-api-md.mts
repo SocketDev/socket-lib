@@ -7,7 +7,14 @@
  *   exports change.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
+import { tmpdir } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -336,6 +343,7 @@ export function renderLlmsTxt(
 
 async function main(): Promise<void> {
   try {
+    const check = process.argv.includes('--check')
     const pkg = JSON.parse(
       readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
     ) as { exports: PackageExports; name: string }
@@ -344,10 +352,62 @@ async function main(): Promise<void> {
     const groups = groupRows(rows)
 
     const apiPath = path.join(rootPath, 'docs', 'api.md')
-    writeFileSync(apiPath, renderMarkdown(groups, pkg.name))
+    const apiContents = renderMarkdown(groups, pkg.name)
 
     const llmsPath = path.join(rootPath, 'llms.txt')
-    writeFileSync(llmsPath, renderLlmsTxt(groups, rows.length))
+    const llmsContents = renderLlmsTxt(groups, rows.length)
+
+    if (check) {
+      const tempDirectory = mkdtempSync(
+        path.join(tmpdir(), 'socket-lib-docs-check-'),
+      )
+      try {
+        const tempApiPath = path.join(tempDirectory, 'api.md')
+        const tempLlmsPath = path.join(tempDirectory, 'llms.txt')
+        writeFileSync(tempApiPath, apiContents)
+        writeFileSync(tempLlmsPath, llmsContents)
+        await spawn(
+          isWin32()
+            ? 'node_modules\\.bin\\oxfmt.cmd'
+            : 'node_modules/.bin/oxfmt',
+          [
+            '-c',
+            '.config/fleet/oxfmtrc.json',
+            '--ignore-path',
+            '.config/fleet/.prettierignore',
+            '--write',
+            tempApiPath,
+            tempLlmsPath,
+          ],
+          {
+            cwd: rootPath,
+            shell: isWin32(),
+            stdio: 'ignore',
+          },
+        )
+
+        const apiMatches =
+          existsSync(apiPath) &&
+          readFileSync(apiPath, 'utf8') === readFileSync(tempApiPath, 'utf8')
+        const llmsMatches =
+          existsSync(llmsPath) &&
+          readFileSync(llmsPath, 'utf8') === readFileSync(tempLlmsPath, 'utf8')
+
+        if (!apiMatches || !llmsMatches) {
+          logger.error('Generated docs are out of date. Run: pnpm run docs')
+          process.exitCode = 1
+          return
+        }
+
+        logger.success('docs/api.md and llms.txt are up to date')
+        return
+      } finally {
+        rmSync(tempDirectory, { force: true, recursive: true })
+      }
+    }
+
+    writeFileSync(apiPath, apiContents)
+    writeFileSync(llmsPath, llmsContents)
 
     // Run oxfmt so the checked-in files match the formatter's expectations
     // (table column alignment, etc.) — otherwise lint fails on every build.
@@ -386,9 +446,11 @@ async function main(): Promise<void> {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'generates docs/api.md and llms.txt from the package.json exports map',
-  help: `Usage: node scripts/repo/make-api-md.mts
+  help: `Usage: node scripts/repo/make-api-md.mts [--check]
 
-  No flags. Regenerate whenever the exports map changes.`,
+--check  verify generated docs without writing
+--help, -h  show usage
+--describe  show purpose`,
   json: 'result',
 }
 

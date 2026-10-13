@@ -4039,6 +4039,7 @@
     "depot:auth": "node scripts/fleet/registry/depot/browser-auth.mts",
     "dev": "node scripts/repo/build/run.mts --watch",
     "docs": "node scripts/repo/make-api-md.mts",
+    "docs:check": "node scripts/repo/make-api-md.mts --check",
     "doctor": "node scripts/fleet/doctor.mts",
     "doctor:auth": "node scripts/fleet/check/setup-is-prompt-less.mts",
     "doctor:credentials": "node scripts/fleet/credentials/doctor.mts",
