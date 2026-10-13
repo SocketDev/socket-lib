@@ -7,7 +7,7 @@
  *   exports change.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -30,7 +30,11 @@ const logger = getScriptLogger()
 type PackageExports = Record<
   string,
   | string
-  | { types?: string | undefined; default?: string | undefined }
+  | {
+      source?: string | undefined
+      types?: string | undefined
+      default?: string | undefined
+    }
   | undefined
 >
 
@@ -54,9 +58,16 @@ export function buildRows(exports: PackageExports): Row[] {
     if (!def.startsWith('./dist/')) {
       continue
     }
-    const srcPath = def
-      .replace(/^\.\/dist\//, () => path.join(rootPath, 'src') + path.sep)
-      .replace(/\.js$/, '.ts')
+    const inferredPath = value.source
+      ? path.resolve(rootPath, value.source)
+      : def
+          .replace(/^\.\/dist\//, () => path.join(rootPath, 'src') + path.sep)
+          .replace(/\.c?js$/, extension =>
+            extension === '.cjs' ? '.cts' : '.mts',
+          )
+    const srcPath = existsSync(inferredPath)
+      ? inferredPath
+      : inferredPath.replace(/\.(?:cts|mts|ts)$/, '.mts')
     const display = subpath.slice(2)
     // Link llms.txt at the shipped declaration file (./dist/**/*.d.mts) — the
     // genuinely useful target in a published tarball, where `src/` is absent.
@@ -115,24 +126,31 @@ export function extractSummary(srcPath: string): string {
     return ''
   }
   const afterTag = block.slice(overviewIdx + tagLength)
-  // Strip leading-asterisk continuation and collapse whitespace.
+  // Strip leading-asterisk continuation while preserving prose paragraphs.
   const flat = afterTag
     .split(/\r?\n/)
     .map(line => line.replace(/^\s*\*\s?/, ''))
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-  // Stop at the first JSDoc tag (lines starting with `@` after normalization).
-  const tagBoundary = flat.search(/\s@\w+/)
+  let end = flat.length
+  for (let index = 0; index < flat.length; index += 1) {
+    if (flat[index]!.startsWith('@')) {
+      end = index
+      break
+    }
+  }
   const trimmed = normalizeProse(
-    (tagBoundary > 0 ? flat.slice(0, tagBoundary) : flat).trim(),
+    flat.slice(0, end).join(' ').replace(/\s+/g, ' ').trim(),
   )
   // First sentence, up to a period or 220 chars.
   const dotIdx = trimmed.indexOf('. ')
-  if (dotIdx > 0 && dotIdx < 220) {
-    return trimmed.slice(0, dotIdx + 1)
-  }
-  return trimmed.length > 220 ? `${trimmed.slice(0, 217)}...` : trimmed
+  const summary =
+    dotIdx > 0 && dotIdx < 220
+      ? trimmed.slice(0, dotIdx + 1)
+      : trimmed.length > 220
+        ? `${trimmed.slice(0, 217)}...`
+        : trimmed
+  return summary
+    .replaceAll('|', String.raw`\|`)
+    .replace(/https?:\/\/\S+/g, url => `<${url}>`)
 }
 
 export function groupRows(rows: Row[]): Map<string, Row[]> {
@@ -192,13 +210,34 @@ export function renderMarkdown(
   })
 
   const lines: string[] = []
-  lines.push('# API')
+  lines.push('# API Reference')
   lines.push('')
   lines.push(
     `Every subpath exported by **${packageName}**, grouped by namespace.`,
   )
   lines.push(
-    'Each entry links to the source module and shows the first sentence of its `@fileoverview`.',
+    'Each entry links to the exported source module. Where the module has an `@file` description, it appears in the table. Open the linked module for exported symbols, signatures, behavior, and type definitions.',
+  )
+  lines.push('')
+  lines.push('## Common tasks')
+  lines.push('')
+  lines.push(
+    '- [Start with installation and import examples](./getting-started.md). The package exposes each utility through a subpath import.',
+  )
+  lines.push(
+    '- [Make HTTP requests and downloads](./http-utilities.md), including JSON parsing, retries, redirects, and progress callbacks.',
+  )
+  lines.push(
+    '- [Read and write files safely](./file-system.md), with path, glob, and deletion helpers.',
+  )
+  lines.push(
+    '- [Spawn and manage processes](./process-utilities.md), including platform-aware commands and locks.',
+  )
+  lines.push(
+    '- [Read environment and platform state](./environment.md), including CI and Node.js environment values.',
+  )
+  lines.push(
+    '- [Combine utilities in complete examples](./examples.md), such as downloads with progress and cleanup.',
   )
   lines.push('')
   lines.push(
@@ -234,7 +273,8 @@ export function renderMarkdown(
     lines.push('| Subpath | Description |')
     lines.push('| --- | --- |')
     for (const row of rowsForGroup) {
-      const summary = row.summary || '_(no description)_'
+      const summary =
+        row.summary || 'Open the module for exported symbols and declarations.'
       lines.push(
         `| [\`${packageName}/${row.subpath}\`](../${row.file}) | ${summary} |`,
       )

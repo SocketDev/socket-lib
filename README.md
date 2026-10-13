@@ -36,7 +36,9 @@ import { httpJson } from '@socketsecurity/lib/http-request'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 ```
 
-Start with the [API reference](./docs/api.md) - every subpath export with a one-line description.
+### Documentation
+
+See the [API reference](./docs/api.md) for exported subpaths and linked module references. The [getting started guide](./docs/getting-started.md) has a usage walkthrough. Other guides cover [file system](./docs/file-system.md), [HTTP](./docs/http-utilities.md), [process](./docs/process-utilities.md), and [environment](./docs/environment.md) utilities.
 
 ## Development
 
