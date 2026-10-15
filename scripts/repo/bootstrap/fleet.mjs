@@ -10892,6 +10892,13 @@ function installFiles(filesDir, dest, manifest, options) {
   for (let i = 0, { length } = rels; i < length; i += 1) {
     const rel = rels[i]
     const target = path.join(dest, rel)
+    if (
+      opts.preserveTracked === true &&
+      (isAlwaysTrackedSurface(rel) || rel === '.gitignore')
+    ) {
+      skippedAlwaysTracked += 1
+      continue
+    }
     const stat = repoOwnedPaths.has(normalizeBundlePath(rel))
       ? lstatSync(target, { throwIfNoEntry: false })
       : void 0
@@ -13733,41 +13740,21 @@ function projectMcpClientConfigs(dest, preservedPaths) {
     throw new TypeError(
       `Adapter projection failed. Where: ${openCodePath}. Saw: non-object JSON; wanted an OpenCode configuration object. Fix: repair the file and retry installation.`,
     )
+  if (Object.hasOwn(existing, 'mcp') && !isPlainObject(existing['mcp']))
+    throw new TypeError(
+      `Adapter projection failed. Where: ${openCodePath}. Saw: non-object mcp member; wanted an OpenCode MCP configuration object. Fix: repair the file and retry installation.`,
+    )
   const generated = JSON.parse(renderOpenCodeMcpConfig(servers))
   if (!isPlainObject(generated))
     throw new TypeError('OpenCode MCP renderer returned invalid JSON.')
-  const existingMcp = isPlainObject(existing['mcp']) ? existing['mcp'] : {}
-  const rawExistingServers = isPlainObject(existingMcp['servers'])
-    ? existingMcp['servers']
-    : {}
   const generatedMcp = isPlainObject(generated['mcp']) ? generated['mcp'] : {}
-  const generatedServers = isPlainObject(generatedMcp['servers'])
-    ? generatedMcp['servers']
-    : {}
-  const existingServers = Object.fromEntries(
-    Object.entries(rawExistingServers).filter(
-      ([name]) => !Object.hasOwn(generatedServers, name),
-    ),
-  )
-  const sanitizedExistingMcp = Object.fromEntries(
-    Object.entries(existingMcp).filter(
-      ([name]) => name !== 'servers' && !Object.hasOwn(generatedServers, name),
-    ),
-  )
   writeIfChanged(
     openCodePath,
     `${JSON.stringify(
       {
         ...generated,
         ...existing,
-        mcp: {
-          ...sanitizedExistingMcp,
-          ...generatedMcp,
-          servers: {
-            ...existingServers,
-            ...generatedServers,
-          },
-        },
+        mcp: generatedMcp,
       },
       void 0,
       2,
@@ -14290,6 +14277,7 @@ async function installFleet(config) {
         }
       : memberManifest
     const installResult = installFiles(filesDir, dest, runtimeManifest, {
+      preserveTracked,
       refreshTracked: cfg.refreshTracked === true,
       preservedPaths,
     })
