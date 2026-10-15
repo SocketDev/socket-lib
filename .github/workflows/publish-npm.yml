@@ -651,6 +651,19 @@ jobs:
           install -m 0600 scripts/fleet/npm/native/build.mts "$RUNNER_TEMP/native-build.mts"
           install -m 0600 scripts/fleet/npm/native-artifact-files.mts "$RUNNER_TEMP/native-artifact-files.mts"
           install -m 0600 scripts/fleet/npm/native-artifacts.mts "$RUNNER_TEMP/native-artifacts.mts"
+      - name: Resolve reserved release source
+        id: reserved-release-source
+        if: ${{ inputs.resume-publish == true }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p 'require("./package.json").version')"
+          SOURCE_SHA="$(git log -1 --format=%H --fixed-strings --grep="chore: bump version to $VERSION" HEAD)"
+          if [[ ! "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "::error::Could not resolve the signed reserved release source for $VERSION." >&2
+            exit 1
+          fi
+          echo "source-sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
       - name: Set up and install
         uses: ./.github/actions/fleet/setup-and-install
         env:
@@ -659,7 +672,7 @@ jobs:
           cache: 'false'
           checkout-fetch-depth: '0'
           socket-api-token: ${{ steps.content-trust.outputs.trusted == 'true' && secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW || '' }}
-          checkout-ref: ${{ github.sha }}
+          checkout-ref: ${{ inputs.resume-publish == true && steps.reserved-release-source.outputs.source-sha || github.sha }}
           # Reuse the Release App for a contents:read token scoped to wheelhouse.
           # Both credentials enable the private release fallback. Without the
           # key, hydration still pulls public GHCR anonymously.
@@ -683,6 +696,7 @@ jobs:
         env:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           DISPATCH_SHA: ${{ github.sha }}
+          RESERVED_SOURCE_SHA: ${{ steps.reserved-release-source.outputs.source-sha }}
         run: |
           set -euo pipefail
           VERSION="$(node --input-type=module -e 'import { readPackageJson } from "./scripts/fleet/registry/npm/shared.mts"; process.stdout.write(readPackageJson().version)')"
@@ -691,8 +705,12 @@ jobs:
             exit 1
           fi
           HEAD_SHA="$(git rev-parse HEAD)"
-          if [ "$HEAD_SHA" != "$DISPATCH_SHA" ]; then
-            echo "::error::Reserved release resume did not check out the dispatched default-branch source." >&2
+          if [ "$HEAD_SHA" != "$RESERVED_SOURCE_SHA" ]; then
+            echo "::error::Reserved release resume did not check out the signed bump source." >&2
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "$RESERVED_SOURCE_SHA" "$DISPATCH_SHA"; then
+            echo "::error::Reserved release source is not in the dispatched default-branch history." >&2
             exit 1
           fi
           BUMP_SUBJECT="$(git log -1 --format=%s --fixed-strings --grep="chore: bump version to $VERSION" HEAD)"
