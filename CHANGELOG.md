@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.1.1](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.1) - 2026-10-15
+
+### Fixed
+
+- **`release`** — skip odai for exact versions
+- **`debug`** — peek at the default spinner
+- **`docs`** — use safe temporary directory cleanup
+- **`cover`** — remove expired timing allowances
+- **`spawn`** — forward detached process options
+- **`coverage`** — use the current command runner
+- **`shell`** — preserve process substitution detection on dependency update
+
 ## [7.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.0) - 2026-10-08
 
 ### Added
