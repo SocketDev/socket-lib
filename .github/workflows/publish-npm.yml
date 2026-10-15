@@ -501,7 +501,8 @@ jobs:
     if: ${{ always() && inputs.scan-stage-id == '' && needs.coverage.result == 'success' }}
     cache-mode: read
     name: Publish npm
-    runs-on: ${{ vars.NPM_PUBLISH_RUNNER || vars.ODAI_RUNNER || 'depot-ubuntu-24.04-4' }}
+    # npm provenance rejects self-hosted runners.
+    runs-on: ubuntu-24.04
     # npm's trusted-publisher config pins this GitHub environment name; the
     # OIDC token exchange 404s if the job runs outside it.
     environment: publish-npm
