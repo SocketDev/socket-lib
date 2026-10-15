@@ -479,20 +479,6 @@
       "branches": 92,
       "functions": 97,
       "lines": 96
-    },
-    "budgetAllowances": {
-      "fast": {
-        "maxMs": 180000,
-        "reason": "Publish CI completed 6,615 tests but report finalization exceeded both 55,304 ms and 90,000 ms fast-lane allowances at 31bf3f45a and 2ddabf2c2; Linux x64, Node v26.5.0.",
-        "created": "2026-09-13",
-        "expires": "2026-10-13"
-      },
-      "mid": {
-        "maxMs": 180000,
-        "reason": "Publish coverage passed 6,597 tests but main consumed 56,667 ms and left isolated 3,333 ms in run 34773809254; the combined Linux x64 Node v26.5.0 wall was 111,263 ms.",
-        "created": "2026-09-13",
-        "expires": "2026-10-13"
-      }
     }
   },
   "coverage": {
