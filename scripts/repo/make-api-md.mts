@@ -7,18 +7,13 @@
  *   exports change.
  */
 
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs'
-import { tmpdir } from 'node:os'
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
 import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -359,7 +354,7 @@ async function main(): Promise<void> {
 
     if (check) {
       const tempDirectory = mkdtempSync(
-        path.join(tmpdir(), 'socket-lib-docs-check-'),
+        path.join(os.tmpdir(), 'socket-lib-docs-check-'),
       )
       try {
         const tempApiPath = path.join(tempDirectory, 'api.md')
@@ -402,7 +397,7 @@ async function main(): Promise<void> {
         logger.success('docs/api.md and llms.txt are up to date')
         return
       } finally {
-        rmSync(tempDirectory, { force: true, recursive: true })
+        safeDeleteSync(tempDirectory)
       }
     }
 
