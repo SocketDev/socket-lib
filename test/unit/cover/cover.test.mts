@@ -1,39 +1,46 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   coverageRunBudgetMs,
-  readCoverageBudgets,
+  resolveCoverageBudgets,
 } from '../../../scripts/fleet/cover/budget-allowances.mts'
 import { createSuiteBudget } from '../../../scripts/fleet/cover/lane-budget.mts'
-import { runQuietCommand } from '../../../scripts/fleet/cover-run.mts'
-import { runQuiet } from '../../../scripts/fleet/cover.mts'
+import { runQuietCommand } from '../../../scripts/fleet/cover/execution.mts'
 import { COVER_BUDGET_MS } from '../../../scripts/fleet/constants/test-budget.mts'
 import { REPO_ROOT } from '../../../scripts/fleet/paths.mts'
 
-vi.mock(import('../../../scripts/fleet/cover-run.mts'))
-
-describe('runQuiet', () => {
-  afterEach(() => {
-    vi.mocked(runQuietCommand).mockReset()
-  })
-
-  it('delegates command execution to the coverage runner', async () => {
-    vi.mocked(runQuietCommand).mockResolvedValue({
-      exitCode: 0,
-      stderr: '',
-      stdout: '',
+describe('coverage command execution', () => {
+  it('captures failure output and normalized exit code from a child process', async () => {
+    const childScript = [
+      `process.stdout.write('stdout')`,
+      `process.stderr.write('stderr')`,
+      'process.exitCode = 1',
+    ].join('; ')
+    const result = await runQuietCommand(['exec', 'node', '-e', childScript], {
+      cwd: REPO_ROOT,
     })
 
-    await runQuiet(['exec', 'vitest', 'run'], { cwd: '/tmp' })
-
-    expect(runQuietCommand).toHaveBeenCalledWith(['exec', 'vitest', 'run'], {
-      cwd: '/tmp',
+    expect(result).toMatchObject({
+      exitCode: 1,
+      stdout: 'stdout',
+      stderr: 'stderr',
     })
   })
 })
 
-describe('publish coverage budget', () => {
-  it('preserves the repository fast-lane allowance inside the CI run budget', () => {
-    const policy = readCoverageBudgets(REPO_ROOT)
+describe('coverage budget allowances', () => {
+  const today = '2026-10-13'
+  const allowance = {
+    maxMs: 180_000,
+    reason: 'Fixed fixture for coverage allowance calculations.',
+    created: today,
+    expires: '2026-11-13',
+  }
+
+  it('applies a valid explicit fast-lane allowance within the CI run budget', () => {
+    const policy = resolveCoverageBudgets({
+      today,
+      allowances: { fast: allowance },
+    })
     const totalMs = coverageRunBudgetMs(policy, COVER_BUDGET_MS.ci)
     const budget = createSuiteBudget(REPO_ROOT, totalMs, {
       policy,
@@ -41,6 +48,21 @@ describe('publish coverage budget', () => {
     })
 
     expect(totalMs).toBe(COVER_BUDGET_MS.ci)
-    expect(budget.remaining('fast')).toBe(180_000)
+    expect(budget.remaining('fast')).toBe(allowance.maxMs)
+  })
+
+  it('rejects an allowance that expired before the fixed evaluation date', () => {
+    expect(() =>
+      resolveCoverageBudgets({
+        today,
+        allowances: {
+          fast: {
+            ...allowance,
+            created: '2026-09-13',
+            expires: '2026-10-12',
+          },
+        },
+      }),
+    ).toThrow('Invalid coverage budget allowance.')
   })
 })
