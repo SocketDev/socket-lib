@@ -185,6 +185,7 @@ export function spawn(
   const promiseSpawnOpts = {
     __proto__: null,
     cwd: typeof spawnOptions.cwd === 'string' ? spawnOptions.cwd : undefined,
+    detached: spawnOptions.detached,
     env: envToUse,
     signal: getAbortSignal(),
     stdio: spawnOptions.stdio,

@@ -58,6 +58,7 @@ export type BufferEncoding = globalThis.BufferEncoding
  */
 export type PromiseSpawnOptions = {
   cwd?: string | undefined
+  detached?: boolean | undefined
   env?: NodeJS.ProcessEnv | undefined
   gid?: number | undefined
   /**
