@@ -166,6 +166,19 @@ jobs:
           # The diff-aware suite escalates when it cannot resolve a safe scope.
           # Coverage shards verify the complete suite on each pushed commit.
           main-script: pnpm run test --ci
+      - name: Set up Node.js 18.20.8
+        uses: ./.github/actions/fleet/setup
+        with:
+          node-version: '18.20.8'
+      - name: Verify the built width module on Node.js 18.20.8
+        run: >-
+          node -e "const { stringWidth } = require('./dist/strings/width.js');
+          const { findSelfNestedProcesses } = require('./dist/process/tree.js');
+          const rows = [10, 20, 30, 40].map((pid, index) => ({ pid, ppid:
+          index === 0 ? 1 : pid - 10, command: 'wrapper' })); if
+          (stringWidth('👨‍👩‍👧‍👦') !== 2 ||
+          findSelfNestedProcesses(rows, row => row.command).map(row =>
+          row.pid).join(',') !== '40,30') process.exitCode = 1"
 
   cover-shards:
     if: github.event_name != 'pull_request'

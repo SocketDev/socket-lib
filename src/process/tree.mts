@@ -15,6 +15,7 @@
  */
 
 import { getNodeChildProcess } from '../node/child-process.mjs'
+import { arrayToSorted } from '../polyfills/array.mjs'
 
 export interface ProcessTreeRow {
   command: string
@@ -59,7 +60,10 @@ export function findSelfNestedProcesses(
     }
     depthOf.set(pid, hops)
   }
-  return nested.toSorted((a, b) => depthOf.get(b.pid)! - depthOf.get(a.pid)!)
+  return arrayToSorted(
+    nested,
+    (a, b) => depthOf.get(b.pid)! - depthOf.get(a.pid)!,
+  )
 }
 
 /**
