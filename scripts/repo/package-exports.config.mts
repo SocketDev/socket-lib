@@ -202,7 +202,7 @@ export const config: ExportsConfig = {
     'dist/**/shared-*.js',
     'src/**',
   ],
-  nodeRange: '>=24',
+  nodeRange: '>=18.20.8',
   outDir: 'dist',
   publicNames: {
     './spinner/create': './spinner/spinner',

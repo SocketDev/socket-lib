@@ -15,7 +15,7 @@
 
 import { stripAnsi } from '../term/ansi/strip.mjs'
 import { IntlSegmenter } from '../primordials/intl.mjs'
-import { RegExpPrototypeTest } from '../primordials/regexp.mjs'
+import { RegExpCtor, RegExpPrototypeTest } from '../primordials/regexp.mjs'
 import {
   StringPrototypeCharCodeAt,
   StringPrototypeCodePointAt,
@@ -70,21 +70,29 @@ let emojiRegex: RegExp
 
 try {
   // Try 'v' flag first (Node 20+) for most accurate Unicode property support.
-  zeroWidthClusterRegex =
-    /^(?:\p{Control}|\p{Default_Ignorable_Code_Point}|\p{Mark}|\p{Surrogate})+$/v
+  zeroWidthClusterRegex = new RegExpCtor(
+    '^(?:\\p{Control}|\\p{Default_Ignorable_Code_Point}|\\p{Mark}|\\p{Surrogate})+$',
+    'v',
+  )
 
-  leadingNonPrintingRegex =
-    /^[\p{Default_Ignorable_Code_Point}\p{Control}\p{Format}\p{Mark}\p{Surrogate}]+/v
+  leadingNonPrintingRegex = new RegExpCtor(
+    '^[\\p{Default_Ignorable_Code_Point}\\p{Control}\\p{Format}\\p{Mark}\\p{Surrogate}]+',
+    'v',
+  )
 
-  emojiRegex = /^\p{RGI_Emoji}$/v
+  emojiRegex = new RegExpCtor('^\\p{RGI_Emoji}$', 'v')
   /* c8 ignore start */
 } catch {
   // Fall back to 'u' flag (Node 18+) — no \p{Surrogate}, broader emoji.
-  zeroWidthClusterRegex =
-    /^(?:\p{Control}|\p{Default_Ignorable_Code_Point}|\p{Mark})+$/u
-  leadingNonPrintingRegex =
-    /^[\p{Default_Ignorable_Code_Point}\p{Control}\p{Format}\p{Mark}]+/u
-  emojiRegex = /^\p{Extended_Pictographic}$/u
+  zeroWidthClusterRegex = new RegExpCtor(
+    '^(?:\\p{Control}|\\p{Default_Ignorable_Code_Point}|\\p{Mark})+$',
+    'u',
+  )
+  leadingNonPrintingRegex = new RegExpCtor(
+    '^[\\p{Default_Ignorable_Code_Point}\\p{Control}\\p{Format}\\p{Mark}]+',
+    'u',
+  )
+  emojiRegex = new RegExpCtor('^\\p{Extended_Pictographic}$', 'u')
 }
 /* c8 ignore stop */
 
