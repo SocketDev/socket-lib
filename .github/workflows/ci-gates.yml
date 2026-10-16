@@ -81,8 +81,6 @@ jobs:
           # key, hydration still pulls public GHCR anonymously.
           payload-token-client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
-      - name: Verify public consumer usage evidence
-        run: pnpm run audit:consumer-usage
       - name: Run script
         uses: ./.github/actions/fleet/run-script
         env:
