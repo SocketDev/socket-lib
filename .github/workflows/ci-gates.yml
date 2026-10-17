@@ -87,7 +87,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           setup-script: pnpm run build
-          main-script: pnpm run check --all
+          main-script: pnpm run ci:gates --stage=check
 
   test:
     name: Test (${{ matrix.os }})
@@ -162,7 +162,7 @@ jobs:
         with:
           setup-script: pnpm run build
           # The diff-aware suite escalates when it cannot resolve a safe scope.
-          main-script: pnpm run test --ci
+          main-script: pnpm run ci:gates --stage=test
       - name: Set up Node.js 18.20.8
         uses: ./.github/actions/fleet/setup
         with:
