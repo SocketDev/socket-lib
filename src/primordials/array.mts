@@ -113,11 +113,19 @@ export const ArrayPrototypeSplice = uncurryThis(Array.prototype.splice) as <T>(
 export const ArrayPrototypeToLocaleString = uncurryThis(
   Array.prototype.toLocaleString,
 )
-export const ArrayPrototypeToReversed = uncurryThis(Array.prototype.toReversed)
-export const ArrayPrototypeToSorted = uncurryThis(Array.prototype.toSorted)
+export const ArrayPrototypeToReversed =
+  typeof Array.prototype.toReversed === 'function'
+    ? uncurryThis(Array.prototype.toReversed)
+    : arrayToReversedFallback
+export const ArrayPrototypeToSorted =
+  typeof Array.prototype.toSorted === 'function'
+    ? uncurryThis(Array.prototype.toSorted)
+    : arrayToSortedFallback
 // `toSpliced` is a copying variant of `splice`; same `(start, deleteCount, ...items)` signature.
-export const ArrayPrototypeToSpliced = uncurryThis(
-  Array.prototype.toSpliced,
+export const ArrayPrototypeToSpliced = (
+  typeof Array.prototype.toSpliced === 'function'
+    ? uncurryThis(Array.prototype.toSpliced)
+    : arrayToSplicedFallback
 ) as <T>(
   self: T[],
   start: number,
@@ -134,11 +142,93 @@ export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
 export const ArrayPrototypeValues = uncurryThis(Array.prototype.values)
 // ES2023 Change Array By Copy — `arr.with(i, v)` returns a copy with
 // index `i` replaced by `v`.
-export const ArrayPrototypeWith = uncurryThis(Array.prototype.with) as <T>(
+export const ArrayPrototypeWith = (
+  typeof Array.prototype.with === 'function'
+    ? uncurryThis(Array.prototype.with)
+    : arrayWithFallback
+) as <T>(self: T[], index: number, value: T) => T[]
+
+export function arrayToReversedFallback<T>(self: T[]): T[] {
+  const output = new ArrayCtor<T>(self.length)
+  for (let index = 0; index < self.length; index += 1) {
+    output[index] = self[self.length - index - 1]!
+  }
+  return output
+}
+
+export function arrayToSortedFallback<T>(
   self: T[],
-  index: number,
-  value: T,
-) => T[]
+  comparator?: ((left: T, right: T) => number) | undefined,
+): T[] {
+  if (comparator !== undefined && typeof comparator !== 'function') {
+    throw new TypeError('The comparator must be a function or undefined')
+  }
+  const output = new ArrayCtor<T>(self.length)
+  for (let index = 0; index < self.length; index += 1) {
+    output[index] = self[index]!
+  }
+  return ArrayPrototypeSort(output, comparator)
+}
+
+export function arrayToSplicedFallback<T>(
+  self: T[],
+  start: number,
+  deleteCount?: number | undefined,
+  ...items: T[]
+): T[] {
+  const length = self.length
+  const relativeStart = normalizeArrayStart(start, length)
+  const actualDeleteCount =
+    arguments.length < 3
+      ? length - relativeStart
+      : Math.min(
+          Math.max(Math.trunc(Number(deleteCount)) || 0, 0),
+          length - relativeStart,
+        )
+  const output = new ArrayCtor<T>(length - actualDeleteCount + items.length)
+  let outputIndex = 0
+  for (let index = 0; index < relativeStart; index += 1) {
+    output[outputIndex] = self[index]!
+    outputIndex += 1
+  }
+  for (const item of items) {
+    output[outputIndex] = item
+    outputIndex += 1
+  }
+  for (
+    let index = relativeStart + actualDeleteCount;
+    index < length;
+    index += 1
+  ) {
+    output[outputIndex] = self[index]!
+    outputIndex += 1
+  }
+  return output
+}
+
+export function arrayWithFallback<T>(self: T[], index: number, value: T): T[] {
+  const integer = Number.isNaN(index) ? 0 : Math.trunc(index)
+  const actualIndex = integer < 0 ? self.length + integer : integer
+  if (actualIndex < 0 || actualIndex >= self.length) {
+    throw new RangeError('Array index is out of range')
+  }
+  const output = new ArrayCtor<T>(self.length)
+  for (let position = 0; position < self.length; position += 1) {
+    output[position] = position === actualIndex ? value : self[position]!
+  }
+  return output
+}
+
+export function normalizeArrayStart(index: number, length: number): number {
+  const integer = Number.isNaN(index) ? 0 : Math.trunc(index)
+  if (integer === -Infinity) {
+    return 0
+  }
+  if (integer < 0) {
+    return Math.max(length + integer, 0)
+  }
+  return Math.min(integer, length)
+}
 
 // ─── Iterator (prototype) ──────────────────────────────────────────────
 // Map#keys() / Set#values() / etc. share an iterator prototype chain.
