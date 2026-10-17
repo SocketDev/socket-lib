@@ -20,7 +20,7 @@ import { getEnvValue } from './rewire.mjs'
  * @returns The configured NPM registry URL, or `undefined` if not set
  */
 export function getNpmConfigRegistry(): string | undefined {
-  return /*@__NO_SIDE_EFFECTS__*/ getEnvValue('npm_config_registry')
+  return getEnvValue('npm_config_registry')
 }
 
 /**

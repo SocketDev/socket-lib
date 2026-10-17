@@ -48,6 +48,10 @@ import {
   ArrayPrototypeUnshift,
   ArrayPrototypeValues,
   ArrayPrototypeWith,
+  arrayToReversedFallback,
+  arrayToSortedFallback,
+  arrayToSplicedFallback,
+  arrayWithFallback,
   AtomicsWait,
   IteratorPrototypeNext,
   IteratorPrototypeReturn,
@@ -122,6 +126,34 @@ describe('Array (static)', () => {
       throw err
     }
     await expect(ArrayFromAsync!(gen())).rejects.toBe(err)
+  })
+})
+
+describe('change-array-by-copy fallbacks', () => {
+  it('copies and densifies arrays when reversing and sorting', () => {
+    const sparse: number[] = []
+    sparse.length = 3
+    sparse[0] = 3
+    sparse[2] = 1
+    const reversed = arrayToReversedFallback(sparse)
+    expect(reversed).toEqual([1, undefined, 3])
+    expect(1 in reversed).toBe(true)
+    expect(
+      arrayToSortedFallback(sparse, (left, right) => left - right),
+    ).toEqual([1, 3, undefined])
+    expect(sparse.length).toBe(3)
+    expect(0 in sparse).toBe(true)
+    expect(1 in sparse).toBe(false)
+    expect(sparse[2]).toBe(1)
+  })
+
+  it('copies and edits arrays with splice and with semantics', () => {
+    expect(arrayToSplicedFallback([1, 2, 3, 4], -2, 1, 8, 9)).toEqual([
+      1, 2, 8, 9, 4,
+    ])
+    expect(arrayToSplicedFallback([1, 2, 3], 1)).toEqual([1])
+    expect(arrayWithFallback([1, 2, 3], -1, 9)).toEqual([1, 2, 9])
+    expect(() => arrayWithFallback([1, 2, 3], 3, 9)).toThrow(RangeError)
   })
 })
 
