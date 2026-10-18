@@ -743,7 +743,7 @@ jobs:
       - name: Validate repository publish contract
         run: pnpm run --if-present prepublish:check
       - name: Set up odai
-        if: ${{ inputs.resume-publish != true }}
+        if: ${{ inputs.resume-publish != true && inputs.release-as == '' && inputs.nightly-version == '' }}
         uses: ./.github/actions/fleet/setup-odai
       - name: 'Mint PR branch token'
         if: ${{ steps.content-trust.outputs.trusted == 'true' }}
