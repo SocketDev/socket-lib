@@ -300,17 +300,17 @@ describe('runCoverageDiagnostics', () => {
   )
 })
 
-test('collects coverage in four shards before aggregation', () => {
+test('collects publish coverage in shards before aggregation', () => {
   const document = parseDocument(
     readFileSync(
-      new URL('../../.github/workflows/ci-gates.yml', import.meta.url),
+      new URL('../../.github/workflows/publish-npm.yml', import.meta.url),
       'utf8',
     ),
   )
   expect(document.errors).toEqual([])
   const workflow = document.toJS() as {
     jobs: {
-      'cover-shards': {
+      'coverage-shards': {
         outputs: Record<string, string>
         strategy: { matrix: { shard: number[] } }
         steps: Array<{
@@ -320,7 +320,7 @@ test('collects coverage in four shards before aggregation', () => {
           env?: Record<string, string> | undefined
         }>
       }
-      cover: {
+      coverage: {
         needs: string[]
         steps: Array<{
           name?: string | undefined
@@ -331,8 +331,10 @@ test('collects coverage in four shards before aggregation', () => {
       }
     }
   }
-  const collection = workflow.jobs['cover-shards']
-  expect(collection.strategy.matrix.shard).toEqual([1, 2, 3, 4])
+  const collection = workflow.jobs['coverage-shards']
+  expect(collection.strategy.matrix.shard).toEqual([
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+  ])
   expect(collection.outputs['shard-count']).toBe('${{ strategy.job-total }}')
   expect(
     collection.steps.find(step => step.name === 'Run coverage'),
@@ -343,34 +345,23 @@ test('collects coverage in four shards before aggregation', () => {
     },
     with: {
       'main-script':
-        'pnpm run cover:shard --shard="$COVERAGE_SHARD/$COVERAGE_SHARD_COUNT"',
-      'setup-script': 'pnpm run build',
+        'pnpm run ci:gates --stage=cover-shard --shard="$COVERAGE_SHARD/$COVERAGE_SHARD_COUNT"',
     },
   })
 
-  const aggregate = workflow.jobs.cover
-  expect(aggregate.needs).toEqual(['cover-shards'])
-  expect(
-    aggregate.steps
-      .filter(step => step.name?.startsWith('Download coverage shard'))
-      .map(step => step.with?.['name']),
-  ).toEqual([
-    'coverage-shard-1',
-    'coverage-shard-2',
-    'coverage-shard-3',
-    'coverage-shard-4',
+  const aggregate = workflow.jobs.coverage
+  expect(aggregate.needs).toEqual([
+    'coverage-plan',
+    'coverage-build',
+    'coverage-shards',
   ])
   expect(
-    aggregate.steps.find(step => step.name === 'Run coverage'),
+    aggregate.steps.find(step => step.name === 'Aggregate coverage'),
   ).toMatchObject({
     env: {
-      COVERAGE_SHARD_COUNT: '${{ needs.cover-shards.outputs.shard-count }}',
+      COVERAGE_SHARD_COUNT: '${{ needs.coverage-shards.outputs.shard-count }}',
     },
-    with: {
-      'main-script':
-        'pnpm run cover:aggregate --shards="$COVERAGE_SHARD_COUNT"',
-      'setup-script': 'pnpm run build',
-    },
+    run: 'pnpm run cover:aggregate --shards="$COVERAGE_SHARD_COUNT"',
   })
   expect(
     [...collection.steps, ...aggregate.steps].some(step =>
