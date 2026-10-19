@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.2.0) - 2026-10-18
+
+### Fixed
+
+- **`release`** — skip model setup for explicit targets
+- **`node`** — support Node 18 array primordials
+- **`node`** — support npm 10 on Node 18
+- **`node`** — support Node 18.20.8 runtime
+- **`release`** — resume from reserved bump source
+- **`release`** — use hosted npm runner
+
+### Internal
+
+- **`ci`** — track publish coverage workflow
+- **`ci`** — repair required workflow gates
+- **`ci`** — remove consumer freshness gate
+- **`ci`** — move quality audits to follow-ups
+
 ## [7.1.1](https://github.com/SocketDev/socket-lib/releases/tag/v7.1.1) - 2026-10-15
 
 ### Fixed
