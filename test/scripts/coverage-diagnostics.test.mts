@@ -321,13 +321,20 @@ test('collects publish coverage in shards before aggregation', () => {
         }>
       }
       coverage: {
+        'continue-on-error'?: boolean | undefined
+        name: string
         needs: string[]
         steps: Array<{
+          if?: string | undefined
           name?: string | undefined
           run?: string | undefined
           with?: Record<string, string> | undefined
           env?: Record<string, string> | undefined
         }>
+      }
+      'npm-publish': {
+        if: string
+        needs?: string[] | undefined
       }
     }
   }
@@ -350,6 +357,18 @@ test('collects publish coverage in shards before aggregation', () => {
   })
 
   const aggregate = workflow.jobs.coverage
+  expect(aggregate['continue-on-error']).toBe(true)
+  expect(aggregate.name).toBe('Coverage warning')
+  expect(workflow.jobs['npm-publish'].needs).toBeUndefined()
+  expect(workflow.jobs['npm-publish'].if).not.toContain('coverage')
+  expect(
+    aggregate.steps.find(
+      step => step.name === 'Report coverage failure as a warning',
+    ),
+  ).toMatchObject({
+    if: 'failure()',
+    run: expect.stringContaining('::warning::'),
+  })
   expect(aggregate.needs).toEqual([
     'coverage-plan',
     'coverage-build',
