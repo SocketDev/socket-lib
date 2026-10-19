@@ -714,11 +714,17 @@ jobs:
             exit 1
           fi
           BUMP_SUBJECT="$(git log -1 --format=%s --fixed-strings --grep="chore: bump version to $VERSION" HEAD)"
-          GITHUB_PR_SUFFIX='^(.*) \(#[1-9][0-9]*\)$'
-          if [[ "$BUMP_SUBJECT" =~ $GITHUB_PR_SUFFIX ]]; then
-            BUMP_SUBJECT="${BASH_REMATCH[1]}"
+          EXPECTED_BUMP_SUBJECT="chore: bump version to $VERSION"
+          if [[ "$BUMP_SUBJECT" == "$EXPECTED_BUMP_SUBJECT (#"*\) ]]; then
+            PR_NUMBER="${BUMP_SUBJECT#"$EXPECTED_BUMP_SUBJECT (#"}"
+            PR_NUMBER="${PR_NUMBER%)}"
+            case "$PR_NUMBER" in
+              ''|*[!0-9]*) ;;
+              *) BUMP_SUBJECT="$EXPECTED_BUMP_SUBJECT" ;;
+            esac
           fi
-          if [ "$BUMP_SUBJECT" != "chore: bump version to $VERSION" ]; then
+          if [ "$BUMP_SUBJECT" != "$EXPECTED_BUMP_SUBJECT" ]; then
+            echo "[reserved-bump-subject] $BUMP_SUBJECT" >&2
             echo "::error::Default-branch history does not contain the signed bump commit for $VERSION. Merge its release PR first." >&2
             exit 1
           fi
