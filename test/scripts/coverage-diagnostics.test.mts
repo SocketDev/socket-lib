@@ -335,6 +335,10 @@ test('collects publish coverage in shards before aggregation', () => {
       'npm-publish': {
         if: string
         needs?: string[] | undefined
+        steps: Array<{
+          if?: string | undefined
+          name?: string | undefined
+        }>
       }
     }
   }
@@ -361,6 +365,12 @@ test('collects publish coverage in shards before aggregation', () => {
   expect(aggregate.name).toBe('Coverage warning')
   expect(workflow.jobs['npm-publish'].needs).toBeUndefined()
   expect(workflow.jobs['npm-publish'].if).not.toContain('coverage')
+  expect(
+    workflow.jobs['npm-publish'].steps.find(step => step.name === 'Set up odai')
+      ?.if,
+  ).toBe(
+    "${{ inputs.resume-publish != true && inputs.release-as == '' && inputs.nightly-version == '' }}",
+  )
   expect(
     aggregate.steps.find(
       step => step.name === 'Report coverage failure as a warning',
