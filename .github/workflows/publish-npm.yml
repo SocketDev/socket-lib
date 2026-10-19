@@ -714,6 +714,10 @@ jobs:
             exit 1
           fi
           BUMP_SUBJECT="$(git log -1 --format=%s --fixed-strings --grep="chore: bump version to $VERSION" HEAD)"
+          GITHUB_PR_SUFFIX='^(.*) \(#[1-9][0-9]*\)$'
+          if [[ "$BUMP_SUBJECT" =~ $GITHUB_PR_SUFFIX ]]; then
+            BUMP_SUBJECT="${BASH_REMATCH[1]}"
+          fi
           if [ "$BUMP_SUBJECT" != "chore: bump version to $VERSION" ]; then
             echo "::error::Default-branch history does not contain the signed bump commit for $VERSION. Merge its release PR first." >&2
             exit 1
