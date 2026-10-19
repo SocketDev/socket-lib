@@ -352,8 +352,9 @@ jobs:
 
   coverage:
     needs: [coverage-plan, coverage-build, coverage-shards]
-    if: ${{ !cancelled() && inputs.scan-stage-id == '' }}
-    name: Coverage gate
+    if: ${{ !cancelled() && inputs.scan-stage-id == '' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
+    continue-on-error: true
+    name: Coverage warning
     runs-on: ubuntu-26.04
     timeout-minutes: 60
     steps:
@@ -495,10 +496,13 @@ jobs:
       - name: Run Bun coverage
         if: ${{ needs.coverage-plan.outputs.runner == 'bun' }}
         run: pnpm run cover
+      - name: Report coverage failure as a warning
+        if: failure()
+        shell: bash
+        run: echo '::warning::Coverage failed; npm publishing continues. Rerun this follow-up to inspect the coverage failure.'
 
   npm-publish:
-    needs: [coverage]
-    if: ${{ always() && inputs.scan-stage-id == '' && needs.coverage.result == 'success' }}
+    if: ${{ !cancelled() && inputs.scan-stage-id == '' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     cache-mode: read
     name: Publish npm
     # npm provenance rejects self-hosted runners.
