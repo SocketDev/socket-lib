@@ -497,14 +497,15 @@ jobs:
         run: pnpm run cover
 
   npm-publish:
-    needs: [coverage]
-    if: ${{ always() && inputs.scan-stage-id == '' && needs.coverage.result == 'success' }}
+    if: ${{ !cancelled() && inputs.scan-stage-id == '' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     cache-mode: read
     name: Publish npm
     runs-on: ${{ vars.NPM_PUBLISH_RUNNER || vars.ODAI_RUNNER || 'depot-ubuntu-24.04-4' }}
     # npm's trusted-publisher config pins this GitHub environment name; the
     # OIDC token exchange 404s if the job runs outside it.
     environment: publish-npm
+    env:
+      MBX_REMOTE_URL: ''
     permissions:
       actions: read
       contents: read
@@ -722,7 +723,7 @@ jobs:
       - name: Validate repository publish contract
         run: pnpm run --if-present prepublish:check
       - name: Set up odai
-        if: ${{ inputs.resume-publish != true && inputs.release-as == '' && inputs.nightly-version == '' }}
+        if: ${{ inputs.resume-publish != true }}
         uses: ./.github/actions/fleet/setup-odai
       - name: 'Mint PR branch token'
         if: ${{ steps.content-trust.outputs.trusted == 'true' }}
@@ -741,6 +742,15 @@ jobs:
           private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
+      - name: 'Mint release ledger token'
+        if: ${{ steps.content-trust.outputs.trusted == 'true' }}
+        id: release-ledger-app
+        uses: ./.github/actions/fleet/github-release-ledger-app-token
+        with:
+          client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
       # The version resolver consumes a prerelease hint, uses configured odai
       # for patch/minor, or defaults to minor.
       - name: Publish
@@ -753,6 +763,7 @@ jobs:
           NIGHTLY_VERSION: ${{ inputs.nightly-version }}
           PR_APP_TOKEN: ${{ steps.pr-branch-app.outputs.token }}
           RELEASE_AS: ${{ inputs.release-as }}
+          RELEASE_LEDGER_TOKEN: ${{ steps.release-ledger-app.outputs.token }}
           RESUME_PUBLISH: ${{ inputs.resume-publish }}
           RELEASE_APP_TOKEN: ${{ steps.release-app.outputs.token }}
           GH_TOKEN: ${{ steps.release-app.outputs.token }}
@@ -918,6 +929,14 @@ jobs:
           PUBLISH_TASK_NAME: ${{ inputs.task-name }}
           SCAN_PACKAGE: ${{ inputs.scan-package }}
         run: node scripts/fleet/registry/npm/publish-dispatch-context.mts --name "$PUBLISH_TASK_NAME" --package "$SCAN_PACKAGE"
+      - name: Mint read-only release ledger token
+        id: release-ledger-read-app
+        uses: ./.github/actions/fleet/github-release-ledger-read-app-token
+        with:
+          client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
       # repo-cutout: scan-build
       # <repo>
       # </repo>
@@ -932,6 +951,7 @@ jobs:
           SCAN_STAGE_ID: ${{ inputs.scan-stage-id }}
           SCAN_STAGE_SHA1: ${{ inputs.scan-stage-sha1 }}
           SCAN_VERSION: ${{ inputs.scan-version }}
+          RELEASE_LEDGER_TOKEN: ${{ steps.release-ledger-read-app.outputs.token }}
           SOCKET_API_TOKEN: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
         run: node scripts/fleet/npm/scan/staged.mts --json
       - name: Upload scan receipt
