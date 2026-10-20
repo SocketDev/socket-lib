@@ -5780,6 +5780,10 @@ dist/
 !/.github/actions/fleet/setup/plan-setup-node.mjs
 !/.github/actions/fleet/setup/plan-setup-tools.d.mts
 !/.github/actions/fleet/setup/plan-setup-tools.mjs
+!/.github/actions/fleet/setup/tls-trust-bootstrap.generated.mjs
+!/.github/actions/fleet/setup/tls-trust-bootstrap.mts
+!/.github/actions/fleet/setup/tls-trust-files.mts
+!/.github/actions/fleet/setup/tls-trust-sfw-overlay.mts
 !/.github/dependabot.yml
 !/.github/workflows/
 !/.github/workflows/ci-fix.yml
@@ -5810,6 +5814,7 @@ dist/
 !/patches/fleet/run-local-ci@0.18.1.patch
 !/patches/fleet/vitest@5.0.0.patch
 !/patches/fleet/vitest@5.0.3.patch
+!/patches/fleet/vitest@5.0.4.patch
 !/scripts/
 !/scripts/fleet/
 /scripts/fleet/*

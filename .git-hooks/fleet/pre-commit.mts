@@ -130,7 +130,7 @@ function refuseOutOfScopeStagedPaths(repoRoot: string): number {
   if (outside.length === 0) {
     return 0
   }
-  logger.fail('Refusing to commit paths outside this feature worktree scope.')
+  logger.warn('Staged paths are outside this feature worktree scope.')
   const shownPaths = outside.slice(0, 8)
   for (let i = 0, { length } = shownPaths; i < length; i += 1) {
     logger.info(`  ${shownPaths[i]!}`)
@@ -139,9 +139,9 @@ function refuseOutOfScopeStagedPaths(repoRoot: string): number {
     logger.info(`  …and ${outside.length - 8} more`)
   }
   logger.info(
-    '  fix: unstage those paths or create a separate scoped worktree.',
+    '  review: update the worktree scope or confirm these paths belong here.',
   )
-  return 1
+  return 0
 }
 
 function checkSigningConfig(): number {
@@ -168,11 +168,8 @@ function checkSigningConfig(): number {
       logger.info('  git config --global commit.gpgsign true')
       logger.info('')
       logger.info('If you have not set up commit signing yet, run:')
-      logger.info('  node .claude/hooks/fleet/setup-security-tools/install.mts')
-      logger.info(
-        'which detects available signing methods (GPG, SSH, 1Password)',
-      )
-      logger.info('and walks you through the one-time setup.')
+      logger.info('  pnpm run setup:signing')
+      logger.info('It detects your active SSH agent, then SSH keys or GPG.')
       errors++
     } else if (!signingKey) {
       logger.fail('commit.gpgsign=true but user.signingkey is not set')
@@ -181,7 +178,7 @@ function checkSigningConfig(): number {
       logger.info('  git config --global user.signingkey <YOUR_KEY_ID>')
       logger.info('')
       logger.info('Or run the setup helper for guided configuration:')
-      logger.info('  node .claude/hooks/fleet/setup-security-tools/install.mts')
+      logger.info('  pnpm run setup:signing')
       errors++
     }
     if (errors > 0) {

@@ -1434,6 +1434,7 @@ const ALWAYS_TRACKED_PREFIXES = [
   'patches/fleet/run-local-ci@0.18.1.patch',
   'patches/fleet/vitest@5.0.0.patch',
   'patches/fleet/vitest@5.0.3.patch',
+  'patches/fleet/vitest@5.0.4.patch',
   'scripts/fleet/npm/native-artifact-files.mts',
   'scripts/fleet/npm/native-artifacts.mts',
   'scripts/fleet/npm/native/build.mts',
@@ -10892,6 +10893,13 @@ function installFiles(filesDir, dest, manifest, options) {
   for (let i = 0, { length } = rels; i < length; i += 1) {
     const rel = rels[i]
     const target = path.join(dest, rel)
+    if (
+      opts.preserveTracked === true &&
+      (isAlwaysTrackedSurface(rel) || rel === '.gitignore')
+    ) {
+      skippedAlwaysTracked += 1
+      continue
+    }
     const stat = repoOwnedPaths.has(normalizeBundlePath(rel))
       ? lstatSync(target, { throwIfNoEntry: false })
       : void 0
@@ -13284,7 +13292,11 @@ const MCP_PROVIDERS = {
         clientId: '1601185624273.8899143856786',
         callbackPort: 3118,
       },
-      codex: { kind: 'oauth' },
+      codex: {
+        kind: 'oauth',
+        clientId: '1292389187026.12337285527779',
+        callbackPort: 3118,
+      },
       opencode: {
         kind: 'oauth',
         clientId: '1601185624273.8899143856786',
@@ -13636,6 +13648,31 @@ function parseStringArray(value, field) {
     throw new Error(`MCP server ${field} must be an array of strings`)
   return [...value]
 }
+function appendCodexHttpMcpConfig(lines, name, key, server) {
+  lines.push(`url = ${tomlString(server.url)}`)
+  if (findMcpProviderForServer(name)?.auth === 'oauth')
+    lines.push(`auth = ${tomlString('oauth')}`)
+  if (server.bearerTokenEnv)
+    lines.push(`bearer_token_env_var = ${tomlString(server.bearerTokenEnv)}`)
+  const oauth = nativeMcpOAuth('codex', name, server)
+  if (!oauth?.clientId && !oauth?.callbackPort && !oauth?.callbackUrl) return
+  lines.push('', `[mcp_servers.${key}.oauth]`)
+  if (oauth.clientId) lines.push(`client_id = ${tomlString(oauth.clientId)}`)
+  if (oauth.callbackPort) lines.push(`callback_port = ${oauth.callbackPort}`)
+  if (oauth.callbackUrl)
+    lines.push(`callback_url = ${tomlString(oauth.callbackUrl)}`)
+}
+function appendCodexStdioMcpConfig(lines, key, server) {
+  lines.push(`command = ${tomlString(server.command)}`)
+  lines.push(...tomlStringArray(server.args))
+  lines.push('', `[mcp_servers.${key}.env]`)
+  const env = {
+    ...server.env,
+    FLEET_MCP_CLIENT: 'codex',
+  }
+  for (const [envName, value] of Object.entries(sortRecord(env)))
+    lines.push(`${tomlKey(envName)} = ${tomlString(value)}`)
+}
 /**
  * Render the trusted-project `.codex/config.toml` MCP section.
  */
@@ -13647,33 +13684,9 @@ function renderCodexMcpConfig(servers) {
   for (const [name, server] of clientMcpServers(servers, 'codex')) {
     const key = /^[\w-]+$/.test(name) ? name : tomlString(name)
     lines.push('', `[mcp_servers.${key}]`)
-    if (server.kind === 'http') {
-      lines.push(`url = ${tomlString(server.url)}`)
-      if (server.bearerTokenEnv)
-        lines.push(
-          `bearer_token_env_var = ${tomlString(server.bearerTokenEnv)}`,
-        )
-      const oauth = nativeMcpOAuth('codex', name, server)
-      if (oauth?.clientId || oauth?.callbackPort || oauth?.callbackUrl) {
-        lines.push('', `[mcp_servers.${key}.oauth]`)
-        if (oauth.clientId)
-          lines.push(`client_id = ${tomlString(oauth.clientId)}`)
-        if (oauth.callbackPort)
-          lines.push(`callback_port = ${oauth.callbackPort}`)
-        if (oauth.callbackUrl)
-          lines.push(`callback_url = ${tomlString(oauth.callbackUrl)}`)
-      }
-    } else {
-      lines.push(`command = ${tomlString(server.command)}`)
-      lines.push(...tomlStringArray(server.args))
-      lines.push('', `[mcp_servers.${key}.env]`)
-      const env = {
-        ...server.env,
-        FLEET_MCP_CLIENT: 'codex',
-      }
-      for (const [envName, value] of Object.entries(sortRecord(env)))
-        lines.push(`${tomlKey(envName)} = ${tomlString(value)}`)
-    }
+    if (server.kind === 'http')
+      appendCodexHttpMcpConfig(lines, name, key, server)
+    else appendCodexStdioMcpConfig(lines, key, server)
   }
   return `${lines.join('\n')}\n`
 }
@@ -13733,41 +13746,21 @@ function projectMcpClientConfigs(dest, preservedPaths) {
     throw new TypeError(
       `Adapter projection failed. Where: ${openCodePath}. Saw: non-object JSON; wanted an OpenCode configuration object. Fix: repair the file and retry installation.`,
     )
+  if (Object.hasOwn(existing, 'mcp') && !isPlainObject(existing['mcp']))
+    throw new TypeError(
+      `Adapter projection failed. Where: ${openCodePath}. Saw: non-object mcp member; wanted an OpenCode MCP configuration object. Fix: repair the file and retry installation.`,
+    )
   const generated = JSON.parse(renderOpenCodeMcpConfig(servers))
   if (!isPlainObject(generated))
     throw new TypeError('OpenCode MCP renderer returned invalid JSON.')
-  const existingMcp = isPlainObject(existing['mcp']) ? existing['mcp'] : {}
-  const rawExistingServers = isPlainObject(existingMcp['servers'])
-    ? existingMcp['servers']
-    : {}
   const generatedMcp = isPlainObject(generated['mcp']) ? generated['mcp'] : {}
-  const generatedServers = isPlainObject(generatedMcp['servers'])
-    ? generatedMcp['servers']
-    : {}
-  const existingServers = Object.fromEntries(
-    Object.entries(rawExistingServers).filter(
-      ([name]) => !Object.hasOwn(generatedServers, name),
-    ),
-  )
-  const sanitizedExistingMcp = Object.fromEntries(
-    Object.entries(existingMcp).filter(
-      ([name]) => name !== 'servers' && !Object.hasOwn(generatedServers, name),
-    ),
-  )
   writeIfChanged(
     openCodePath,
     `${JSON.stringify(
       {
         ...generated,
         ...existing,
-        mcp: {
-          ...sanitizedExistingMcp,
-          ...generatedMcp,
-          servers: {
-            ...existingServers,
-            ...generatedServers,
-          },
-        },
+        mcp: generatedMcp,
       },
       void 0,
       2,
@@ -14290,6 +14283,7 @@ async function installFleet(config) {
         }
       : memberManifest
     const installResult = installFiles(filesDir, dest, runtimeManifest, {
+      preserveTracked,
       refreshTracked: cfg.refreshTracked === true,
       preservedPaths,
     })

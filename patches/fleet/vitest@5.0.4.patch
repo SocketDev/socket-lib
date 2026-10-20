@@ -1,0 +1,46 @@
+diff --git a/dist/chunks/cli-api.Bx28WXzL.js b/dist/chunks/cli-api.Bx28WXzL.js
+index 676656c018739024f393ca4d540768a20c42cb38..3269f070c8acd5bb228dd6393c8d0d111b86dc6d 100644
+--- a/dist/chunks/cli-api.Bx28WXzL.js
++++ b/dist/chunks/cli-api.Bx28WXzL.js
+@@ -6424,10 +6424,7 @@ Update your dependencies and make sure the versions match.`));
+ 			const include = this.options.include;
+ 			this.globMatchers = {
+ 				matchExclude: exclude.length ? pm(exclude, { dot: true }) : () => false,
+-				matchInclude: include ? pm(include, {
+-					dot: true,
+-					ignore: exclude
+-				}) : () => true
++				matchInclude: include ? pm(include, { dot: true }) : () => true
+ 			};
+ 		}
+ 		return this.globMatchers;
+diff --git a/dist/chunks/index.B8VfM7Mf.js b/dist/chunks/index.B8VfM7Mf.js
+index 8d7dbdb845b24edd4b99e6e359ce07cb9c11b8ed..763e96599d1db0111481bb3eb24c82cc6bc92c97 100644
+--- a/dist/chunks/index.B8VfM7Mf.js
++++ b/dist/chunks/index.B8VfM7Mf.js
+@@ -5429,6 +5429,7 @@ class ForksPoolWorker {
+ 	entrypoint;
+ 	execArgv;
+ 	env;
++	sigkillTimeout;
+ 	_fork;
+ 	stdout;
+ 	stderr;
+@@ -5437,6 +5438,8 @@ class ForksPoolWorker {
+ 	constructor(options) {
+ 		this.execArgv = options.execArgv;
+ 		this.env = options.env;
++		const teardownTimeout = options.project.config.teardownTimeout;
++		this.sigkillTimeout = this.execArgv.includes("--cpu-prof") && Number.isFinite(teardownTimeout) && teardownTimeout > 0 && teardownTimeout <= 2147483647 ? teardownTimeout : SIGKILL_TIMEOUT;
+ 		this.stdout = options.project.vitest.logger.outputStream;
+ 		this.stderr = options.project.vitest.logger.errorStream;
+ 		/** Loads {@link file://./../../../runtime/workers/forks.ts} */
+@@ -5484,7 +5487,7 @@ class ForksPoolWorker {
+ 		* - https://github.com/jestjs/jest/blob/25a8785584c9d54a05887001ee7f498d489a5441/packages/jest-worker/src/workers/ChildProcessWorker.ts#L463-L477
+ 		* - https://github.com/tinylibs/tinypool/blob/40b4b3eb926dabfbfd3d0a7e3d1222d4dd1c0d2d/src/runtime/process-worker.ts#L56
+ 		*/
+-		const sigkillTimeout = setTimeout(() => fork.kill("SIGKILL"), SIGKILL_TIMEOUT);
++		const sigkillTimeout = setTimeout(() => fork.kill("SIGKILL"), this.sigkillTimeout);
+ 		fork.kill();
+ 		await waitForExit;
+ 		clearTimeout(sigkillTimeout);

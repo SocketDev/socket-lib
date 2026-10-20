@@ -341,8 +341,8 @@
     },
     "google-chrome-beta": {
       "description": "Google Chrome Beta for the Gemma on-device AI backend",
-      "version": "155.0.8059.12-1",
-      "versionDate": "2026-09-23T16:28:19.340691Z",
+      "version": "156.0.8078.12-1",
+      "versionDate": "2026-10-07T14:58:44.126486Z",
       "chromeVersionExclusions": [
         {
           "version": "154.0.8037.0-1",
@@ -356,8 +356,12 @@
       ],
       "platforms": {
         "linux-x64": {
-          "asset": "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-beta/google-chrome-beta_155.0.8059.12-1_amd64.deb",
-          "integrity": "sha512-Y+OdK+18q5zuh22tBx65KOZQlEPMg5cjLMfTNAR6umECNbJb2tJB4UEE5qWuRX0BNw3WfURarHvxIizjQQVd3A=="
+          "asset": "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-beta/google-chrome-beta_156.0.8078.12-1_amd64.deb",
+          "integrity": {
+            "value": "sha256-edf8b363114b320e84e30ea358e1e30f7827adb621e84a50bcbfbd0231cc58f9",
+            "src": "https://dl.google.com/linux/chrome/deb/dists/stable/main/binary-amd64/Packages",
+            "date": "2026-10-16"
+          }
         }
       },
       "origin": "node-dist"
@@ -369,12 +373,12 @@
         "The odai image must pass model session creation and offline inference before publication."
       ],
       "description": "Google Chrome stable .deb for the odai backend, pinned and integrity-verified before installation",
-      "version": "154.0.8037.97-1",
-      "versionDate": "2026-10-02T00:56:19.827163Z",
+      "version": "155.0.8059.39-1",
+      "versionDate": "2026-10-06T17:09:07.199909Z",
       "platforms": {
         "linux-x64": {
-          "asset": "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_154.0.8037.97-1_amd64.deb",
-          "integrity": "sha512-mQ8TPxCR0K6kjMC/vMjzA/7oDRKKk/AveRDA4LtGxF7paXGHkDfN4QC7NYmShP/0/lsXKs6bnV5kZdRfMR0a4A=="
+          "asset": "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_155.0.8059.39-1_amd64.deb",
+          "integrity": "sha512-QrTsnsYf7lMqhI/fNZc9OrpsCDAo7kXJhXLxu9nlHoZcvVv5+75pW2yadpNkcqrM1Y+GDsuLzOOAr6b9V7y0cg=="
         }
       },
       "origin": "node-dist"
@@ -399,34 +403,35 @@
       "origin": "gh-asset"
     },
     "mbx": {
-      "version": "1.22.0",
-      "tag": "v1.22.0",
+      "version": "1.24.1",
+      "tag": "v1.24.1",
       "repository": "github:jdx/mr-boxington",
       "origin": "gh-asset",
       "platforms": {
         "darwin-arm64": {
           "asset": "mbx-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-Tjab3gdmPQtkmEvsjgjOqMzEWWxBCsAlQifXCcN/mv8oRH1BN8RRthm8jVdQ9PsNQjEhIhyYYlnhcysJ4+1YRg=="
+          "integrity": "sha512-D60ncHlyFaXgyFs6aGj5HCMFFWFlqMiHzDEbyDFmS5GpqSav2cpx5OQ9FYvqW35T0myEb6lv/DsziB/3MUH7/g=="
         },
         "linux-arm64-musl": {
           "asset": "mbx-aarch64-unknown-linux-musl.tar.gz",
-          "integrity": "sha512-qgsbEFeo6J9K7tH4K2hfFJjV6Rm6s26na2eEd8nw/qsSLzw/8E26rWrhTqsyXPog7f160iWG3/u6XV2sgSaYvg=="
+          "integrity": "sha512-OK/BQ8h9G5PKKzg3jHbjCoyixhAX8/if9sOvLo+pA+qUxPkvow5dpFOH6FvcAGW1CeNNUXOCBuztstwKfmJM9g=="
         },
         "linux-x64-musl": {
           "asset": "mbx-x86_64-unknown-linux-musl.tar.gz",
-          "integrity": "sha512-tdOgq9JazUqnPrDkwsCd77mZpao5kNCaXSun1QdV690X/LneoSzh0AK0z/609n6X8awdg4JNGsHolJs7WNbU2g=="
+          "integrity": "sha512-M19aTOiGUged/qI4VTCpt3OpEERGiBmpzdMod5pZUvLhN5DbhXZhstFhZtG3cpK5WUokQg4XBEWbudVjWytf2w=="
         },
         "win32-x64": {
           "asset": "mbx-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-BflfuUwzGfNGYPnbhIjs2bDXTSjpNqpXUjZ4AjPQhN/Eklpg1K2dlnyfeJX2ZQCikLknO02e5QnowSxuFgiihw=="
+          "integrity": "sha512-mKg9IeZqUIARkAe86hsGDHVGIYS6cdAnc1fp0es18uujI5k+lkeg9LNc8gdhdJ0jQfx2GJIwIHx68wZ9TzTKmw=="
         }
       },
       "description": "Cache front-end for cargo: put mbx in front of any cargo command and one cache warms every worktree and CI run, pruning itself to a size budget.",
       "soakBypass": {
-        "published": "2026-10-03",
-        "removable": "2026-10-10",
-        "version": "1.22.0"
-      }
+        "version": "1.24.1",
+        "published": "2026-10-16",
+        "removable": "2026-10-23"
+      },
+      "versionDate": "2026-10-16"
     },
     "mise": {
       "binaryName": "mise",
@@ -495,11 +500,6 @@
           "binary": "mise/bin/mise.exe",
           "integrity": "sha512-bqxT4/JBwKzs+kAvuc6u8/J9CHwPU+Q49bULZ308aJzp6QEpoPZzsbtqYB2pqCw1pu5UFO3vc1gpIE3uedkzmA=="
         }
-      },
-      "soakBypass": {
-        "published": "2026-10-09",
-        "removable": "2026-10-16",
-        "version": "2026.10.7"
       }
     },
     "mold": {
@@ -521,12 +521,7 @@
           "integrity": "sha512-zaBDy80sdWAo7Ht71p1wmrgyTvdN1FkeirMzKTHH++kX+ahDzEPaeoGsLEvFTR20OL8VysuLGKQVfxhbSqNlRA=="
         }
       },
-      "description": "mold high-speed ELF linker for Linux builds",
-      "soakBypass": {
-        "version": "3.0.0",
-        "published": "2026-10-05",
-        "removable": "2026-10-12"
-      }
+      "description": "mold high-speed ELF linker for Linux builds"
     },
     "npm": {
       "notes": [
@@ -538,11 +533,6 @@
       "repository": "npm:npm",
       "version": "12.2.0",
       "integrity": "sha512-ZsJjKpTnlmSXOLLXiU1xDCzC4Wlok4IwZmh/aw2KUuXytU7q6qMv/cUT7MoeSf95Slwuw/lRXYefGzGCspHPNQ==",
-      "soakBypass": {
-        "version": "12.2.0",
-        "published": "2026-09-30",
-        "removable": "2026-10-07"
-      },
       "origin": "npm"
     },
     "opencode": {
@@ -666,7 +656,7 @@
       "origin": "git",
       "repository": "https://github.com/PerryTS/perry.git",
       "ref": "main",
-      "sha": "9fda98df68d9fac3c08b2385fae007aa9f5278df",
+      "sha": "c4f234d89d7a9d67b8ed2af47487b767b8622af1",
       "integrity": "sha256:0b5f75fd3471e45ecfaf83fd8627ed9c0e68b4e5e8e23bd575cb0a587389bcf8",
       "submodule": {
         "path": "upstream/perry",
@@ -915,12 +905,7 @@
           "integrity": "sha512-zi2isECucghnSVLVDjTaABKr/2nsmiUHVGEELcj1/7DRLbFIYLq+m3zpcfRJTLstElWbht2PjIJQuHWtnrzLrw=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-10-01",
-        "removable": "2026-10-08",
-        "version": "1.15.4"
-      }
+      "origin": "gh-asset"
     },
     "sfw-free": {
       "notes": [
@@ -962,55 +947,51 @@
           "integrity": "sha512-kh7yWn5TzLGI+rpujGwzX+HIaVa1/BHTVpJ58cBAYnwPSuYRhgUciX0vqKKoK3P3nYYMGrN7IvhZ4L91krsYLw=="
         }
       },
-      "origin": "gh-asset",
-      "soakBypass": {
-        "published": "2026-10-01",
-        "removable": "2026-10-08",
-        "version": "1.15.4"
-      }
+      "origin": "gh-asset"
     },
     "uv": {
       "notes": [
         "uv (Astral) — the fleet's Python project tool. Installed in the bootstrap (release-asset, SRI-verified per platform, like janus/codedb) so a hash-locked uv install is available BEFORE the security-tools step that needs it (SkillSpector installs via a uv project + uv.lock, no pipx — the fleet 'uv for projects' rule). external-tools/update.mts re-hashes the GitHub release assets on a bump.",
-        "The GitHub release is a known-publisher binary distribution. The installer uses the version as the release tag."
+        "The GitHub release is a known-publisher binary distribution. The installer uses the version as the release tag.",
+        "Security update: 0.13.4 adopts webpki-root-certs 1.0.10 after the eMudhra incident. https://github.com/astral-sh/uv/releases/tag/0.13.4"
       ],
       "description": "uv — Astral Python package/project manager (pinned, SRI-verified)",
       "repository": "github:astral-sh/uv",
-      "version": "0.12.23",
-      "tag": "0.12.23",
-      "versionDate": "2026-10-03",
+      "version": "0.13.4",
+      "tag": "0.13.4",
+      "versionDate": "2026-10-20",
       "binaryName": "uv",
       "platforms": {
         "darwin-arm64": {
           "asset": "uv-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-gfcAJYNFwKXKBwMYW/JKTLGO4O8YJ7bQAUhktvAG7nBRWwWhCBdLvFsFOL5qonUgZguve0oENxa2/o/ElT3E2A=="
+          "integrity": "sha512-rTH+JXnMR3YPVOibNvLUXtKozz3nR8YSamfvylhNompKp5i2eEsZrUCdhGd3A5S6e+oSo7ERYwfusCMan3Meeg=="
         },
         "darwin-x64": {
           "asset": "uv-x86_64-apple-darwin.tar.gz",
-          "integrity": "sha512-T1F7q5xWEOkUPLGeekoWOwz8Cdkkc9akMfwLU2QO8i824WdfOipJ4/zddpkG/Xr9NWA+/LuyHFGwPdwtVv/grg=="
+          "integrity": "sha512-WmjYloU39f0ZAw0jCV73GH/iYs1jRGbZd+Q/aA2JPr+DtMbJsyVUH2CS/vw/e2pVqOEWbgWHZyRXm8QhRkB1Tw=="
         },
         "linux-arm64": {
           "asset": "uv-aarch64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-ebIJu9Gjeq5JoMPzMgW3F8ZF87IiQRjGV48JaEriium+Qy1dYsEP720173ekwSwrKRvE0FdhPyRb8QUEsbxuBg=="
+          "integrity": "sha512-vjsQLcnHlrLgpzwgoNOrqRJisgN0VG8PRlsnNvNPq9WFfLZgz0SSb22MsNvcKTxbo29UNfC3UbIaGXL8DZD9Sw=="
         },
         "linux-x64": {
           "asset": "uv-x86_64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-SYTJBAowVTXLInaa6v0NuBgzOOIC+CoupwDRwwcKHEHgYZOLUGOMUDgBEt2bX2n+Jc6Jz9PQfcvA7D+3Id+Gpg=="
+          "integrity": "sha512-qe2cdV4BVSr/pPdk/6kB7kMmM0LO+ctn16O9iCfGLxTeDGo570Fjr4I/g/mvITFUCGb9H/zBM0cbIewuWFZsjQ=="
         },
         "win32-arm64": {
           "asset": "uv-aarch64-pc-windows-msvc.zip",
-          "integrity": "sha512-RTNfWHH9F1k5oG1i4y8TACMbjh3PSyoR7bkoAKiaX0mNwZedokm4JXq3UpOZ/SwQZL6DpI1BRfuRsEwq2KtazQ=="
+          "integrity": "sha512-zv2J+yqvUitcoX9brJz00BQpuYFCjeWU5+LiwJ5d/ZWZgnOK/TVnTvrF5fC3tFj0EIoErbOCdTwwHBRvmLVs+w=="
         },
         "win32-x64": {
           "asset": "uv-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-8vtkGZbm5WXtEcuwkrgp50tNdxZpHah9tcwR/F9uMeNgw1yYTyVf6RYHhvliPnPUpMY3JEdzgUbID4LOhLflsw=="
+          "integrity": "sha512-8q0tX6gT4mIox8MwV1Lekt8YCTVkYY4Ym4tlg+h1q1AVaug7xbKkT4hU9v/uMxNUq/+xnpwMCa/jywXpvVXzrg=="
         }
       },
       "origin": "gh-asset",
       "soakBypass": {
-        "version": "0.12.23",
-        "published": "2026-10-03",
-        "removable": "2026-10-10"
+        "version": "0.13.4",
+        "published": "2026-10-20",
+        "removable": "2026-10-27"
       }
     },
     "zizmor": {
