@@ -22,6 +22,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { REPO_CACHE_DIR, REPO_ROOT } from '../../fleet/paths.mts'
+export { isFullCommitSha } from '../../../src/git/commit-sha.mts'
 
 /**
  * The GitHub repository that holds npm's OpenAPI source.
@@ -111,14 +112,6 @@ export interface SpecPinPathOptions {
  */
 export function digestOf(bytes: string | Uint8Array): string {
   return `sha256:${crypto.createHash('sha256').update(bytes).digest('hex')}`
-}
-
-/**
- * True when `value` is a 40-character lowercase hex commit sha. A short sha or
- * a branch name is a mutable pointer and must never reach the pin.
- */
-export function isFullCommitSha(value: string): boolean {
-  return value.length === 40 && /^[0-9a-f]+$/.test(value)
 }
 
 /**

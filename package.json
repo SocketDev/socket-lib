@@ -2062,6 +2062,11 @@
       "types": "./dist/git/changed.d.ts",
       "default": "./dist/git/changed.js"
     },
+    "./git/commit-sha": {
+      "source": "./src/git/commit-sha.mts",
+      "types": "./dist/git/commit-sha.d.ts",
+      "default": "./dist/git/commit-sha.js"
+    },
     "./git/exec": {
       "source": "./src/git/exec.mts",
       "types": "./dist/git/exec.d.ts",
