@@ -671,6 +671,8 @@ jobs:
       - name: Set up and install
         uses: ./.github/actions/fleet/setup-and-install
         env:
+          # TODO: Restore frozen installs after generated hook importers are reconciled.
+          npm_config_frozen_lockfile: 'false'
           SOCKET_API_KEY: ${{ steps.content-trust.outputs.trusted == 'true' && secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW || '' }}
         with:
           cache: 'false'
@@ -691,6 +693,10 @@ jobs:
           install -m 0600 "$RUNNER_TEMP/native-build.mts" scripts/fleet/npm/native/build.mts
           install -m 0600 "$RUNNER_TEMP/native-artifact-files.mts" scripts/fleet/npm/native-artifact-files.mts
           install -m 0600 "$RUNNER_TEMP/native-artifacts.mts" scripts/fleet/npm/native-artifacts.mts
+      - name: Restore reserved source metadata after tooling installation
+        if: ${{ inputs.resume-publish == true }}
+        shell: bash
+        run: git restore --source=HEAD --worktree -- .gitattributes .npmrc AGENTS.md pnpm-lock.yaml pnpm-workspace.yaml
       - name: Validate publish task name
         env:
           PUBLISH_TASK_NAME: ${{ inputs.task-name }}

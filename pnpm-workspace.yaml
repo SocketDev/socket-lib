@@ -35,10 +35,7 @@ audit:
   # the high-severity security exception; exact-pinned so a future version
   # re-soaks.
 catalog:
-  '@sigstore/bundle': 5.0.0
-  '@sigstore/core': 4.0.1
-  '@sigstore/protobuf-specs': 0.5.2
-  '@sigstore/verify': 4.1.2
+  tsrs: 0.18.0-ts7.1.0-dev.20260929
   '@mdn/browser-compat-data': 8.1.5
   '@modelcontextprotocol/client': 2.3.1
   # run-local-ci (bin: local-ci, formerly published as @redwoodjs/agent-ci)
@@ -47,7 +44,7 @@ catalog:
   # actions is its GitHub-Actions parser, pinned explicitly (not left
   # transitive) so its version is uniform fleet-wide.
   '@ultrathink/acorn.rs.wasm': 0.2.0
-  'ata-validator': 1.53.0
+  'ata-validator': 1.56.0
   'brace-expansion': 5.0.12
   'dtu-github-actions': 0.18.1
   # shadscan — shadcn UI audit CLI for the design skills (missing UI
@@ -56,10 +53,9 @@ catalog:
   '@shadscan/cli': 0.17.0
   '@sinclair/typebox': 0.34.52
   'ecc-agentshield': 1.6.0
-  'fallow': 3.32.0
+  'fallow': 3.33.1
   'mcp-tada': 0.5.0
   'run-local-ci': 0.18.1
-  'smol-toml': 1.8.0
   # typebox 1.x — the unscoped rewrite of @sinclair/typebox. Both names are
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
@@ -84,7 +80,7 @@ catalog:
   '@socketsecurity/sdk': 4.2.0
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.2.0'
   '@types/mdast': 4.0.4
-  '@types/node': 26.6.4
+  '@types/node': 26.6.5
   '@types/semver': 7.8.0
   '@types/shell-quote': 1.7.5
   'compromise': 14.18.0
@@ -118,8 +114,8 @@ catalog:
   # candidates before simulating what a port actually cuts. Published
   # 2026-06-08, past the 7-day soak.
   'npm-high-impact': 1.13.0
-  'oxfmt': 0.73.0
-  'oxlint': 1.88.0
+  'oxfmt': 0.74.0
+  'oxlint': 1.89.0
   'oxlint-tsgolint': 7.0.2004
   # parse5 — the HTML parser half of the markdown story. mdast hands raw HTML
   # back as an opaque `html` node (README `<picture>`/`<img>` blocks), so
@@ -130,9 +126,9 @@ catalog:
   # playwright-core — headless Chromium driver for the seeing-rendered-output
   # skill (render a page / unpacked MV3 extension popup to PNG). Fleet-canonical
   # catalog dep; source of truth is template/pnpm-workspace.fleet.yaml.
-  'playwright-core': 1.64.0
+  'playwright-core': 1.64.1
   # portless — stable HTTPS `.localhost` URLs for local page tests and rendered UI checks.
-  'portless': 0.15.7
+  'portless': 0.15.8
   # Direct bundler pin for repos that run rolldown as their build
   # (socket-packageurl-js, socket-webext, the trusted-publisher
   # extension, and the in-progress esbuild→rolldown migrations).
@@ -142,7 +138,9 @@ catalog:
   # @rolldown/binding-* + @oxc-project/types stay as soak-excluded
   # transitives (consumers depend on `rolldown` only).
   'regjsparser': 0.13.4
-  'rolldown': 1.2.14
+  # Rolldown 1.2.12 is the requested update after the darwin-x64 SIGSEGV in
+  # 1.2.9. Verify this release on Intel macOS before cascading fleet-wide.
+  'rolldown': 1.2.15
   'semver': 7.8.5
   'shell-quote': 1.12.0
   'taze': 21.3.0
@@ -151,16 +149,21 @@ catalog:
   # high, GHSA-v6wh-96g9-6wx3 medium). Tracked here so the pnpm
   # override below pins every transitive `vite` (vitest, @vitest/*,
   # plugin authors) to it.
-  'typescript': 7.1.0-dev.20261008.1
-  'vitest': 5.0.3
-  '@vitest/coverage-v8': 5.0.3
+  'typescript': 7.1.0-dev.20261013.1
+  'vitest': 5.0.5
+  '@vitest/coverage-v8': 5.0.5
   '@bcoe/v8-coverage': 1.0.2
   ast-v8-to-istanbul: 1.0.7
   'chrome-devtools-mcp': 1.10.1
   # Playwright MCP server — agent-driven browsing with the fleet agent-banner
   # init script (see .config/fleet/playwright/).
   '@playwright/mcp': 0.0.83
-  '@vitest/ui': 5.0.3
+  '@vitest/ui': 5.0.5
+  '@sigstore/bundle': 5.0.0
+  '@sigstore/core': 4.0.1
+  '@sigstore/protobuf-specs': 0.5.2
+  '@sigstore/verify': 4.1.2
+  'smol-toml': 1.8.0
   c8: 12.0.0
   # Alias to the post-rename artifact at the version this repo already
   # installs (dedup: one acorn.rs.wasm major); the pre-rename
@@ -267,6 +270,18 @@ allowBuilds:
 # minutes = 7 days. Same value fleet repos use.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@tsrs/darwin-arm64@0.18.0-ts7.1.0-dev.20260929'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@tsrs/linux-x64-gnu@0.18.0-ts7.1.0-dev.20260929'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@tsrs/linux-x64-musl@0.18.0-ts7.1.0-dev.20260929'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@tsrs/linux-arm64-gnu@0.18.0-ts7.1.0-dev.20260929'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@tsrs/linux-arm64-musl@0.18.0-ts7.1.0-dev.20260929'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - 'tsrs@0.18.0-ts7.1.0-dev.20260929'
   - '@socketoverride/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
@@ -280,6 +295,226 @@ minimumReleaseAgeExclude:
   - '@decmpfs/*'
   - '@node-smol/*'
   - sockeye
+  # published: 2026-10-18 | removable: 2026-10-25
+  - '@ata-validator/native-darwin-arm64@1.56.0'
+  # published: 2026-10-18 | removable: 2026-10-25
+  - '@ata-validator/native-darwin-x64@1.56.0'
+  # published: 2026-10-18 | removable: 2026-10-25
+  - '@ata-validator/native-linux-arm64-gnu@1.56.0'
+  # published: 2026-10-18 | removable: 2026-10-25
+  - '@ata-validator/native-linux-arm64-musl@1.56.0'
+  # published: 2026-10-18 | removable: 2026-10-25
+  - '@ata-validator/native-linux-x64-gnu@1.56.0'
+  # published: 2026-10-18 | removable: 2026-10-25
+  - '@ata-validator/native-linux-x64-musl@1.56.0'
+  # published: 2026-10-18 | removable: 2026-10-25
+  - '@ata-validator/native-win32-x64@1.56.0'
+  # published: 2026-10-15 | removable: 2026-10-22
+  - '@vitest/mocker@5.0.5'
+  # published: 2026-10-15 | removable: 2026-10-22
+  - '@vitest/spy@5.0.5'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-aix-ppc64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-android-arm64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-darwin-arm64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-darwin-x64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-freebsd-arm64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-freebsd-x64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-arm64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-arm@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-loong64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-mips64el@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-ppc64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-riscv64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-s390x@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-linux-x64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-netbsd-arm64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-netbsd-x64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-openbsd-arm64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-openbsd-x64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-sunos-x64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-win32-arm64@7.1.0-beta'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - '@typescript/typescript-win32-x64@7.1.0-beta'
+  # published: 2026-10-15 | removable: 2026-10-22
+  - '@vitest/pretty-format@5.0.5'
+  # published: 2026-10-15 | removable: 2026-10-22
+  - '@vitest/utils@5.0.5'
+  # published: 2026-10-16 | removable: 2026-10-23
+  - '@maschwenk/tsrslint-darwin-arm64@0.1.5'
+  # published: 2026-10-16 | removable: 2026-10-23
+  - '@maschwenk/tsrslint-linux-arm64@0.1.5'
+  # published: 2026-10-16 | removable: 2026-10-23
+  - '@maschwenk/tsrslint-linux-x64@0.1.5'
+  # published: 2026-10-16 | removable: 2026-10-23
+  - '@maschwenk/tsrslint@0.1.5'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - 'motherload@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/core@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/csv@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/env@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/json5@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/jsonc@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/md@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/toml@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/txt@0.1.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@motherload/yaml@0.1.0'
+  # published: 2026-10-15 | removable: 2026-10-22
+  - '@vitest/coverage-v8@5.0.5'
+  # published: 2026-10-15 | removable: 2026-10-22
+  - '@vitest/ui@5.0.5'
+  # published: 2026-10-20 | removable: 2026-10-27
+  - 'typescript@7.1.0-beta'
+  # published: 2026-10-15 | removable: 2026-10-22
+  - 'vitest@5.0.5'
+  # published: 2026-10-18 | removable: 2026-10-25
+  - 'ata-validator@1.56.0'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-android-arm-eabi@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-android-arm64@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-darwin-arm64@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-darwin-x64@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-freebsd-x64@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-linux-arm-gnueabihf@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-linux-arm64-gnu@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-linux-arm64-musl@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-linux-ppc64-gnu@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-linux-s390x-gnu@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-linux-x64-gnu@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-linux-x64-musl@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-openharmony-arm64@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-win32-arm64-msvc@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - '@rolldown/binding-win32-x64-msvc@1.2.15'
+  # published: 2026-10-21 | removable: 2026-10-28
+  - 'rolldown@1.2.15'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxc-project/types@0.155.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-android-arm-eabi@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-android-arm64@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-darwin-arm64@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-darwin-x64@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-freebsd-x64@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-arm-gnueabihf@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-arm-musleabihf@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-arm64-gnu@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-arm64-musl@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-ppc64-gnu@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-riscv64-gnu@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-riscv64-musl@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-s390x-gnu@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-x64-gnu@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-linux-x64-musl@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-openharmony-arm64@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-win32-arm64-msvc@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-win32-ia32-msvc@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxfmt/binding-win32-x64-msvc@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-android-arm-eabi@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-android-arm64@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-darwin-arm64@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-darwin-x64@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-freebsd-x64@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-arm-gnueabihf@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-arm-musleabihf@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-arm64-gnu@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-arm64-musl@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-ppc64-gnu@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-riscv64-gnu@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-riscv64-musl@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-s390x-gnu@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-x64-gnu@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-linux-x64-musl@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-openharmony-arm64@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-win32-arm64-msvc@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-win32-ia32-msvc@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - '@oxlint/binding-win32-x64-msvc@1.89.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - 'oxfmt@0.74.0'
+  # published: 2026-10-19 | removable: 2026-10-26
+  - 'oxlint@1.89.0'
+  # published: 2026-10-22 | removable: 2026-10-29
+  - 'reylo@0.0.2'
+  # published: 2026-10-22 | removable: 2026-10-29
+  - '@reylosql/postgres@0.0.2'
   - 'sfw'
   - 'socket'
   - 'sdxgen'
@@ -509,14 +744,15 @@ overrides:
   'hasown': 'npm:@socketregistry/hasown@1.0.7'
   'iconv-lite': '0.7.3'
   'isexe@>=3': '4.0.0'
-  'js-yaml@>=5.0.0 <5.2.2': '5.4.2'
+  'js-yaml@>=5.0.0 <5.2.2': '5.4.3'
   'lru-cache@>=10': '11.5.3'
-  'magic-string': '1.4.2'
+  'magic-string': '1.4.3'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
   'minipass@>=4': '7.1.3'
-  'postcss@>=8': '8.5.28'
+  'oxlint-tsgolint': 'npm:@maschwenk/tsrslint@0.1.5'
+  'postcss@>=8': '8.5.30'
   'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
   'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
   'semver@>=5.0.0 <7.6.0': '7.8.5'
@@ -703,6 +939,17 @@ patchedDependencies:
   # patched v10 answers that same shape.
   # On a bump, regenerate via `pnpm patch minimatch` + `pnpm patch-commit`.
   minimatch@10.2.6: patches/fleet/minimatch@10.2.6.patch
+  # default-export interop (managed by socket-wheelhouse sync; do not edit):
+  # 5.0.7 dropped the default export from BOTH builds. The CJS half breaks
+  # minimatch@9's compiled `__importDefault`, which reads `.default` and
+  # skips the namespace fallback once `__esModule` is set. The ESM half
+  # breaks any `import x from 'brace-expansion'`, the shape the fleet CI
+  # cache action resolves through, so an unpatched member throws "does not
+  # provide an export named default" and dies at setup before a test runs.
+  # The patch restores `expand` as the default on each build separately;
+  # patching one build leaves the other broken.
+  # On a bump, regenerate via `pnpm patch brace-expansion` + `pnpm patch-commit`.
+  brace-expansion@5.0.12: patches/fleet/brace-expansion@5.0.12.patch
   # dedup: workflow variable presence (managed by socket-wheelhouse sync):
   # Local CI must accept explicitly supplied empty workflow variables.
   # The fleet payload client ID defaults to empty when no app is configured.
@@ -711,6 +958,13 @@ patchedDependencies:
   # Intercepted fetch records local HEAD in FETCH_HEAD so inline detached
   # checkout preserves the pre-populated Local CI workspace.
   run-local-ci@0.18.1: patches/fleet/run-local-ci@0.18.1.patch
+  # dedup: coverage matcher allocation (managed by socket-wheelhouse sync):
+  # Coverage checks exclusions before matching includes.
+  # Compile exclusions once instead of once per include pattern.
+  # This preserves membership and bounds matcher memory for fleet coverage.
+  # CPU-profiled forks use the configured teardown deadline to flush profiles.
+  # Ordinary forks retain the upstream 500 ms termination grace.
+  vitest@5.0.5: patches/fleet/vitest@5.0.5.patch
   # Indirects the `node-gyp/bin/node-gyp.js` require.resolve so the rolldown
   # bundle doesn't statically inline node-gyp; consumer: pacote → run-script
   # in the bundled dist tree.
@@ -754,24 +1008,6 @@ patchedDependencies:
   # that body-parser@2.2.2 still relies on, after the content-type 1/2
   # collapse. Carried up from the 2.0.0 entry this replaced.
   content-type@2.1.0: patches/repo/content-type@2.1.0.patch
-  # default-export interop (managed by socket-wheelhouse sync; do not edit):
-  # 5.0.7 dropped the default export from BOTH builds. The CJS half breaks
-  # minimatch@9's compiled `__importDefault`, which reads `.default` and
-  # skips the namespace fallback once `__esModule` is set. The ESM half
-  # breaks any `import x from 'brace-expansion'`, the shape the fleet CI
-  # cache action resolves through, so an unpatched member throws "does not
-  # provide an export named default" and dies at setup before a test runs.
-  # The patch restores `expand` as the default on each build separately;
-  # patching one build leaves the other broken.
-  # On a bump, regenerate via `pnpm patch brace-expansion` + `pnpm patch-commit`.
-  brace-expansion@5.0.12: patches/fleet/brace-expansion@5.0.12.patch
-  # dedup: coverage matcher allocation (managed by socket-wheelhouse sync):
-  # Coverage checks exclusions before matching includes.
-  # Compile exclusions once instead of once per include pattern.
-  # This preserves membership and bounds matcher memory for fleet coverage.
-  # CPU-profiled forks use the configured teardown deadline to flush profiles.
-  # Ordinary forks retain the upstream 500 ms termination grace.
-  vitest@5.0.3: patches/fleet/vitest@5.0.3.patch
   # braces 3.0.3 must reject nesting beyond the parser limit before recursion;
   # this restores bounded parsing for micromatch@4.0.8, a repository dependency.
   braces@3.0.3: patches/repo/braces@3.0.3.patch
