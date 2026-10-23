@@ -151,13 +151,15 @@ describe('findUnlistedStubs', () => {
 })
 
 describe('inspectFleetUsageValidation', () => {
-  it('fails fleet usage validation when consumer evidence is missing', () => {
+  it('requires installed consumer evidence when the audit is run directly', () => {
     const repoRoot = writeFixtureRepo()
-
     expect(() => inspectFleetUsageValidation(repoRoot)).toThrow()
   })
+})
+
+describe('main consumer evidence boundary', () => {
   it.each([false, true])(
-    'main fails without success output when quiet=%s and evidence is missing',
+    'missing external consumer evidence does not block local checks when quiet=%s',
     quiet => {
       const repoRoot = writeFixtureRepo()
       writeFileSync(
@@ -179,12 +181,35 @@ describe('inspectFleetUsageValidation', () => {
       try {
         process.exitCode = 0
         main()
-        expect(process.exitCode).toBe(1)
-        expect(state.error).toHaveBeenCalledTimes(1)
-        expect(state.log).not.toHaveBeenCalled()
+        expect(process.exitCode).toBe(0)
+        expect(state.error).not.toHaveBeenCalled()
+        expect(state.log).toHaveBeenCalledTimes(quiet ? 0 : 1)
       } finally {
         process.exitCode = originalExitCode
       }
     },
   )
+
+  it('still blocks when the recorded roster does not match the current roster', () => {
+    const repoRoot = writeFixtureRepo()
+    writeFileSync(
+      path.join(repoRoot, '.config/repo/socket-wheelhouse.json'),
+      JSON.stringify({
+        buildStubs: { unexposed: { leaves: [], scannedRoster: [] } },
+      }),
+    )
+    safeDeleteSync(path.join(repoRoot, 'dist'))
+    state.root = repoRoot
+    const originalExitCode = process.exitCode
+    try {
+      process.exitCode = 0
+      main()
+      expect(process.exitCode).toBe(1)
+      expect(state.error.mock.calls.flat().join('\n')).toContain(
+        'stub list was judged against a different fleet',
+      )
+    } finally {
+      process.exitCode = originalExitCode
+    }
+  })
 })

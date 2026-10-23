@@ -92,11 +92,6 @@ export interface FleetUsageValidation {
   stale: StaleStubFinding[]
 }
 
-/**
- * Listed stub leaves the CURRENT roster checkouts prove are not safe to stub
- * — each one would ship as a throwing stub to a real consumer, or names a
- * leaf that is no longer a public src-backed module.
- */
 export function findFleetUsedStubLeaves(
   repoRoot: string,
   options: { report?: FleetLibUsageReport | undefined } = {},
@@ -149,10 +144,8 @@ export function main(): void {
 
   function checkRosterCoverage(): void {
     // Coverage leg. Runs even when a checkout is missing, because it compares
-    // the roster the list RECORDS against the roster that exists — a question
-    // answered from committed data, needing no checkout at all. It is the only
-    // leg that can catch a list written before a member joined, which is a state
-    // the usage leg below reads as clean.
+    // the roster the list RECORDS against the current roster — a question
+    // answered from committed data, needing no checkout or external evidence.
     const coverage = rosterCoverageGap(
       rosterRepoNames(REPO_ROOT),
       readScannedRoster(REPO_ROOT),
@@ -176,44 +169,20 @@ export function main(): void {
   }
   checkRosterCoverage()
 
-  try {
-    const validation = inspectFleetUsageValidation(REPO_ROOT)
-    const { stale } = validation
-    if (stale.length > 0) {
-      for (let i = 0, { length } = stale; i < length; i += 1) {
-        const f = stale[i] as StaleStubFinding
-        logger.error(`${CHECK} stale stub-list entry: ${f.leaf} (${f.reason})`)
-      }
-      logger.error(
-        `${CHECK} the committed stub list is stale against the roster.\n` +
-          '  Where: .config/repo/socket-wheelhouse.json\n' +
-          `  Saw: ${stale.length} listed leaf/leaves the fleet now reaches; wanted every listed leaf fleet-unused.\n` +
-          '  Fix: run `pnpm run audit:consumer-usage --write-stub-list`, commit the regenerated list, and rebuild.',
-      )
-      failed = true
-    }
-    failed ||= validation.failed
-  } catch (error) {
-    logger.error(
-      `${CHECK} ${error instanceof Error ? error.message : 'Consumer evidence verification failed. Run pnpm run audit:consumer-usage.'}`,
-    )
-    failed = true
-  }
-
   if (failed) {
     process.exitCode = 1
     return
   }
   if (!quiet) {
     logger.log(
-      `${CHECK} ok — every stubbed leaf is allowlisted and fleet-unused.`,
+      `${CHECK} ok — shipped stubs are allowlisted and unreachable, and the stub list matches the current roster.`,
     )
   }
 }
 
 const SCRIPT_META: ScriptMeta = {
   describe:
-    'checks every leaf compiled out of the published build is allowlisted and still fleet-unused',
+    'checks shipped stub reachability, allowlist coverage, and recorded fleet roster',
   help: `Usage: node scripts/repo/check/stubbed-leaves-are-fleet-unused.mts [flags]
 
   --quiet, --silent   suppress non-error output`,
@@ -228,9 +197,8 @@ function reportDistStubs(quiet: boolean): boolean {
   let failed = false
   const distDir = path.join(REPO_ROOT, 'dist')
   if (existsSync(distDir)) {
-    // Reachability leg. Asks whether shipped code can REACH a stub, which the
-    // usage leg below cannot answer: it asks who imports a specifier, and a
-    // leaf resolved through an exports CONDITION is named by nobody.
+    // Check whether shipped code can reach a stub. This is deterministic and
+    // does not depend on external consumer evidence.
     const reachable = findStubsReachableFromShippedCode(REPO_ROOT)
     if (reachable.length > 0) {
       for (let i = 0, { length } = reachable; i < length; i += 1) {

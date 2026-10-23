@@ -16,9 +16,11 @@ import {
   debugLogNs,
   debugNs,
   debugtime,
+  getSpinner,
 } from '../../../src/debug/output.mjs'
 import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { getDefaultLogger } from '../../../src/logger/default.mjs'
+import { peekDefaultSpinner } from '../../../src/spinner/default-state.mjs'
 
 const logger = getDefaultLogger()
 
@@ -51,6 +53,12 @@ describe('debug/output', { concurrent: false }, () => {
     logSpy.mockRestore()
     resetEnv()
     vi.unstubAllEnvs()
+  })
+
+  it('does not create the default spinner when reading it', () => {
+    expect(peekDefaultSpinner()).toBeUndefined()
+    expect(getSpinner()).toBeUndefined()
+    expect(peekDefaultSpinner()).toBeUndefined()
   })
 
   describe('debugLog / debugLogNs', () => {
