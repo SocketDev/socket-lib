@@ -8,7 +8,6 @@ import {
   lstat,
   mkdir,
   readFile,
-  readdir,
   rename,
   rm,
   writeFile,
@@ -49,11 +48,16 @@ import {
   TLS_CA_SOURCE_KEYS,
   getTlsTrustBashEnvPath,
   getTlsTrustBundlePath,
-  getTlsTrustEmptyDirectoryPath,
+  getTlsTrustDisabledCaDirectoryPath,
   getTlsTrustHelperPath,
   getTlsTrustRootPath,
   getTlsTrustStatePath,
 } from '../../../../scripts/fleet/paths/tls-trust.mts'
+import {
+  ensureTlsTrustDisabledCaDirectory,
+  isTlsTrustDisabledCaDirectorySafe,
+} from '../../../../scripts/fleet/setup/tls-trust-disabled-ca-directory.mts'
+import { hasPrivateTlsPermissions } from '../../../../scripts/fleet/setup/tls-trust-permissions.mts'
 
 const CA_KEYS = TLS_CA_SOURCE_KEYS
 
@@ -104,32 +108,13 @@ async function buildBundles(): Promise<State> {
   const directory = rootDirectory()
   await mkdir(directory, { recursive: true, mode: 0o700 })
   await chmod(directory, 0o700)
-  const emptyDirectoryPath = getTlsTrustEmptyDirectoryPath(directory)
-  try {
-    const info = await lstat(emptyDirectoryPath)
-    if (
-      !info.isDirectory() ||
-      info.isSymbolicLink() ||
-      (await readdir(emptyDirectoryPath)).length
-    ) {
-      throw new Error(
-        'Managed TLS CA directory is not a private empty directory.',
-      )
-    }
-  } catch (error) {
-    if (
-      !(error instanceof Error && 'code' in error && error.code === 'ENOENT')
-    ) {
-      throw error
-    }
-    await mkdir(emptyDirectoryPath, { mode: 0o700 })
-  }
-  await chmod(emptyDirectoryPath, 0o700)
+  const emptyDirectoryPath = getTlsTrustDisabledCaDirectoryPath(directory)
+  await ensureTlsTrustDisabledCaDirectory(emptyDirectoryPath)
   for (const key of ['SSL_CERT_DIR', 'GIT_SSL_CAPATH']) {
     const directoryOverride = process.env[key]
     if (directoryOverride && directoryOverride !== emptyDirectoryPath) {
       throw new Error(
-        `${key} points to an unmanaged CA directory; clear it or use the managed empty directory.`,
+        `${key} points to an unmanaged CA directory; clear it or use the managed disabled CA directory.`,
       )
     }
   }
@@ -192,7 +177,7 @@ async function buildBundles(): Promise<State> {
   bundlePaths['SSL_CERT_FILE'] = getTlsTrustBundlePath(
     directory,
     'SSL_CERT_FILE',
-    'ssl-cert-file.pem',
+    { sslCertFileName: 'ssl-cert-file.pem' },
   )
 
   for (const key of CA_KEYS.slice(1)) {
@@ -239,6 +224,7 @@ async function buildBundles(): Promise<State> {
     throw new Error([...inspection.conflicts, ...inspection.errors].join(' '))
   }
   if (rejected.length) {
+    // oxlint-disable-next-line socket/no-direct-stream-write -- Keep the CA filtering diagnostic on stderr.
     process.stderr.write(
       `Filtered blocked CA keys: ${[...new Set(rejected)].join(', ')}\n`,
     )
@@ -255,7 +241,11 @@ async function readState(): Promise<State> {
   const directory = rootDirectory()
   const statePath = getTlsTrustStatePath(directory)
   const info = await lstat(statePath)
-  if (!info.isFile() || info.isSymbolicLink() || (info.mode & 0o077) !== 0) {
+  if (
+    !info.isFile() ||
+    info.isSymbolicLink() ||
+    !hasPrivateTlsPermissions(info.mode)
+  ) {
     throw new Error(
       'TLS trust state is missing or unsafe; rerun the setup action.',
     )
@@ -263,7 +253,8 @@ async function readState(): Promise<State> {
   const value = JSON.parse(await readFile(statePath, 'utf8')) as State
   if (
     value.version !== 1 ||
-    value.emptyDirectoryPath !== getTlsTrustEmptyDirectoryPath(directory) ||
+    value.emptyDirectoryPath !==
+      getTlsTrustDisabledCaDirectoryPath(directory) ||
     !value.bundlePaths ||
     !Array.isArray(value.sources)
   ) {
@@ -318,7 +309,7 @@ async function validateState(
   if (
     !directoryInfo.isDirectory() ||
     directoryInfo.isSymbolicLink() ||
-    (directoryInfo.mode & 0o077) !== 0
+    !hasPrivateTlsPermissions(directoryInfo.mode)
   ) {
     throw new Error(
       'TLS trust directory is not private; rerun the setup action.',
@@ -344,7 +335,11 @@ async function validateState(
   }
   for (const file of Object.values(state.bundlePaths)) {
     const info = await lstat(file)
-    if (!info.isFile() || info.isSymbolicLink() || (info.mode & 0o077) !== 0) {
+    if (
+      !info.isFile() ||
+      info.isSymbolicLink() ||
+      !hasPrivateTlsPermissions(info.mode)
+    ) {
       throw new Error(
         'A managed TLS bundle is missing or unsafe; rerun the setup action.',
       )
@@ -356,15 +351,9 @@ async function validateState(
       )
     }
   }
-  const emptyInfo = await lstat(state.emptyDirectoryPath)
-  if (
-    !emptyInfo.isDirectory() ||
-    emptyInfo.isSymbolicLink() ||
-    (emptyInfo.mode & 0o077) !== 0 ||
-    (await readdir(state.emptyDirectoryPath)).length
-  ) {
+  if (!(await isTlsTrustDisabledCaDirectorySafe(state.emptyDirectoryPath))) {
     throw new Error(
-      'Managed TLS CA directory is missing, unsafe, or not empty.',
+      'Managed disabled CA directory is missing, unsafe, or contains unrecognized files.',
     )
   }
   await validateTlsBootstrapSources(state.sources)
@@ -398,7 +387,7 @@ async function validateState(
   if (
     !rcInfo.isFile() ||
     rcInfo.isSymbolicLink() ||
-    (rcInfo.mode & 0o077) !== 0 ||
+    !hasPrivateTlsPermissions(rcInfo.mode) ||
     (await readFile(bashEnvPath(), 'utf8')) !== rcContents
   ) {
     throw new Error('BASH_ENV is missing or unsafe; rerun the setup action.')
@@ -407,7 +396,7 @@ async function validateState(
   if (
     !helperInfo.isFile() ||
     helperInfo.isSymbolicLink() ||
-    (helperInfo.mode & 0o077) !== 0
+    !hasPrivateTlsPermissions(helperInfo.mode)
   ) {
     throw new Error(
       'TLS bootstrap helper is missing or unsafe; rerun the setup action.',
@@ -462,6 +451,7 @@ async function main(args: string[]): Promise<void> {
       statePath: getTlsTrustStatePath(rootDirectory()),
       env: process.env,
     })) {
+      // oxlint-disable-next-line socket/no-direct-stream-write -- Shell startup consumes these lines as environment assignments.
       process.stdout.write(`${line}\n`)
     }
     return
@@ -485,12 +475,14 @@ async function main(args: string[]): Promise<void> {
     env: runtimeEnv,
     nodeOptions: appendNodeOption(runtimeEnv['NODE_OPTIONS']),
   })) {
+    // oxlint-disable-next-line socket/no-direct-stream-write -- Shell startup consumes these lines as environment assignments.
     process.stdout.write(`${line}\n`)
   }
 }
 
 if (isMainModule(import.meta.url)) {
   main(process.argv.slice(2)).catch(error => {
+    // oxlint-disable-next-line socket/no-direct-stream-write -- Keep CLI errors on stderr without modifying their text.
     process.stderr.write(`${errorMessage(error)}\n`)
     process.exitCode = 1
   })

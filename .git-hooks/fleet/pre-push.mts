@@ -111,8 +111,10 @@ const main = async (): Promise<number> => {
       totalErrors += 1
     }
     const range = computeRange(remote, localRef, localSha, remoteSha)
-    // `computeRange` returns `undefined` for skip cases (tags, deletions, new
-    // branches); use loose equality so both `null` and `undefined` skip. A
+    // `computeRange` returns `undefined` for skip cases (tags and deletions);
+    // when a new branch has no remote baseline it returns the local tip so
+    // every reachable commit still receives the safety scans. Use loose
+    // equality so both `null` and `undefined` skip. A
     // strict `=== null` check let `undefined` fall through and failed every
     // tag push with "Invalid commit range: undefined".
     if (range == null) {

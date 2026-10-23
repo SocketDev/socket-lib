@@ -74,7 +74,7 @@ export async function validateTlsBootstrapSources(
         )
       }
       const current = filterTlsCertificates(
-        await readTlsPlatformRoots(kind, source.environment),
+        await readTlsPlatformRoots(kind, { environment: source.environment }),
         {
           requireNonEmpty: false,
           skipNonCa: true,

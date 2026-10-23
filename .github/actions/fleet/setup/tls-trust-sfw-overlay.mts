@@ -16,6 +16,7 @@ import {
   getTlsTrustRootPath,
   TLS_SFW_BUNDLE_KEYS,
 } from '../../../../scripts/fleet/paths/tls-trust.mts'
+import { hasPrivateTlsPermissions } from '../../../../scripts/fleet/setup/tls-trust-permissions.mts'
 
 const SFW_BUNDLE_KEYS = TLS_SFW_BUNDLE_KEYS
 
@@ -56,7 +57,7 @@ export async function sfwTlsRuntimeDirectoryRoot(
   if (
     !rootInfo.isDirectory() ||
     rootInfo.isSymbolicLink() ||
-    (rootInfo.mode & 0o077) !== 0 ||
+    !hasPrivateTlsPermissions(rootInfo.mode) ||
     (await realpath(root)) !== root
   ) {
     throw new Error('Socket Firewall TLS state directory is not private.')
@@ -64,12 +65,9 @@ export async function sfwTlsRuntimeDirectoryRoot(
   return root
 }
 
-export function validateSfwTlsRuntimeMarkerPair(
-  env: NodeJS.ProcessEnv,
-): void {
+export function validateSfwTlsRuntimeMarkerPair(env: NodeJS.ProcessEnv): void {
   if (
-    Boolean(env[TLS_RUNTIME_DIRECTORY_KEY]) !==
-    Boolean(env[TLS_RUNTIME_CA_KEY])
+    Boolean(env[TLS_RUNTIME_DIRECTORY_KEY]) !== Boolean(env[TLS_RUNTIME_CA_KEY])
   ) {
     throw new Error('TLS runtime trust markers are incomplete; rerun setup.')
   }
@@ -155,8 +153,8 @@ export async function resolveSfwTlsOverlay(
   const runtimeCaSource = env[TLS_RUNTIME_CA_KEY]
   const runtimeAlreadyNormalized = Boolean(
     runtimeEnv &&
-      source === runtimeEnv['NODE_EXTRA_CA_CERTS'] &&
-      CA_SOURCE_KEYS.every(key => env[key] === runtimeEnv[key]),
+    source === runtimeEnv['NODE_EXTRA_CA_CERTS'] &&
+    CA_SOURCE_KEYS.every(key => env[key] === runtimeEnv[key]),
   )
   if (runtimeAlreadyNormalized) {
     return runtimeEnv!
@@ -207,9 +205,7 @@ export async function resolveSfwTlsOverlay(
   const inspectionEnv = {
     ...env,
     NODE_EXTRA_CA_CERTS: bundlePaths['NODE_EXTRA_CA_CERTS'],
-    ...Object.fromEntries(
-      SFW_BUNDLE_KEYS.map(key => [key, bundlePaths[key]]),
-    ),
+    ...Object.fromEntries(SFW_BUNDLE_KEYS.map(key => [key, bundlePaths[key]])),
   }
   const inspection = inspectTlsEnvironment(inspectionEnv, {
     platform: process.platform,

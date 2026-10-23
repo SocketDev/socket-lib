@@ -718,26 +718,12 @@ jobs:
             exit 1
           fi
           HEAD_SHA="$(git rev-parse HEAD)"
-          if [ "$HEAD_SHA" != "$RESERVED_SOURCE_SHA" ]; then
-            echo "::error::Reserved release resume did not check out the signed bump source." >&2
-            exit 1
-          fi
-          if ! git merge-base --is-ancestor "$RESERVED_SOURCE_SHA" "$DISPATCH_SHA"; then
-            echo "::error::Reserved release source is not in the dispatched default-branch history." >&2
+          if [ "$HEAD_SHA" != "$DISPATCH_SHA" ]; then
+            echo "::error::Reserved release resume did not check out the dispatched default-branch source." >&2
             exit 1
           fi
           BUMP_SUBJECT="$(git log -1 --format=%s --fixed-strings --grep="chore: bump version to $VERSION" HEAD)"
-          EXPECTED_BUMP_SUBJECT="chore: bump version to $VERSION"
-          if [[ "$BUMP_SUBJECT" == "$EXPECTED_BUMP_SUBJECT (#"*\) ]]; then
-            PR_NUMBER="${BUMP_SUBJECT#"$EXPECTED_BUMP_SUBJECT (#"}"
-            PR_NUMBER="${PR_NUMBER%)}"
-            case "$PR_NUMBER" in
-              ''|*[!0-9]*) ;;
-              *) BUMP_SUBJECT="$EXPECTED_BUMP_SUBJECT" ;;
-            esac
-          fi
-          if [ "$BUMP_SUBJECT" != "$EXPECTED_BUMP_SUBJECT" ]; then
-            echo "[reserved-bump-subject] $BUMP_SUBJECT" >&2
+          if [ "$BUMP_SUBJECT" != "chore: bump version to $VERSION" ]; then
             echo "::error::Default-branch history does not contain the signed bump commit for $VERSION. Merge its release PR first." >&2
             exit 1
           fi
@@ -785,15 +771,6 @@ jobs:
           private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
-      - name: 'Mint release ledger token'
-        if: ${{ steps.content-trust.outputs.trusted == 'true' }}
-        id: release-ledger-app
-        uses: ./.github/actions/fleet/github-release-ledger-app-token
-        with:
-          client-id: ${{ secrets.SOCKET_RELEASE_CLIENT_ID || vars.SOCKET_RELEASE_CLIENT_ID }}
-          private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }}
-          repositories: ${{ github.event.repository.name }}
       # The version resolver consumes a prerelease hint, uses configured odai
       # for patch/minor, or defaults to minor.
       - name: Publish
@@ -806,7 +783,6 @@ jobs:
           NIGHTLY_VERSION: ${{ inputs.nightly-version }}
           PR_APP_TOKEN: ${{ steps.pr-branch-app.outputs.token }}
           RELEASE_AS: ${{ inputs.release-as }}
-          RELEASE_LEDGER_TOKEN: ${{ steps.release-ledger-app.outputs.token }}
           RESUME_PUBLISH: ${{ inputs.resume-publish }}
           RELEASE_APP_TOKEN: ${{ steps.release-app.outputs.token }}
           GH_TOKEN: ${{ steps.release-app.outputs.token }}
